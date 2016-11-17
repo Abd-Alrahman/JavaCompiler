@@ -11,18 +11,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\yacc.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\lex.l" />
     <None Include="..\yacc.output" />
     <None Include="..\yacc.y" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Replace of.txt" />
+    <Text Include="in.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\yacc.hpp" />
+    <ClInclude Include="ErrorRecovery.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\lex.yy.cc" />
+    <ClCompile Include="..\yacc.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ECC68D74-0E73-4605-83B8-4886E809DF98}</ProjectGuid>
@@ -66,7 +69,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

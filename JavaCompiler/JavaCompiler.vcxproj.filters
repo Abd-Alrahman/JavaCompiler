@@ -15,11 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\yacc.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\lex.l">
       <Filter>Source Files</Filter>
     </None>
@@ -34,9 +29,23 @@
     <Text Include="..\Replace of.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="in.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\yacc.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorRecovery.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\lex.yy.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\yacc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

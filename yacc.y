@@ -3,12 +3,15 @@
 	#include <iostream>
 	using namespace std;
 	#include <FlexLexer.h>
+	#include "JavaCompiler\ErrorRecovery.h"
 	int yylex(void);
 	int yyparse();
 	void yyerror(char *);
 	
 	FlexLexer* lexer = new yyFlexLexer();
-	
+	ErrorRecovery* err = new ErrorRecovery();
+
+
 	class Parser
 	{
 		public:
@@ -33,20 +36,19 @@
 		}r;
 	}
 
-%token ABSTRACT
-%token BOOLEAN BREAK BYTE BYVALUE
-%token CASE CAST CATCH CHAR CLASS CONST CONTINUE
-%token DEFAULT DO DOUBLE
-%token EXTENDS
-%token FINAL FINALLY FLOAT FOR FUTURE
+%token ABSTRACT ASSERT
+%token BOOLEAN BREAK BYVALUE
+%token CASE CAST CATCH CLASS CONST CONTINUE
+%token DEFAULT DO
+%token ENUM EXTENDS
+%token FINAL FINALLY FOR FUTURE
 %token GENERIC GOTO
-%token IF IMPLEMENTS IMPORT INNER INSTANCEOF INT INTERFACE
-%token LONG
+%token IF IMPLEMENTS IMPORT INNER INSTANCEOF INTERFACE
 %token NATIVE NEW JNULL
 %token OPERATOR OUTER
 %token PACKAGE PRIVATE PROTECTED PUBLIC
 %token REST RETURN
-%token SHORT STATIC SUPER SWITCH SYNCHRONIZED
+%token STATIC SUPER SWITCH SYNCHRONIZED
 %token THIS THROW THROWS TRANSIENT TRY
 %token VAR VOID VOLATILE
 %token WHILE
@@ -57,7 +59,14 @@
 %token OP_DIM
 %token ASS_MUL ASS_DIV ASS_MOD ASS_ADD ASS_SUB
 %token ASS_SHL ASS_SHR ASS_SHRR ASS_AND ASS_XOR ASS_OR
-%token IDENTIFIER LITERAL BOOLLIT
+%token OPEN_D CLOSE_D OPEN_B CLOSE_B OPEN CLOSE SEMICOLON COLON POINT COMMA
+%token PLUS MINUS MULT DIV AND OR QUES_MARK EXC_MARK MODULE DURA ASSIGN
+%token XOR LESS GREATER
+%token INT SHORT LONG FLOAT DOUBLE CHAR BYTE
+%token IDENTIFIER
+%token INTEGER_VALUE LONG_VALUE N_ID FLOAT_VALUE CHAR_VALUE STRING_VALUE
+%token BOOLLIT LITERAL
+
 %nonassoc e1
 %nonassoc ELSE
 
@@ -66,581 +75,583 @@
 %%
 
 TypeSpecifier
-	: TypeName
-	| TypeName Dims { cout << "TypeSpecifier"; }
+	: TypeName		{ cout << "TypeSpecifier 1\n"; }
+	| TypeName Dims { cout << "TypeSpecifier 2\n"; }
 	;
 
 TypeName
-	: PrimitiveType
-	| QualifiedName
+	: PrimitiveType { cout << "TypeName 1\n"; }
+	| QualifiedName { cout << "TypeName 2\n"; }
 	;
 
 ClassNameList
-        : QualifiedName
-        | ClassNameList ',' QualifiedName
+    : QualifiedName { cout << "ClassNameList\n"; }
+    | ClassNameList COMMA QualifiedName
 	;
 
 PrimitiveType
-	: BOOLEAN
-	| CHAR
-	| BYTE
-	| SHORT
-	| INT
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| VOID
+	: BOOLEAN { cout << "PrimitiveType BOOLEAN\n"; }
+	| CHAR	  { cout << "PrimitiveType CHAR\n"; }
+	| BYTE	  { cout << "PrimitiveType BYTE\n"; }
+	| SHORT	  { cout << "PrimitiveType SHORT\n"; }
+	| INT	  { cout << "PrimitiveType INT\n"; }
+	| LONG	  { cout << "PrimitiveType LONG\n"; }
+	| FLOAT	  { cout << "PrimitiveType FLOAT\n"; }
+	| DOUBLE  { cout << "PrimitiveType DOUBLE\n"; }
+	| VOID	  { cout << "PrimitiveType VOID\n"; }
 	;
 
 SemiColons
-	: ';'
-        | SemiColons ';'
-        ;
+	: SEMICOLON { cout << "SemiColons\n"; }
+    | SemiColons SEMICOLON
+    ;
 
 CompilationUnit
-	: ProgramFile
-        ;
+	: ProgramFile {
+					cout <<"-----------\nTHE END !\n";
+					YYABORT;
+				  }
 
 ProgramFile
-	: PackageStatement ImportStatements TypeDeclarations
-	| PackageStatement ImportStatements
-	| PackageStatement                  TypeDeclarations
-	|                  ImportStatements TypeDeclarations
-	| PackageStatement
-	|                  ImportStatements
-	|                                   TypeDeclarations
+	: PackageStatement ImportStatements TypeDeclarations { cout << "ProgramFile 1 \n"; }
+	| PackageStatement ImportStatements					 { cout << "ProgramFile 2 \n"; }
+	| PackageStatement                  TypeDeclarations { cout << "ProgramFile 3 \n"; }
+	|                  ImportStatements TypeDeclarations { cout << "ProgramFile 4 \n"; }
+	| PackageStatement									 { cout << "ProgramFile 5 \n"; }
+	|                  ImportStatements					 { cout << "ProgramFile 6 \n"; }
+	|                                   TypeDeclarations { cout << "ProgramFile 7 \n"; }
 	;
 
 PackageStatement
-	: PACKAGE QualifiedName SemiColons
+	: PACKAGE QualifiedName SemiColons { cout << "PackageStatement\n"; }
 	;
 
 TypeDeclarations
-	: TypeDeclarationOptSemi
+	: TypeDeclarationOptSemi { cout << "TypeDeclarations\n"; }
 	| TypeDeclarations TypeDeclarationOptSemi
 	;
 
 TypeDeclarationOptSemi
-        : TypeDeclaration
-        | TypeDeclaration SemiColons
-        ;
+    : TypeDeclaration { cout << "TypeDeclarationOptSemi\n"; }
+    | TypeDeclaration SemiColons
+    ;
 
 ImportStatements
-	: ImportStatement
+	: ImportStatement { cout << "ImportStatements\n"; }
 	| ImportStatements ImportStatement
 	;
 
 ImportStatement
-	: IMPORT QualifiedName SemiColons
-	| IMPORT QualifiedName '.' '*' SemiColons
+	: IMPORT QualifiedName SemiColons			 { cout << "ImportStatement 1\n"; }
+	| IMPORT QualifiedName POINT MULT SemiColons { cout << "ImportStatement 2\n"; }
 	;
 
 QualifiedName
-	: IDENTIFIER
-	| QualifiedName '.' IDENTIFIER
+	: IDENTIFIER { cout << "QualifiedName\n"; }
+	| QualifiedName POINT IDENTIFIER
 	;
 
 TypeDeclaration
-	: ClassHeader '{' FieldDeclarations '}'
-	| ClassHeader '{' '}'
+	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; }
+	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; }
 	;
 
 ClassHeader
-	: Modifiers ClassWord IDENTIFIER Extends Interfaces
-	| Modifiers ClassWord IDENTIFIER Extends
-	| Modifiers ClassWord IDENTIFIER       Interfaces
-	|           ClassWord IDENTIFIER Extends Interfaces
-	| Modifiers ClassWord IDENTIFIER
-	|           ClassWord IDENTIFIER Extends
-	|           ClassWord IDENTIFIER       Interfaces
-	|           ClassWord IDENTIFIER
+	: Modifiers ClassWord IDENTIFIER Extends Interfaces { cout << "ClassHeader 1\n"; }
+	| Modifiers ClassWord IDENTIFIER Extends			{ cout << "ClassHeader 2\n"; }
+	| Modifiers ClassWord IDENTIFIER       Interfaces	{ cout << "ClassHeader 3\n"; }
+	|           ClassWord IDENTIFIER Extends Interfaces { cout << "ClassHeader 4\n"; }
+	| Modifiers ClassWord IDENTIFIER					{ cout << "ClassHeader 5\n"; }
+	|           ClassWord IDENTIFIER Extends			{ cout << "ClassHeader 6\n"; }
+	|           ClassWord IDENTIFIER       Interfaces	{ cout << "ClassHeader 7\n"; }
+	|           ClassWord IDENTIFIER					{ cout << "ClassHeader 8\n"; }
 	;
 
 Modifiers
-	: Modifier
+	: Modifier  { cout << "Modifiers\n"; }
 	| Modifiers Modifier
 	;
 
 Modifier
-	: ABSTRACT
-	| FINAL
-	| PUBLIC
-	| PROTECTED
-	| PRIVATE
-	| STATIC
-	| TRANSIENT
-	| VOLATILE
-	| NATIVE
-	| SYNCHRONIZED
+	: ABSTRACT     { cout << "Modifier ABSTRACT\n"; }
+	| FINAL		   { cout << "Modifier FINAL\n"; }
+	| PUBLIC	   { cout << "Modifier PUBLIC\n"; }
+	| PROTECTED	   { cout << "Modifier PROTECTED\n"; }
+	| PRIVATE	   { cout << "Modifier PRIVATE\n"; }
+	| STATIC	   { cout << "Modifier STATIC\n"; }
+	| TRANSIENT	   { cout << "Modifier TRANSIENT\n"; }
+	| VOLATILE	   { cout << "Modifier VOLATILE\n"; }
+	| NATIVE	   { cout << "Modifier NATIVE\n"; }
+	| SYNCHRONIZED { cout << "Modifier SYNCHRONIZED\n"; }
 	;
 
 ClassWord
-	: CLASS
-	| INTERFACE
+	: CLASS		{ cout << "ClassWord CLASS\n"; }
+	| INTERFACE { cout << "ClassWord INTERFACE\n"; }
 	;
 
 Interfaces
-	: IMPLEMENTS ClassNameList
+	: IMPLEMENTS ClassNameList { cout << "Interfaces\n"; }
 	;
 
 FieldDeclarations
-	: FieldDeclarationOptSemi
-        | FieldDeclarations FieldDeclarationOptSemi
+	: FieldDeclarationOptSemi { cout << "FieldDeclarations\n"; }
+    | FieldDeclarations FieldDeclarationOptSemi
 	;
 
 FieldDeclarationOptSemi
-        : FieldDeclaration
-        | FieldDeclaration SemiColons
-        ;
+    : FieldDeclaration { cout << "FieldDeclarationOptSemi\n"; }
+    | FieldDeclaration SemiColons
+    ;
 
 FieldDeclaration
-	: FieldVariableDeclaration ';'
-	| MethodDeclaration
-	| ConstructorDeclaration
-	| StaticInitializer
-        | NonStaticInitializer
-        | TypeDeclaration
+	: FieldVariableDeclaration SEMICOLON { cout << "FieldDeclaration 1\n"; }
+	| MethodDeclaration					 { cout << "FieldDeclaration 2\n"; }
+	| ConstructorDeclaration			 { cout << "FieldDeclaration 3\n"; }
+	| StaticInitializer					 { cout << "FieldDeclaration 4\n"; }
+    | NonStaticInitializer				 { cout << "FieldDeclaration 5\n"; }
+    | TypeDeclaration					 { cout << "FieldDeclaration 6\n"; }
 	;
 
 FieldVariableDeclaration
-	: Modifiers TypeSpecifier VariableDeclarators
-	|           TypeSpecifier VariableDeclarators
+	: Modifiers TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 1\n"; }
+	|           TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 2\n"; }
 	;
 
 VariableDeclarators
-	: VariableDeclarator
-	| VariableDeclarators ',' VariableDeclarator
+	: VariableDeclarator { cout << "VariableDeclarators\n"; }
+	| VariableDeclarators COMMA VariableDeclarator
 	;
 
 VariableDeclarator
-	: DeclaratorName
-	| DeclaratorName '=' VariableInitializer
+	: DeclaratorName							{ cout << "VariableDeclarator 1\n"; }
+	| DeclaratorName ASSIGN VariableInitializer { cout << "VariableDeclarator 2\n"; }
 	;
 
 VariableInitializer
-	: Expression
-	| '{' '}'
-        | '{' ArrayInitializers '}'
-        ;
+	: Expression					   { cout << "VariableInitializer 1\n"; }
+	| OPEN_D CLOSE_D				   { cout << "VariableInitializer 2\n"; }
+    | OPEN_D ArrayInitializers CLOSE_D { cout << "VariableInitializer 3\n"; }
+    ;
 
 ArrayInitializers
-	: VariableInitializer
-	| ArrayInitializers ',' VariableInitializer
-	| ArrayInitializers ','
+	: VariableInitializer						  { cout << "ArrayInitializers 1\n"; }
+	| ArrayInitializers COMMA VariableInitializer { cout << "ArrayInitializers 2\n"; }
+	| ArrayInitializers COMMA					  { cout << "ArrayInitializers 3\n"; }
 	;
 
 MethodDeclaration
-	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody
-	| Modifiers TypeSpecifier MethodDeclarator        MethodBody
-	|           TypeSpecifier MethodDeclarator Throws MethodBody
-	|           TypeSpecifier MethodDeclarator        MethodBody
+	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody { cout << "MethodDeclaration 1\n"; }
+	| Modifiers TypeSpecifier MethodDeclarator        MethodBody { cout << "MethodDeclaration 2\n"; }
+	|           TypeSpecifier MethodDeclarator Throws MethodBody { cout << "MethodDeclaration 3\n"; }
+	|           TypeSpecifier MethodDeclarator        MethodBody { cout << "MethodDeclaration 4\n"; }
 	;
 
 MethodDeclarator
-	: DeclaratorName '(' ParameterList ')'
-	| DeclaratorName '(' ')'
-	| MethodDeclarator OP_DIM
+	: DeclaratorName OPEN_B ParameterList CLOSE_B { cout << "MethodDeclarator 1\n"; }
+	| DeclaratorName OPEN_B CLOSE_B				  { cout << "MethodDeclarator 2\n"; }
+	| MethodDeclarator OP_DIM					  { cout << "MethodDeclarator 3\n"; }
 	;
 
 ParameterList
-	: Parameter
-	| ParameterList ',' Parameter
+	: Parameter { cout << "ParameterList\n"; }
+	| ParameterList COMMA Parameter
 	;
 
 Parameter
-	: TypeSpecifier DeclaratorName
-        | FINAL TypeSpecifier DeclaratorName
+	: TypeSpecifier DeclaratorName		 { cout << "Parameter 1\n"; }
+    | FINAL TypeSpecifier DeclaratorName { cout << "Parameter 2\n"; } 
 	;
 
 DeclaratorName
-	: IDENTIFIER
-        | DeclaratorName OP_DIM
-        ;
+	: IDENTIFIER			{ cout << "DeclaratorName 1\n"; }
+    | DeclaratorName OP_DIM { cout << "DeclaratorName 2\n"; }
+    ;
 
 Throws
-	: THROWS ClassNameList
+	: THROWS ClassNameList { cout << "Throws\n"; }
 	;
 
 MethodBody
-	: Block
-	| ';'
+	: Block		{ cout << "MethodBody 1\n"; }
+	| SEMICOLON { cout << "MethodBody 2\n"; }
 	;
 
 ConstructorDeclaration
-	: Modifiers ConstructorDeclarator Throws Block
-	| Modifiers ConstructorDeclarator        Block
-	|           ConstructorDeclarator Throws Block
-	|           ConstructorDeclarator        Block
+	: Modifiers ConstructorDeclarator Throws Block { cout << "ConstructorDeclaration 1\n"; }
+	| Modifiers ConstructorDeclarator        Block { cout << "ConstructorDeclaration 2\n"; }
+	|           ConstructorDeclarator Throws Block { cout << "ConstructorDeclaration 3\n"; }
+	|           ConstructorDeclarator        Block { cout << "ConstructorDeclaration 4\n"; }
 	;
 
 ConstructorDeclarator
-	: IDENTIFIER '(' ParameterList ')'
-	| IDENTIFIER '(' ')'
+	: IDENTIFIER OPEN_B ParameterList CLOSE_B { cout << "ConstructorDeclarator 1\n"; }
+	| IDENTIFIER OPEN_B CLOSE_B				  { cout << "ConstructorDeclarator 2\n"; }
 	;
 
 StaticInitializer
-	: STATIC Block
+	: STATIC Block { cout << "StaticInitializer\n"; }
 	;
 
 NonStaticInitializer
-        : Block
+        : Block { cout << "NonStaticInitializer\n"; }
         ;
 
 Extends
-	: EXTENDS TypeName
-	| Extends ',' TypeName
+	: EXTENDS TypeName		 { cout << "Extends 1\n"; }
+	| Extends COMMA TypeName { cout << "Extends 2\n"; }
 	;
 
 Block
-	: '{' LocalVariableDeclarationsAndStatements '}'
-	| '{' '}'
-        ;
+	: OPEN_D LocalVariableDeclarationsAndStatements CLOSE_D { cout << "Block 1\n"; }
+	| OPEN_D CLOSE_D										{ cout << "Block 2\n"; }
+    ;
 
 LocalVariableDeclarationsAndStatements
-	: LocalVariableDeclarationOrStatement
+	: LocalVariableDeclarationOrStatement { cout << "LocalVariableDeclarationsAndStatements\n"; }
 	| LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
 	;
 
 LocalVariableDeclarationOrStatement
-	: LocalVariableDeclarationStatement
-	| Statement
+	: LocalVariableDeclarationStatement { cout << "LocalVariableDeclarationOrStatement 1\n"; }
+	| Statement							{ cout << "LocalVariableDeclarationOrStatement 2\n"; }
 	;
 
 LocalVariableDeclarationStatement
-	: TypeSpecifier VariableDeclarators ';'
-        | FINAL TypeSpecifier VariableDeclarators ';'
+	: TypeSpecifier VariableDeclarators SEMICOLON		{ cout << "LocalVariableDeclarationStatement 1\n"; }
+    | FINAL TypeSpecifier VariableDeclarators SEMICOLON { cout << "LocalVariableDeclarationStatement 2\n"; }
 	;
 
 Statement
-	: EmptyStatement
-	| LabelStatement
-	| ExpressionStatement ';'
-        | SelectionStatement
-        | IterationStatement
-	| JumpStatement
-	| GuardingStatement
-	| Block
+	: EmptyStatement				{ cout << "Statement 1\n"; }
+	| LabelStatement				{ cout << "Statement 2\n"; }
+	| ExpressionStatement SEMICOLON { cout << "Statement 3\n"; }
+    | SelectionStatement			{ cout << "Statement 4\n"; }
+    | IterationStatement			{ cout << "Statement 5\n"; }
+	| JumpStatement					{ cout << "Statement 6\n"; }
+	| GuardingStatement				{ cout << "Statement 7\n"; }
+	| Block							{ cout << "Statement 8\n"; }
 	;
 
 EmptyStatement
-	: ';'
-        ;
+	: SEMICOLON { cout << "EmptyStatement 8\n"; }
+    ;
 
 LabelStatement
-	: IDENTIFIER ':'
-        | CASE ConstantExpression ':'
-	| DEFAULT ':'
-        ;
+	: IDENTIFIER COLON				{ cout << "LabelStatement 1\n"; }
+    | CASE ConstantExpression COLON { cout << "LabelStatement 2\n"; }
+	| DEFAULT COLON					{ cout << "LabelStatement 3\n"; }
+    ;
 
 ExpressionStatement
-	: Expression
+	: Expression { cout << "ExpressionStatement\n"; }
 	;
 
 SelectionStatement
-	: IF '(' Expression ')' Statement %prec e1
-        | IF '(' Expression ')' Statement ELSE Statement
-        | SWITCH '(' Expression ')' Block
-        ;
+	: IF OPEN_B Expression CLOSE_B Statement %prec e1		{ cout << "SelectionStatement 1\n"; }
+    | IF OPEN_B Expression CLOSE_B Statement ELSE Statement { cout << "SelectionStatement 2\n"; }
+    | SWITCH OPEN_B Expression CLOSE_B Block				{ cout << "SelectionStatement 3\n"; }
+    ;
 
 IterationStatement
-	: WHILE '(' Expression ')' Statement
-	| DO Statement WHILE '(' Expression ')' ';'
-	| FOR '(' ForInit ForExpr ForIncr ')' Statement
-	| FOR '(' ForInit ForExpr         ')' Statement
+	: WHILE OPEN_B Expression CLOSE_B Statement				 { cout << "IterationStatement 1\n"; }
+	| DO Statement WHILE OPEN_B Expression CLOSE_B SEMICOLON { cout << "IterationStatement 2\n"; }
+	| FOR OPEN_B ForInit ForExpr ForIncr CLOSE_B Statement	 { cout << "IterationStatement 3\n"; }
+	| FOR OPEN_B ForInit ForExpr         CLOSE_B Statement	 { cout << "IterationStatement 4\n"; }
 	;
 
 ForInit
-	: ExpressionStatements ';'
-	| LocalVariableDeclarationStatement
-	| ';'
+	: ExpressionStatements SEMICOLON	{ cout << "ForInit 1\n"; }
+	| LocalVariableDeclarationStatement { cout << "ForInit 2\n"; }
+	| SEMICOLON							{ cout << "ForInit 3\n"; }
 	;
 
 ForExpr
-	: Expression ';'
-	| ';'
+	: Expression SEMICOLON { cout << "ForExpr 1\n"; }
+	| SEMICOLON			   { cout << "ForExpr 2\n"; }
 	;
 
 ForIncr
-	: ExpressionStatements
+	: ExpressionStatements { cout << "ForIncr\n"; }
 	;
 
 ExpressionStatements
-	: ExpressionStatement
-	| ExpressionStatements ',' ExpressionStatement
+	: ExpressionStatement { cout << "ExpressionStatements\n"; }
+	| ExpressionStatements COMMA ExpressionStatement
 	;
 
 JumpStatement
-	: BREAK IDENTIFIER ';'
-	| BREAK            ';'
-        | CONTINUE IDENTIFIER ';'
-	| CONTINUE            ';'
-	| RETURN Expression ';'
-	| RETURN            ';'
-	| THROW Expression ';'
+	: BREAK IDENTIFIER SEMICOLON	{ cout << "JumpStatement 1\n"; }
+	| BREAK            SEMICOLON	{ cout << "JumpStatement 2\n"; }
+    | CONTINUE IDENTIFIER SEMICOLON { cout << "JumpStatement 3\n"; }
+	| CONTINUE            SEMICOLON { cout << "JumpStatement 4\n"; }
+	| RETURN Expression SEMICOLON	{ cout << "JumpStatement 5\n"; }
+	| RETURN            SEMICOLON	{ cout << "JumpStatement 6\n"; }
+	| THROW Expression SEMICOLON	{ cout << "JumpStatement 7\n"; }
 	;
 
 GuardingStatement
-	: SYNCHRONIZED '(' Expression ')' Statement
-	| TRY Block Finally
-	| TRY Block Catches
-	| TRY Block Catches Finally
+	: SYNCHRONIZED OPEN_B Expression CLOSE_B Statement { cout << "GuardingStatement 1\n"; }
+	| TRY Block Finally								   { cout << "GuardingStatement 2\n"; }
+	| TRY Block Catches								   { cout << "GuardingStatement 3\n"; }
+	| TRY Block Catches Finally						   { cout << "GuardingStatement 4\n"; }
 	;
 
 Catches
-	: Catch
+	: Catch { cout << "Catches\n"; }
 	| Catches Catch
 	;
 
 Catch
-	: CatchHeader Block
+	: CatchHeader Block { cout << "Catch\n"; }
 	;
 
 CatchHeader
-	: CATCH '(' TypeSpecifier IDENTIFIER ')'
-	| CATCH '(' TypeSpecifier ')'
+	: CATCH OPEN_B TypeSpecifier IDENTIFIER CLOSE_B { cout << "CatchHeader 1\n"; }
+	| CATCH OPEN_B TypeSpecifier CLOSE_B			{ cout << "CatchHeader 2\n"; }
 	;
 
 Finally
-	: FINALLY Block
+	: FINALLY Block { cout << "Finally\n"; }
 	;
 
 PrimaryExpression
-	: QualifiedName
-	| NotJustName
+	: QualifiedName { cout << "PrimaryExpression 1\n"; }
+	| NotJustName	{ cout << "PrimaryExpression 2\n"; }
 	;
 
 NotJustName
-	: SpecialName
-	| NewAllocationExpression
-	| ComplexPrimary
+	: SpecialName			  { cout << "NotJustName 1\n"; }
+	| NewAllocationExpression { cout << "NotJustName 2\n"; }
+	| ComplexPrimary		  { cout << "NotJustName 3\n"; }
 	;
 
 ComplexPrimary
-	: '(' Expression ')'
-	| ComplexPrimaryNoParenthesis
+	: OPEN_B Expression CLOSE_B	  { cout << "ComplexPrimary 1\n"; }
+	| ComplexPrimaryNoParenthesis { cout << "ComplexPrimary 2\n"; }
 	;
 
 ComplexPrimaryNoParenthesis
-	: LITERAL
-	| BOOLLIT
-	| ArrayAccess
-	| FieldAccess
-	| MethodCall
+	: LITERAL	  { cout << "ComplexPrimaryNoParenthesis 1\n"; }
+	| BOOLLIT	  { cout << "ComplexPrimaryNoParenthesis 2\n"; }
+	| ArrayAccess { cout << "ComplexPrimaryNoParenthesis 3\n"; }
+	| FieldAccess { cout << "ComplexPrimaryNoParenthesis 4\n"; }
+	| MethodCall  { cout << "ComplexPrimaryNoParenthesis 5\n"; }
 	;
 
 ArrayAccess
-	: QualifiedName '[' Expression ']'
-	| ComplexPrimary '[' Expression ']'
+	: QualifiedName OPEN Expression CLOSE  { cout << "ArrayAccess 1\n"; }
+	| ComplexPrimary OPEN Expression CLOSE { cout << "ArrayAccess 2\n"; }
 	;
 
 FieldAccess
-	: NotJustName '.' IDENTIFIER
-	| RealPostfixExpression '.' IDENTIFIER
-        | QualifiedName '.' THIS
-        | QualifiedName '.' CLASS
-        | PrimitiveType '.' CLASS
+	: NotJustName POINT IDENTIFIER			 { cout << "FieldAccess 1\n"; }
+	| RealPostfixExpression POINT IDENTIFIER { cout << "FieldAccess 2\n"; }
+    | QualifiedName POINT THIS				 { cout << "FieldAccess 3\n"; }
+    | QualifiedName POINT CLASS				 { cout << "FieldAccess 4\n"; }
+    | PrimitiveType POINT CLASS				 { cout << "FieldAccess 5\n"; }
 	;
 
 MethodCall
-	: MethodAccess '(' ArgumentList ')'
-	| MethodAccess '(' ')'
+	: MethodAccess OPEN_B ArgumentList CLOSE_B { cout << "MethodCall 1\n"; }
+	| MethodAccess OPEN_B CLOSE_B			   { cout << "MethodCall 2\n"; }
 	;
 
 MethodAccess
-	: ComplexPrimaryNoParenthesis
-	| SpecialName
-	| QualifiedName
+	: ComplexPrimaryNoParenthesis { cout << "MethodAccess 1\n"; }
+	| SpecialName				  { cout << "MethodAccess 2\n"; }
+	| QualifiedName				  { cout << "MethodAccess 3\n"; }
 	;
 
 SpecialName
-	: THIS
-	| SUPER
-	| JNULL
+	: THIS  { cout << "SpecialName THIS\n"; }
+	| SUPER { cout << "SpecialName SUPER\n"; }
+	| JNULL { cout << "SpecialName JNULL\n"; }
 	;
 
 ArgumentList
-	: Expression
-	| ArgumentList ',' Expression
+	: Expression					{ cout << "ArgumentList 1\n"; }
+	| ArgumentList COMMA Expression { cout << "ArgumentList 2\n"; }
 	;
 
 NewAllocationExpression
-        : PlainNewAllocationExpression
-        | QualifiedName '.' PlainNewAllocationExpression
-        ;
+    : PlainNewAllocationExpression					   { cout << "NewAllocationExpression 1\n"; }
+    | QualifiedName POINT PlainNewAllocationExpression { cout << "NewAllocationExpression 2\n"; }
+    ;
 
 PlainNewAllocationExpression
-    	: ArrayAllocationExpression
-    	| ClassAllocationExpression
-    	| ArrayAllocationExpression '{' '}'
-    	| ClassAllocationExpression '{' '}'
-    	| ArrayAllocationExpression '{' ArrayInitializers '}'
-    	| ClassAllocationExpression '{' FieldDeclarations '}'
-    	;
+    : ArrayAllocationExpression									 { cout << "PlainNewAllocationExpression 1\n"; }
+    | ClassAllocationExpression									 { cout << "PlainNewAllocationExpression 2\n"; }
+    | ArrayAllocationExpression OPEN_D CLOSE_D					 { cout << "PlainNewAllocationExpression 3\n"; }
+    | ClassAllocationExpression OPEN_D CLOSE_D					 { cout << "PlainNewAllocationExpression 4\n"; }
+    | ArrayAllocationExpression OPEN_D ArrayInitializers CLOSE_D { cout << "PlainNewAllocationExpression 5\n"; }
+    | ClassAllocationExpression OPEN_D FieldDeclarations CLOSE_D { cout << "PlainNewAllocationExpression 6\n"; }
+    ;
 
 ClassAllocationExpression
-	: NEW TypeName '(' ArgumentList ')'
-	| NEW TypeName '('              ')'
-        ;
+	: NEW TypeName OPEN_B ArgumentList CLOSE_B { cout << "ClassAllocationExpression 1\n"; }
+	| NEW TypeName OPEN_B              CLOSE_B { cout << "ClassAllocationExpression 2\n"; }
+    ;
 
 ArrayAllocationExpression
-	: NEW TypeName DimExprs Dims
-	| NEW TypeName DimExprs
-        | NEW TypeName Dims
+	: NEW TypeName DimExprs Dims { cout << "ArrayAllocationExpression 1\n"; }
+	| NEW TypeName DimExprs		 { cout << "ArrayAllocationExpression 2\n"; }
+    | NEW TypeName Dims			 { cout << "ArrayAllocationExpression 3\n"; }
 	;
 
 DimExprs
-	: DimExpr
-	| DimExprs DimExpr
+	: DimExpr		   { cout << "DimExprs 1\n"; }
+	| DimExprs DimExpr { cout << "DimExprs 2\n"; }
 	;
 
 DimExpr
-	: '[' Expression ']'
+	: OPEN Expression CLOSE { cout << "DimExpr\n"; }
 	;
 
 Dims
-	: OP_DIM
+	: OP_DIM { cout << "Dims\n"; }
 	| Dims OP_DIM
 	;
 
 PostfixExpression
-	: PrimaryExpression
-	| RealPostfixExpression
+	: PrimaryExpression		{ cout << "PostfixExpression 1\n"; }
+	| RealPostfixExpression { cout << "PostfixExpression 2\n"; }
 	;
 
 RealPostfixExpression
-	: PostfixExpression OP_INC
-	| PostfixExpression OP_DEC
+	: PostfixExpression OP_INC { cout << "RealPostfixExpression 1\n"; }
+	| PostfixExpression OP_DEC { cout << "RealPostfixExpression 2\n"; }
 	;
 
 UnaryExpression
-	: OP_INC UnaryExpression
-	| OP_DEC UnaryExpression
-	| ArithmeticUnaryOperator CastExpression
-	| LogicalUnaryExpression
+	: OP_INC UnaryExpression				 { cout << "UnaryExpression 1\n"; }
+	| OP_DEC UnaryExpression				 { cout << "UnaryExpression 2\n"; }
+	| ArithmeticUnaryOperator CastExpression { cout << "UnaryExpression 3\n"; }
+	| LogicalUnaryExpression				 { cout << "UnaryExpression 4\n"; }
 	;
 
 LogicalUnaryExpression
-	: PostfixExpression
-	| LogicalUnaryOperator UnaryExpression
+	: PostfixExpression					   { cout << "LogicalUnaryExpression 1\n"; }
+	| LogicalUnaryOperator UnaryExpression { cout << "LogicalUnaryExpression 2\n"; }
 	;
 
 LogicalUnaryOperator
-	: '~'
-	| '!'
+	: DURA	   { cout << "LogicalUnaryOperator DURA\n"; }
+	| EXC_MARK { cout << "LogicalUnaryOperator EXC_MARK\n"; }
 	;
 
 ArithmeticUnaryOperator
-	: '+'
-	| '-'
+	: PLUS	{ cout << "ArithmeticUnaryOperator PLUS\n"; }
+	| MINUS { cout << "ArithmeticUnaryOperator MINUS\n"; }
 	;
 
 CastExpression
-	: UnaryExpression
-	| '(' PrimitiveTypeExpression ')' CastExpression
-	| '(' ClassTypeExpression ')' CastExpression
-	| '(' Expression ')' LogicalUnaryExpression
+	: UnaryExpression										{ cout << "CastExpression 1\n"; }
+	| OPEN_B PrimitiveTypeExpression CLOSE_B CastExpression { cout << "CastExpression 2\n"; }
+	| OPEN_B ClassTypeExpression CLOSE_B CastExpression		{ cout << "CastExpression 3\n"; }
+	| OPEN_B Expression CLOSE_B LogicalUnaryExpression		{ cout << "CastExpression 4\n"; }
 	;
 
 PrimitiveTypeExpression
-	: PrimitiveType
-        | PrimitiveType Dims
-        ;
+	: PrimitiveType		 { cout << "PrimitiveTypeExpression 1\n"; }
+    | PrimitiveType Dims { cout << "PrimitiveTypeExpression 2\n"; }
+    ;
 
 ClassTypeExpression
-	: QualifiedName Dims
-        ;
+	: QualifiedName Dims { cout << "ClassTypeExpression\n"; }
+    ;
 
 MultiplicativeExpression
-	: CastExpression
-	| MultiplicativeExpression '*' CastExpression
-	| MultiplicativeExpression '/' CastExpression
-	| MultiplicativeExpression '%' CastExpression
+	: CastExpression								 { cout << "MultiplicativeExpression 1\n"; }
+	| MultiplicativeExpression MULT CastExpression	 { cout << "MultiplicativeExpression 2\n"; }
+	| MultiplicativeExpression DIV CastExpression	 { cout << "MultiplicativeExpression 3\n"; }
+	| MultiplicativeExpression MODULE CastExpression { cout << "MultiplicativeExpression 4\n"; }
 	;
 
 AdditiveExpression
-	: MultiplicativeExpression
-        | AdditiveExpression '+' MultiplicativeExpression
-	| AdditiveExpression '-' MultiplicativeExpression
-        ;
+	: MultiplicativeExpression							{ cout << "AdditiveExpression 1\n"; }
+    | AdditiveExpression PLUS MultiplicativeExpression	{ cout << "AdditiveExpression 2\n"; }
+	| AdditiveExpression MINUS MultiplicativeExpression { cout << "AdditiveExpression 3\n"; }
+    ;
 
 ShiftExpression
-	: AdditiveExpression
-        | ShiftExpression OP_SHL AdditiveExpression
-        | ShiftExpression OP_SHR AdditiveExpression
-        | ShiftExpression OP_SHRR AdditiveExpression
+	: AdditiveExpression						 { cout << "ShiftExpression 1\n"; }
+    | ShiftExpression OP_SHL AdditiveExpression	 { cout << "ShiftExpression 2\n"; }
+    | ShiftExpression OP_SHR AdditiveExpression	 { cout << "ShiftExpression 3\n"; }
+    | ShiftExpression OP_SHRR AdditiveExpression { cout << "ShiftExpression 4\n"; }
 	;
 
 RelationalExpression
-	: ShiftExpression
-        | RelationalExpression '<' ShiftExpression
-	| RelationalExpression '>' ShiftExpression
-	| RelationalExpression OP_LE ShiftExpression
-	| RelationalExpression OP_GE ShiftExpression
-	| RelationalExpression INSTANCEOF TypeSpecifier
+	: ShiftExpression								{ cout << "RelationalExpression 1\n"; }
+    | RelationalExpression LESS ShiftExpression		{ cout << "RelationalExpression 2\n"; }
+	| RelationalExpression GREATER ShiftExpression	{ cout << "RelationalExpression 3\n"; }
+	| RelationalExpression OP_LE ShiftExpression	{ cout << "RelationalExpression 4\n"; }
+	| RelationalExpression OP_GE ShiftExpression	{ cout << "RelationalExpression 5\n"; }
+	| RelationalExpression INSTANCEOF TypeSpecifier { cout << "RelationalExpression 6\n"; }
 	;
 
 EqualityExpression
-	: RelationalExpression
-        | EqualityExpression OP_EQ RelationalExpression
-        | EqualityExpression OP_NE RelationalExpression
-        ;
+	: RelationalExpression							{ cout << "EqualityExpression 1\n"; }
+    | EqualityExpression OP_EQ RelationalExpression { cout << "EqualityExpression 2\n"; }
+    | EqualityExpression OP_NE RelationalExpression { cout << "EqualityExpression 3\n"; }
+    ;
 
 AndExpression
-	: EqualityExpression
-        | AndExpression '&' EqualityExpression
-        ;
+	: EqualityExpression				   { cout << "AndExpression 1\n"; }
+    | AndExpression AND EqualityExpression { cout << "AndExpression 2\n"; }
+    ;
 
 ExclusiveOrExpression
-	: AndExpression
-	| ExclusiveOrExpression '^' AndExpression
+	: AndExpression							  { cout << "ExclusiveOrExpression 1\n"; }
+	| ExclusiveOrExpression XOR AndExpression { cout << "ExclusiveOrExpression 2\n"; }
 	;
 
 InclusiveOrExpression
-	: ExclusiveOrExpression
-	| InclusiveOrExpression '|' ExclusiveOrExpression
+	: ExclusiveOrExpression							 { cout << "InclusiveOrExpression 1\n"; }
+	| InclusiveOrExpression OR ExclusiveOrExpression { cout << "InclusiveOrExpression 2\n"; }
 	;
 
 ConditionalAndExpression
-	: InclusiveOrExpression
-	| ConditionalAndExpression OP_LAND InclusiveOrExpression
+	: InclusiveOrExpression									 { cout << "ConditionalAndExpression 1\n"; }
+	| ConditionalAndExpression OP_LAND InclusiveOrExpression { cout << "ConditionalAndExpression 2\n"; }
 	;
 
 ConditionalOrExpression
-	: ConditionalAndExpression
-	| ConditionalOrExpression OP_LOR ConditionalAndExpression
+	: ConditionalAndExpression								  { cout << "ConditionalOrExpression 1\n"; }
+	| ConditionalOrExpression OP_LOR ConditionalAndExpression { cout << "ConditionalOrExpression 2\n"; }
 	;
 
 ConditionalExpression
-	: ConditionalOrExpression
-	| ConditionalOrExpression '?' Expression ':' ConditionalExpression
+	: ConditionalOrExpression												   { cout << "ConditionalExpression 1\n"; }
+	| ConditionalOrExpression QUES_MARK Expression COLON ConditionalExpression { cout << "ConditionalExpression 2\n"; }
 	;
 
 AssignmentExpression
-	: ConditionalExpression
-	| UnaryExpression AssignmentOperator AssignmentExpression
+	: ConditionalExpression									  { cout << "AssignmentExpression 1\n"; }
+	| UnaryExpression AssignmentOperator AssignmentExpression { cout << "AssignmentExpression 2\n"; }
 	;
 
 AssignmentOperator
-	: '='
-	| ASS_MUL
-	| ASS_DIV
-	| ASS_MOD
-	| ASS_ADD
-	| ASS_SUB
-	| ASS_SHL
-	| ASS_SHR
-	| ASS_SHRR
-	| ASS_AND
-	| ASS_XOR
-	| ASS_OR
+	: ASSIGN   { cout << "AssignmentOperator ASSIGN\n"; }
+	| ASS_MUL  { cout << "AssignmentOperator ASS_MUL\n"; }
+	| ASS_DIV  { cout << "AssignmentOperator ASS_DIV\n"; }
+	| ASS_MOD  { cout << "AssignmentOperator ASS_MOD\n"; }
+	| ASS_ADD  { cout << "AssignmentOperator ASS_ADD\n"; }
+	| ASS_SUB  { cout << "AssignmentOperator ASS_SUB\n"; }
+	| ASS_SHL  { cout << "AssignmentOperator ASS_SHL\n"; }
+	| ASS_SHR  { cout << "AssignmentOperator ASS_SHR\n"; }
+	| ASS_SHRR { cout << "AssignmentOperator ASS_SHRR\n"; }
+	| ASS_AND  { cout << "AssignmentOperator ASS_AND\n"; }
+	| ASS_XOR  { cout << "AssignmentOperator ASS_XOR\n"; }
+	| ASS_OR   { cout << "AssignmentOperator ASS_OR\n"; }
 	;
 
 Expression
-	: AssignmentExpression
-        ;
+	: AssignmentExpression { cout << "Expression\n"; }
+    ;
 
 ConstantExpression
-	: ConditionalExpression
+	: ConditionalExpression { cout << "ConstantExpression\n"; }
 	;
 
 %%
@@ -658,7 +669,11 @@ int yylex()
 }
 void main(void)
 {
+	freopen("in.txt","r" ,stdin);
+	freopen("out.txt","w" ,stdout);
+
 	Parser* p = new Parser();
 	p->parse();
-	
+	if(!err->errQ->isEmpty())						   
+		err->printErrQueue();
 }

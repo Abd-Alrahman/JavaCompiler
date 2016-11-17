@@ -30,182 +30,246 @@
       know about them.  */
    enum yytokentype {
      ABSTRACT = 258,
-     BOOLEAN = 259,
-     BREAK = 260,
-     BYTE = 261,
+     ASSERT = 259,
+     BOOLEAN = 260,
+     BREAK = 261,
      BYVALUE = 262,
      CASE = 263,
      CAST = 264,
      CATCH = 265,
-     CHAR = 266,
-     CLASS = 267,
-     CONST = 268,
-     CONTINUE = 269,
-     DEFAULT = 270,
-     DO = 271,
-     DOUBLE = 272,
-     EXTENDS = 273,
-     FINAL = 274,
-     FINALLY = 275,
-     FLOAT = 276,
-     FOR = 277,
-     FUTURE = 278,
-     GENERIC = 279,
-     GOTO = 280,
-     IF = 281,
-     IMPLEMENTS = 282,
-     IMPORT = 283,
-     INNER = 284,
-     INSTANCEOF = 285,
-     INT = 286,
-     INTERFACE = 287,
-     LONG = 288,
-     NATIVE = 289,
-     NEW = 290,
-     JNULL = 291,
-     OPERATOR = 292,
-     OUTER = 293,
-     PACKAGE = 294,
-     PRIVATE = 295,
-     PROTECTED = 296,
-     PUBLIC = 297,
-     REST = 298,
-     RETURN = 299,
-     SHORT = 300,
-     STATIC = 301,
-     SUPER = 302,
-     SWITCH = 303,
-     SYNCHRONIZED = 304,
-     THIS = 305,
-     THROW = 306,
-     THROWS = 307,
-     TRANSIENT = 308,
-     TRY = 309,
-     VAR = 310,
-     VOID = 311,
-     VOLATILE = 312,
-     WHILE = 313,
-     OP_INC = 314,
-     OP_DEC = 315,
-     OP_SHL = 316,
-     OP_SHR = 317,
-     OP_SHRR = 318,
-     OP_GE = 319,
-     OP_LE = 320,
-     OP_EQ = 321,
-     OP_NE = 322,
-     OP_LAND = 323,
-     OP_LOR = 324,
-     OP_DIM = 325,
-     ASS_MUL = 326,
-     ASS_DIV = 327,
-     ASS_MOD = 328,
-     ASS_ADD = 329,
-     ASS_SUB = 330,
-     ASS_SHL = 331,
-     ASS_SHR = 332,
-     ASS_SHRR = 333,
-     ASS_AND = 334,
-     ASS_XOR = 335,
-     ASS_OR = 336,
-     IDENTIFIER = 337,
-     LITERAL = 338,
-     BOOLLIT = 339,
-     e1 = 340,
-     ELSE = 341
+     CLASS = 266,
+     CONST = 267,
+     CONTINUE = 268,
+     DEFAULT = 269,
+     DO = 270,
+     ENUM = 271,
+     EXTENDS = 272,
+     FINAL = 273,
+     FINALLY = 274,
+     FOR = 275,
+     FUTURE = 276,
+     GENERIC = 277,
+     GOTO = 278,
+     IF = 279,
+     IMPLEMENTS = 280,
+     IMPORT = 281,
+     INNER = 282,
+     INSTANCEOF = 283,
+     INTERFACE = 284,
+     NATIVE = 285,
+     NEW = 286,
+     JNULL = 287,
+     OPERATOR = 288,
+     OUTER = 289,
+     PACKAGE = 290,
+     PRIVATE = 291,
+     PROTECTED = 292,
+     PUBLIC = 293,
+     REST = 294,
+     RETURN = 295,
+     STATIC = 296,
+     SUPER = 297,
+     SWITCH = 298,
+     SYNCHRONIZED = 299,
+     THIS = 300,
+     THROW = 301,
+     THROWS = 302,
+     TRANSIENT = 303,
+     TRY = 304,
+     VAR = 305,
+     VOID = 306,
+     VOLATILE = 307,
+     WHILE = 308,
+     OP_INC = 309,
+     OP_DEC = 310,
+     OP_SHL = 311,
+     OP_SHR = 312,
+     OP_SHRR = 313,
+     OP_GE = 314,
+     OP_LE = 315,
+     OP_EQ = 316,
+     OP_NE = 317,
+     OP_LAND = 318,
+     OP_LOR = 319,
+     OP_DIM = 320,
+     ASS_MUL = 321,
+     ASS_DIV = 322,
+     ASS_MOD = 323,
+     ASS_ADD = 324,
+     ASS_SUB = 325,
+     ASS_SHL = 326,
+     ASS_SHR = 327,
+     ASS_SHRR = 328,
+     ASS_AND = 329,
+     ASS_XOR = 330,
+     ASS_OR = 331,
+     OPEN_D = 332,
+     CLOSE_D = 333,
+     OPEN_B = 334,
+     CLOSE_B = 335,
+     OPEN = 336,
+     CLOSE = 337,
+     SEMICOLON = 338,
+     COLON = 339,
+     POINT = 340,
+     COMMA = 341,
+     PLUS = 342,
+     MINUS = 343,
+     MULT = 344,
+     DIV = 345,
+     AND = 346,
+     OR = 347,
+     QUES_MARK = 348,
+     EXC_MARK = 349,
+     MODULE = 350,
+     DURA = 351,
+     ASSIGN = 352,
+     XOR = 353,
+     LESS = 354,
+     GREATER = 355,
+     INT = 356,
+     SHORT = 357,
+     LONG = 358,
+     FLOAT = 359,
+     DOUBLE = 360,
+     CHAR = 361,
+     BYTE = 362,
+     IDENTIFIER = 363,
+     INTEGER_VALUE = 364,
+     LONG_VALUE = 365,
+     N_ID = 366,
+     FLOAT_VALUE = 367,
+     CHAR_VALUE = 368,
+     STRING_VALUE = 369,
+     BOOLLIT = 370,
+     LITERAL = 371,
+     e1 = 372,
+     ELSE = 373
    };
 #endif
 /* Tokens.  */
 #define ABSTRACT 258
-#define BOOLEAN 259
-#define BREAK 260
-#define BYTE 261
+#define ASSERT 259
+#define BOOLEAN 260
+#define BREAK 261
 #define BYVALUE 262
 #define CASE 263
 #define CAST 264
 #define CATCH 265
-#define CHAR 266
-#define CLASS 267
-#define CONST 268
-#define CONTINUE 269
-#define DEFAULT 270
-#define DO 271
-#define DOUBLE 272
-#define EXTENDS 273
-#define FINAL 274
-#define FINALLY 275
-#define FLOAT 276
-#define FOR 277
-#define FUTURE 278
-#define GENERIC 279
-#define GOTO 280
-#define IF 281
-#define IMPLEMENTS 282
-#define IMPORT 283
-#define INNER 284
-#define INSTANCEOF 285
-#define INT 286
-#define INTERFACE 287
-#define LONG 288
-#define NATIVE 289
-#define NEW 290
-#define JNULL 291
-#define OPERATOR 292
-#define OUTER 293
-#define PACKAGE 294
-#define PRIVATE 295
-#define PROTECTED 296
-#define PUBLIC 297
-#define REST 298
-#define RETURN 299
-#define SHORT 300
-#define STATIC 301
-#define SUPER 302
-#define SWITCH 303
-#define SYNCHRONIZED 304
-#define THIS 305
-#define THROW 306
-#define THROWS 307
-#define TRANSIENT 308
-#define TRY 309
-#define VAR 310
-#define VOID 311
-#define VOLATILE 312
-#define WHILE 313
-#define OP_INC 314
-#define OP_DEC 315
-#define OP_SHL 316
-#define OP_SHR 317
-#define OP_SHRR 318
-#define OP_GE 319
-#define OP_LE 320
-#define OP_EQ 321
-#define OP_NE 322
-#define OP_LAND 323
-#define OP_LOR 324
-#define OP_DIM 325
-#define ASS_MUL 326
-#define ASS_DIV 327
-#define ASS_MOD 328
-#define ASS_ADD 329
-#define ASS_SUB 330
-#define ASS_SHL 331
-#define ASS_SHR 332
-#define ASS_SHRR 333
-#define ASS_AND 334
-#define ASS_XOR 335
-#define ASS_OR 336
-#define IDENTIFIER 337
-#define LITERAL 338
-#define BOOLLIT 339
-#define e1 340
-#define ELSE 341
+#define CLASS 266
+#define CONST 267
+#define CONTINUE 268
+#define DEFAULT 269
+#define DO 270
+#define ENUM 271
+#define EXTENDS 272
+#define FINAL 273
+#define FINALLY 274
+#define FOR 275
+#define FUTURE 276
+#define GENERIC 277
+#define GOTO 278
+#define IF 279
+#define IMPLEMENTS 280
+#define IMPORT 281
+#define INNER 282
+#define INSTANCEOF 283
+#define INTERFACE 284
+#define NATIVE 285
+#define NEW 286
+#define JNULL 287
+#define OPERATOR 288
+#define OUTER 289
+#define PACKAGE 290
+#define PRIVATE 291
+#define PROTECTED 292
+#define PUBLIC 293
+#define REST 294
+#define RETURN 295
+#define STATIC 296
+#define SUPER 297
+#define SWITCH 298
+#define SYNCHRONIZED 299
+#define THIS 300
+#define THROW 301
+#define THROWS 302
+#define TRANSIENT 303
+#define TRY 304
+#define VAR 305
+#define VOID 306
+#define VOLATILE 307
+#define WHILE 308
+#define OP_INC 309
+#define OP_DEC 310
+#define OP_SHL 311
+#define OP_SHR 312
+#define OP_SHRR 313
+#define OP_GE 314
+#define OP_LE 315
+#define OP_EQ 316
+#define OP_NE 317
+#define OP_LAND 318
+#define OP_LOR 319
+#define OP_DIM 320
+#define ASS_MUL 321
+#define ASS_DIV 322
+#define ASS_MOD 323
+#define ASS_ADD 324
+#define ASS_SUB 325
+#define ASS_SHL 326
+#define ASS_SHR 327
+#define ASS_SHRR 328
+#define ASS_AND 329
+#define ASS_XOR 330
+#define ASS_OR 331
+#define OPEN_D 332
+#define CLOSE_D 333
+#define OPEN_B 334
+#define CLOSE_B 335
+#define OPEN 336
+#define CLOSE 337
+#define SEMICOLON 338
+#define COLON 339
+#define POINT 340
+#define COMMA 341
+#define PLUS 342
+#define MINUS 343
+#define MULT 344
+#define DIV 345
+#define AND 346
+#define OR 347
+#define QUES_MARK 348
+#define EXC_MARK 349
+#define MODULE 350
+#define DURA 351
+#define ASSIGN 352
+#define XOR 353
+#define LESS 354
+#define GREATER 355
+#define INT 356
+#define SHORT 357
+#define LONG 358
+#define FLOAT 359
+#define DOUBLE 360
+#define CHAR 361
+#define BYTE 362
+#define IDENTIFIER 363
+#define INTEGER_VALUE 364
+#define LONG_VALUE 365
+#define N_ID 366
+#define FLOAT_VALUE 367
+#define CHAR_VALUE 368
+#define STRING_VALUE 369
+#define BOOLLIT 370
+#define LITERAL 371
+#define e1 372
+#define ELSE 373
 
 
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 25 "C:\\Users\\Dell-PC\\documents\\visual studio 2013\\Projects\\JavaCompiler\\yacc.y"
+#line 28 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\yacc.y"
 typedef union YYSTYPE {
 	struct R{
 		int i;
@@ -217,7 +281,7 @@ typedef union YYSTYPE {
 		}r;
 	} YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 221 "yacc.hpp"
+#line 285 "yacc.hpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

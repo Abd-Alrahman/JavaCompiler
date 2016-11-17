@@ -1,2 +1,2 @@
 package name;
-public class test { int x = 10; float f = 10.0; }
+public class test { int x = 10; float f = 10.0; String string = "new string added to test"; }

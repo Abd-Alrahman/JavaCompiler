@@ -1,2 +1,29 @@
-package name;
-public class test { int x = 10; float f = 10.0; String string = "new string added to test"; }
+package test;
+package test.test.test;
+
+import java.lang.io;
+import java.*;
+import payroll.Employee;
+
+/*
+class Test {}
+class MyClass extends MySuperClass {}
+class MyClass implements MyInterface {}
+
+class MyClass extends MySuperClass implements MyInterface {}
+
+class MyClass extends MySuperClass1, MySuperClass2 implements MyInterface1, MyInterface2 {}
+
+public class MyClass extends MySuperClass1, MySuperClass2 implements MyInterface1, MyInterface2 {}
+*/
+
+class Test {
+	boolean canMoveUp()	{}
+	int canMoveUp() {}
+	float canMoveUp() {}
+	double canMoveUp() {}
+	long canMoveUp() {}
+	short canMoveUp() {}
+	char canMoveUp() {}
+	byte canMoveUp() {}
+}

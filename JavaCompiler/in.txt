@@ -1,2 +1,2 @@
 package name;
-public class test { int x = 10; }
+public class test { int x = 10; float f = 10.0; }

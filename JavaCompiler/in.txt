@@ -26,4 +26,7 @@ class Test {
 	short canMoveUp() {}
 	char canMoveUp() {}
 	byte canMoveUp() {}
+
+	void newMethodToTest() {}
 }
+

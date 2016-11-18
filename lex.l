@@ -806,7 +806,7 @@ Letter					[a-zA-Z_]
 \/\*                                        { BEGIN multilinecomment; }
 <multilinecomment>[^*\n]*					{;}
 <multilinecomment>"*"+[^*/\n]*				{lineNo++;}
-<multilinecomment>"*"+"/"                   { BEGIN INITIAL;cout<<"\t it is a Multi Line Comment \n";}
+<multilinecomment>"*"+"/"                   { BEGIN INITIAL;cout<<"It is a Multi Line Comment \n";}
 
 
 {Identifier}			{	
@@ -824,9 +824,9 @@ Letter					[a-zA-Z_]
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
 							colNo += strlen(yytext);
-							cout<<":Integer value (yytext) ="<<yytext<<"\n";
+							cout<<"Integer value (yytext) = "<<yytext<<"\n";
 							int i = atoi(yytext);
-							cout<<":Int value as int ="<<i;
+							cout<<"Int value as int = "<<i;
 							yylval.r.i = i;
 							if(strlen(yytext) <= 4)
 								return INTEGER_VALUE;

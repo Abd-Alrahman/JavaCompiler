@@ -28,5 +28,6 @@ class Test {
 	byte canMoveUp() {}
 
 	void newMethodToTest() {}
+	void newMethodToTest2() {}
 }
 

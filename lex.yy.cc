@@ -546,9 +546,9 @@ static yyconst short int yy_chk[487] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 1 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 #define INITIAL 0
-#line 2 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 2 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 		#include "yacc.hpp"
 		#include <iostream>
 		#include <istream>
@@ -690,7 +690,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 27 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 27 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 
 #line 694 "lex.yy.cc"
 
@@ -777,7 +777,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 28 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 28 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -787,7 +787,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 35 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 35 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -797,7 +797,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 42 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 42 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -807,7 +807,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 49 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 49 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -817,7 +817,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 56 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 56 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -827,7 +827,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 63 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 63 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -837,7 +837,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 70 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 70 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -847,7 +847,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 77 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 77 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -857,7 +857,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 84 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 84 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -867,7 +867,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 91 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 91 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -877,7 +877,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 98 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 98 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -887,7 +887,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 105 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 105 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -897,7 +897,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 112 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 112 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -907,7 +907,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 119 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 119 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -917,7 +917,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 127 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 127 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -927,7 +927,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 134 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 134 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext); 
                             yylval.r.myLineNo= lineNo; 
@@ -937,7 +937,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 141 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 141 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -947,7 +947,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 148 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 148 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -957,7 +957,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 155 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 155 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -967,7 +967,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 162 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 162 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -977,7 +977,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 169 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 169 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -987,7 +987,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 177 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 177 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -997,7 +997,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 184 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 184 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1007,7 +1007,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 191 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 191 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1017,7 +1017,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 198 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 198 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1027,7 +1027,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 205 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 205 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1037,7 +1037,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 212 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 212 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1046,7 +1046,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 219 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 219 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1056,7 +1056,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 226 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 226 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1066,7 +1066,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 233 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 233 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1076,7 +1076,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 241 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 241 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1086,7 +1086,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 248 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 248 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1096,7 +1096,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 255 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 255 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1106,7 +1106,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 262 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 262 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1115,7 +1115,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 269 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 269 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1125,7 +1125,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 276 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 276 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1135,7 +1135,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 283 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 283 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1145,7 +1145,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 291 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 291 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
                             colNo += strlen(yytext);
                             yylval.r.myLineNo= lineNo; 
@@ -1155,7 +1155,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 298 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 298 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1165,7 +1165,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 305 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 305 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1175,7 +1175,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 312 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 312 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1185,7 +1185,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 319 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 319 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1195,7 +1195,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 326 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 326 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1205,7 +1205,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 333 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 333 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1215,7 +1215,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 340 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 340 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1225,7 +1225,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 347 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 347 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1235,7 +1235,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 354 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 354 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1245,7 +1245,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 361 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 361 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1255,7 +1255,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 368 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 368 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1265,7 +1265,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 375 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 375 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1275,7 +1275,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 382 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 382 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1285,7 +1285,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 389 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 389 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1295,7 +1295,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 396 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 396 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1305,7 +1305,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 403 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 403 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1315,7 +1315,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 410 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 410 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1325,7 +1325,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 417 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 417 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1335,7 +1335,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 424 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 424 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1345,7 +1345,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 431 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 431 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1355,7 +1355,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 438 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 438 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1365,7 +1365,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 445 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 445 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1375,7 +1375,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 452 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 452 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1385,7 +1385,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 459 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 459 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1395,7 +1395,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 466 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 466 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1405,7 +1405,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 473 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 473 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1415,7 +1415,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 480 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 480 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1425,7 +1425,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 487 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 487 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1435,7 +1435,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 494 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 494 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1445,7 +1445,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 501 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 501 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1455,7 +1455,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 508 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 508 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1465,7 +1465,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 515 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 515 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
@@ -1475,7 +1475,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 522 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 522 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1485,7 +1485,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 529 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 529 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1495,7 +1495,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 536 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 536 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1505,7 +1505,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 543 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 543 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1515,7 +1515,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 550 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 550 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1525,7 +1525,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 557 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 557 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							lineNo = lineNo+1;
 							colNo = 1;
@@ -1535,7 +1535,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 564 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 564 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += 4;
 							yylval.r.myLineNo= lineNo; 
@@ -1544,7 +1544,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 570 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 570 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += 1;
 							yylval.r.myLineNo= lineNo; 
@@ -1553,7 +1553,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 576 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 576 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1563,7 +1563,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 583 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 583 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1573,7 +1573,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 590 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 590 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1583,7 +1583,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 597 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 597 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1593,7 +1593,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 604 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 604 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1603,7 +1603,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 611 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 611 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1613,7 +1613,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 618 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 618 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1623,7 +1623,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 625 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 625 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1633,7 +1633,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 632 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 632 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1643,7 +1643,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 639 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 639 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1653,7 +1653,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 646 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 646 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1663,7 +1663,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 653 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 653 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1673,7 +1673,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 660 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 660 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1683,7 +1683,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 667 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 667 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1693,7 +1693,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 674 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 674 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1703,7 +1703,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 681 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 681 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1713,7 +1713,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 688 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 688 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1723,7 +1723,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 695 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 695 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1733,7 +1733,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 702 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 702 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1743,7 +1743,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 709 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 709 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1753,7 +1753,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 716 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 716 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1763,7 +1763,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 723 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 723 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1773,7 +1773,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 730 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 730 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1783,7 +1783,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 737 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 737 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1793,7 +1793,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 744 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 744 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1805,7 +1805,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 753 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 753 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1817,7 +1817,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 762 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 762 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1829,7 +1829,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 771 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 771 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1841,7 +1841,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 780 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 780 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1853,7 +1853,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 789 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 789 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1863,7 +1863,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 796 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 796 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -1873,27 +1873,27 @@ YY_RULE_SETUP
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 806 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 806 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 { BEGIN multilinecomment; }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 807 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 807 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {;}
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 808 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 808 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {lineNo++;}
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 809 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 809 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 { BEGIN INITIAL;cout<<"\t it is a Multi Line Comment \n";}
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 812 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 812 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {	
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
@@ -1907,7 +1907,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 823 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 823 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
@@ -1924,7 +1924,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 837 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 837 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
@@ -1938,7 +1938,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 848 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 848 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
@@ -1952,7 +1952,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 859 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 859 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
@@ -1968,7 +1968,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 872 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 872 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
@@ -1984,7 +1984,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 885 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 885 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 {
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
@@ -1994,7 +1994,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 893 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 893 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 ECHO;
 	YY_BREAK
 #line 1999 "lex.yy.cc"
@@ -2806,6 +2806,6 @@ int main()
 	return 0;
 	}
 #endif
-#line 893 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
+#line 893 "C:\\Users\\Amany Obied\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
 
 

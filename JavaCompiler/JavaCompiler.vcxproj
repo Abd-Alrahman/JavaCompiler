@@ -11,13 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\lex.l" />
     <None Include="..\yacc.output" />
     <None Include="..\yacc.y" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Replace of.txt" />
-    <Text Include="in.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\yacc.hpp" />

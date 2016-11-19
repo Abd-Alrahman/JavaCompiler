@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\lex.l">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="..\yacc.y">
       <Filter>Source Files</Filter>
     </None>
@@ -27,9 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Replace of.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-    <Text Include="in.txt">
       <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>

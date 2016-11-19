@@ -1,0 +1,32 @@
+package test;
+
+import java.lang.io;
+import java.*;
+import payroll.Employee;
+
+/*
+class Test {}
+class MyClass extends MySuperClass {}
+class MyClass implements MyInterface {}
+
+class MyClass extends MySuperClass implements MyInterface {}
+
+class MyClass extends MySuperClass1, MySuperClass2 implements MyInterface1, MyInterface2 {}
+
+public class MyClass extends MySuperClass1, MySuperClass2 implements MyInterface1, MyInterface2 {}
+*/
+
+class Test {
+	boolean canMoveUp()	{}
+	int canMoveUp() {}
+	float canMoveUp() {}
+	double canMoveUp() {}
+	long canMoveUp() {}
+	short canMoveUp() {}
+	char canMoveUp() {}
+	byte canMoveUp() {}
+
+	void newMethodToTest() {}
+	void newMethodToTest2() {}
+}
+

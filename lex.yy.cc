@@ -25,7 +25,6 @@
 #include <iostream>
 using namespace std;
 
-
 /* Use prototypes in function declarations. */
 #define YY_USE_PROTOS
 
@@ -1889,7 +1888,7 @@ YY_RULE_SETUP
 case 113:
 YY_RULE_SETUP
 #line 809 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\lex.l"
-{ BEGIN INITIAL;cout<<"\t it is a Multi Line Comment \n";}
+{ BEGIN INITIAL;cout<<"It is a Multi Line Comment \n";}
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
@@ -1912,9 +1911,9 @@ YY_RULE_SETUP
 							yylval.r.myColno = colNo;
 							yylval.r.myLineNo = lineNo;
 							colNo += strlen(yytext);
-							cout<<":Integer value (yytext) ="<<yytext<<"\n";
+							cout<<"Integer value (yytext) = "<<yytext<<"\n";
 							int i = atoi(yytext);
-							cout<<":Int value as int ="<<i;
+							cout<<"Int value as int = "<<i;
 							yylval.r.i = i;
 							if(strlen(yytext) <= 4)
 								return INTEGER_VALUE;

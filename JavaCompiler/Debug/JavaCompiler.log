@@ -1,44 +1,9 @@
-﻿Build started 11/17/2016 10:54:42 AM.
-     1>Project "C:\Users\Amany Obied\Documents\Visual Studio 2013\Projects\JavaCompiler\JavaCompiler\JavaCompiler.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\lex.yy.cc ..\yacc.cpp
-         yacc.cpp
-     1>c:\users\amany obied\documents\visual studio 2013\projects\javacompiler\javacompiler\errorrecovery.h(30): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\string.h(118) : see declaration of 'strcat'
-     1>c:\users\amany obied\documents\visual studio 2013\projects\javacompiler\javacompiler\errorrecovery.h(33): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\string.h(118) : see declaration of 'strcat'
-     1>c:\users\amany obied\documents\visual studio 2013\projects\javacompiler\javacompiler\yacc.cpp(436): warning C4273: 'malloc' : inconsistent dll linkage
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\stdlib.h(642) : see previous definition of 'malloc'
-     1>c:\users\amany obied\documents\visual studio 2013\projects\javacompiler\javacompiler\yacc.cpp(443): warning C4273: 'free' : inconsistent dll linkage
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\stdlib.h(641) : see previous definition of 'free'
-     1>c:\users\amany obied\documents\visual studio 2013\projects\javacompiler\javacompiler\yacc.cpp(1782): warning C4065: switch statement contains 'default' but no 'case' labels
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\yacc.y(672): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\stdio.h(226) : see declaration of 'freopen'
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\yacc.y(673): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\stdio.h(226) : see declaration of 'freopen'
-         lex.yy.cc
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(775): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(776): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(785): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(818): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\string.h(112) : see declaration of 'strcpy'
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(843): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\string.h(112) : see declaration of 'strcpy'
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(853): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(866): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\string.h(195) : see declaration of 'strncpy'
-     1>c:\users\dell-pc\documents\visual studio 2013\projects\javacompiler\lex.l(878): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\string.h(195) : see declaration of 'strncpy'
-     1>c:\users\amany obied\documents\visual studio 2013\projects\javacompiler\javacompiler\lex.yy.cc(2603): warning C4273: 'isatty' : inconsistent dll linkage
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\io.h(332) : see previous definition of 'isatty'
-         Generating Code...
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Amany Obied\Documents\Visual Studio 2013\Projects\JavaCompiler\Debug\JavaCompiler.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Amany Obied\Documents\Visual Studio 2013\Projects\JavaCompiler\Debug\JavaCompiler.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Amany Obied\Documents\Visual Studio 2013\Projects\JavaCompiler\Debug\JavaCompiler.lib" /MACHINE:X86 Debug\lex.yy.obj
-         Debug\yacc.obj
-         LINK : C:\Users\Amany Obied\Documents\Visual Studio 2013\Projects\JavaCompiler\Debug\JavaCompiler.exe not found or not built by the last incremental link; performing full link
-         JavaCompiler.vcxproj -> C:\Users\Amany Obied\Documents\Visual Studio 2013\Projects\JavaCompiler\Debug\JavaCompiler.exe
-     1>Done Building Project "C:\Users\Amany Obied\Documents\Visual Studio 2013\Projects\JavaCompiler\JavaCompiler\JavaCompiler.vcxproj" (Build target(s)).
+﻿Build started 11/17/2016 10:30:49 PM.
+     1>Project "C:\Users\Dell-PC\Documents\Visual Studio 2013\Projects\JavaCompiler\JavaCompiler\JavaCompiler.vcxproj" on node 2 (Build target(s)).
+     1>Link:
+         JavaCompiler.vcxproj -> C:\Users\Dell-PC\Documents\Visual Studio 2013\Projects\JavaCompiler\Debug\JavaCompiler.exe
+     1>Done Building Project "C:\Users\Dell-PC\Documents\Visual Studio 2013\Projects\JavaCompiler\JavaCompiler\JavaCompiler.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:06.00
+Time Elapsed 00:00:00.09

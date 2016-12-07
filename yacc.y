@@ -3,7 +3,7 @@
 	#include <iostream>
 	using namespace std;
 	#include <FlexLexer.h>
-	#include "JavaCompiler\ErrorRecovery.h"
+	#include "SymbolTable/MyParser.h"
 	int yylex(void);
 	int yyparse();
 	void yyerror(char *);
@@ -20,7 +20,8 @@
 			return yyparse();
 		}
 	};
-	
+
+	MyParser * p = new MyParser();	
 %}
 
 
@@ -32,8 +33,12 @@
 		char c;
 		char* str;
 		int myLineNo;
-		int myColno;
+		int myColNo;
 		}r;
+		class YaccSimpleType * yaccSimpleType;
+		class Variable * variable;
+		class Function * function;
+		class Type * type;
 	}
 
 %token ABSTRACT ASSERT
@@ -59,7 +64,7 @@
 %token OP_DIM
 %token ASS_MUL ASS_DIV ASS_MOD ASS_ADD ASS_SUB
 %token ASS_SHL ASS_SHR ASS_SHRR ASS_AND ASS_XOR ASS_OR
-%token OPEN_D CLOSE_D OPEN_B CLOSE_B OPEN CLOSE SEMICOLON COLON POINT COMMA
+%token OPEN_D CLOSE_D OPEN_B CLOSE_B OPEN CLOSE COLON COMMA
 %token PLUS MINUS MULT DIV AND OR QUES_MARK EXC_MARK MODULE DURA ASSIGN
 %token XOR LESS GREATER
 %token INT SHORT LONG FLOAT DOUBLE CHAR BYTE
@@ -69,19 +74,32 @@
 
 %nonassoc e1
 %nonassoc ELSE
+%nonassoc e4
+%nonassoc e2
+%nonassoc e3 
+%nonassoc ABSTRACT CLASS FINAL INTERFACE NATIVE PRIVATE PROTECTED PUBLIC STATIC SYNCHRONIZED TRANSIENT  VOLATILE OPEN_D CLOSE_D 
+%nonassoc e5
+%nonassoc e6
+%nonassoc e7
+%nonassoc SEMICOLON POINT
+%nonassoc e8
+%nonassoc BOOLEAN VOID INT SHORT LONG FLOAT DOUBLE CHAR BYTE
+%nonassoc e9
+%nonassoc IDENTIFIER
+
 
 %start CompilationUnit
 
 %%
 
 TypeSpecifier
-	: TypeName		{ cout << "TypeSpecifier 1\n"; }
+	: TypeName   	{ cout << "TypeSpecifier 1\n"; }
 	| TypeName Dims { cout << "TypeSpecifier 2\n"; }
 	;
 
 TypeName
 	: PrimitiveType { cout << "TypeName 1\n"; }
-	| QualifiedName { cout << "TypeName 2\n"; }
+	| QualifiedName %prec e5 { cout << "TypeName 2\n"; }
 	;
 
 ClassNameList
@@ -119,12 +137,20 @@ ProgramFile
 	|                  ImportStatements TypeDeclarations { cout << "ProgramFile 4 \n"; }
 	| PackageStatement									 { cout << "ProgramFile 5 \n"; }
 	|                  ImportStatements					 { cout << "ProgramFile 6 \n"; }
-	|                                   TypeDeclarations { cout << "ProgramFile 7 \n"; }
+	|                                   TypeDeclarations {err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Missing \'Package Statement \'", "" );}
+	|
 	;
 
 PackageStatement
 	: PACKAGE QualifiedName SemiColons { cout << "PackageStatement\n"; }
+	| PACKAGE QualifiedName {err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :Missing \';\'", "" );}
+	| PACKAGE %prec e6 {err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Expected <identifier>", "" );}
+	| PACKAGE SemiColons {err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :Expected <identifier>;", "" );}
+	| SemiColons {err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Expected packageStatment1", "" );}
+	| QualifiedName SemiColons {err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :Expected packageStatment2", "" );}
+	| QualifiedName QualifiedName SemiColons {err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :Expected package put givin", $<r.str>1);}
 	;
+
 
 TypeDeclarations
 	: TypeDeclarationOptSemi { cout << "TypeDeclarations\n"; }
@@ -146,25 +172,78 @@ ImportStatement
 	| IMPORT QualifiedName POINT MULT SemiColons { cout << "ImportStatement 2\n"; }
 	;
 
+
 QualifiedName
 	: IDENTIFIER { cout << "QualifiedName\n"; }
 	| QualifiedName POINT IDENTIFIER
 	;
 
 TypeDeclaration
-	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; }
-	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; }
+	: ClassHeader OPEN_D FieldDeclarations CLOSE_D	{ cout << "TypeDeclaration 1\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
+	| ClassHeader OPEN_D CLOSE_D					{ cout << "TypeDeclaration 2\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
+	| ClassHeader CLOSE_D							{ 
+														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" );
+														$<type>$ = p->finishTypeDeclaration($<type>1);
+													}
+	| ClassHeader OPEN_D  %prec e2					{ 
+														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'}\'", "" );
+														$<type>$ = p->finishTypeDeclaration($<type>1);
+													}
+	| ClassHeader %prec e4							{ 
+														err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'{}\'", "" );
+														$<type>$ = p->finishTypeDeclaration($<type>1);
+													}
 	;
 
 ClassHeader
-	: Modifiers ClassWord IDENTIFIER Extends Interfaces { cout << "ClassHeader 1\n"; }
-	| Modifiers ClassWord IDENTIFIER Extends			{ cout << "ClassHeader 2\n"; }
-	| Modifiers ClassWord IDENTIFIER       Interfaces	{ cout << "ClassHeader 3\n"; }
-	|           ClassWord IDENTIFIER Extends Interfaces { cout << "ClassHeader 4\n"; }
-	| Modifiers ClassWord IDENTIFIER					{ cout << "ClassHeader 5\n"; }
-	|           ClassWord IDENTIFIER Extends			{ cout << "ClassHeader 6\n"; }
-	|           ClassWord IDENTIFIER       Interfaces	{ cout << "ClassHeader 7\n"; }
-	|           ClassWord IDENTIFIER					{ cout << "ClassHeader 8\n"; }
+	: Modifiers ClassWord IDENTIFIER Extends Interfaces { 
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 1\n"; 
+														}
+	| Modifiers ClassWord IDENTIFIER Extends			{ 
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 2\n"; 
+														}
+	| Modifiers ClassWord IDENTIFIER       Interfaces	{ 
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 3\n"; 
+														}
+	|           ClassWord IDENTIFIER Extends Interfaces { 
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 4\n"; 
+														}
+	| Modifiers ClassWord IDENTIFIER					{ 
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 5\n"; 
+														}
+	| QualifiedName ClassWord IDENTIFIER				{ 
+															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'Modifier\' put givin ",$<r.str>1);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+														}
+	|           ClassWord IDENTIFIER Extends			{ 
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 6\n"; 
+														}
+	|           ClassWord IDENTIFIER       Interfaces	{ 
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 7\n"; 
+														}
+	|           ClassWord IDENTIFIER					{ 
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															cout << "ClassHeader 8\n"; 
+														}
+	| Modifiers ClassWord %prec e7			            { 
+															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 1","" );
+															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo);
+														}
+	|		    ClassWord %prec e7			            { 
+															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 2","" );
+															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo);
+														}
+	|           ClassWord Extends						{ 
+															err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"illegal start class","" );
+															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo);
+														}
 	;
 
 Modifiers
@@ -188,10 +267,12 @@ Modifier
 ClassWord
 	: CLASS		{ cout << "ClassWord CLASS\n"; }
 	| INTERFACE { cout << "ClassWord INTERFACE\n"; }
+	| TypeSpecifier %prec e3 { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'class\'", $<r.str>1);}
 	;
 
 Interfaces
 	: IMPLEMENTS ClassNameList { cout << "Interfaces\n"; }
+	| IMPLEMENTS %prec e9	   { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :illegal start of type", "");}
 	;
 
 FieldDeclarations
@@ -214,8 +295,11 @@ FieldDeclaration
 	;
 
 FieldVariableDeclaration
-	: Modifiers TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 1\n"; }
-	|           TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 2\n"; }
+	: Modifiers TypeSpecifier VariableDeclarators	{ cout << "FieldVariableDeclaration 1\n"; }
+	|           TypeSpecifier VariableDeclarators	{ 
+														$<variable>$=p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+														cout << "FieldVariableDeclaration 2\n";
+													}
 	;
 
 VariableDeclarators
@@ -260,6 +344,7 @@ ParameterList
 
 Parameter
 	: TypeSpecifier DeclaratorName		 { cout << "Parameter 1\n"; }
+	| TypeSpecifier DeclaratorName	ASSIGN	 { cout << "Parameter heheheh \n"; }
     | FINAL TypeSpecifier DeclaratorName { cout << "Parameter 2\n"; } 
 	;
 
@@ -300,6 +385,7 @@ NonStaticInitializer
 Extends
 	: EXTENDS TypeName		 { cout << "Extends 1\n"; }
 	| Extends COMMA TypeName { cout << "Extends 2\n"; }
+	| EXTENDS %prec e8       { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :illegal start of type ", "");}
 	;
 
 Block
@@ -433,6 +519,11 @@ ComplexPrimary
 
 ComplexPrimaryNoParenthesis
 	: LITERAL	  { cout << "ComplexPrimaryNoParenthesis 1\n"; }
+	| INTEGER_VALUE  { cout << "ComplexPrimaryNoParenthesis INTEGER_VALUE\n"; }
+	| FLOAT_VALUE  { cout << "ComplexPrimaryNoParenthesis FLOAT_VALUE\n"; }
+	| CHAR_VALUE  { cout << "ComplexPrimaryNoParenthesis CAHR_VALUE\n"; }
+	| LONG_VALUE  { cout << "ComplexPrimaryNoParenthesis LONG_VALUE\n"; }
+	| STRING_VALUE  { cout << "ComplexPrimaryNoParenthesis STRING_VALUE\n"; }
 	| BOOLLIT	  { cout << "ComplexPrimaryNoParenthesis 2\n"; }
 	| ArrayAccess { cout << "ComplexPrimaryNoParenthesis 3\n"; }
 	| FieldAccess { cout << "ComplexPrimaryNoParenthesis 4\n"; }
@@ -630,6 +721,132 @@ AssignmentExpression
 	: ConditionalExpression									  { cout << "AssignmentExpression 1\n"; }
 	| UnaryExpression AssignmentOperator AssignmentExpression { cout << "AssignmentExpression 2\n"; }
 	;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 AssignmentOperator
 	: ASSIGN   { cout << "AssignmentOperator ASSIGN\n"; }

@@ -109,42 +109,50 @@
      CLOSE_B = 335,
      OPEN = 336,
      CLOSE = 337,
-     SEMICOLON = 338,
-     COLON = 339,
-     POINT = 340,
-     COMMA = 341,
-     PLUS = 342,
-     MINUS = 343,
-     MULT = 344,
-     DIV = 345,
-     AND = 346,
-     OR = 347,
-     QUES_MARK = 348,
-     EXC_MARK = 349,
-     MODULE = 350,
-     DURA = 351,
-     ASSIGN = 352,
-     XOR = 353,
-     LESS = 354,
-     GREATER = 355,
-     INT = 356,
-     SHORT = 357,
-     LONG = 358,
-     FLOAT = 359,
-     DOUBLE = 360,
-     CHAR = 361,
-     BYTE = 362,
-     IDENTIFIER = 363,
-     INTEGER_VALUE = 364,
-     LONG_VALUE = 365,
-     N_ID = 366,
-     FLOAT_VALUE = 367,
-     CHAR_VALUE = 368,
-     STRING_VALUE = 369,
-     BOOLLIT = 370,
-     LITERAL = 371,
-     e1 = 372,
-     ELSE = 373
+     COLON = 338,
+     COMMA = 339,
+     PLUS = 340,
+     MINUS = 341,
+     MULT = 342,
+     DIV = 343,
+     AND = 344,
+     OR = 345,
+     QUES_MARK = 346,
+     EXC_MARK = 347,
+     MODULE = 348,
+     DURA = 349,
+     ASSIGN = 350,
+     XOR = 351,
+     LESS = 352,
+     GREATER = 353,
+     INT = 354,
+     SHORT = 355,
+     LONG = 356,
+     FLOAT = 357,
+     DOUBLE = 358,
+     CHAR = 359,
+     BYTE = 360,
+     IDENTIFIER = 361,
+     INTEGER_VALUE = 362,
+     LONG_VALUE = 363,
+     N_ID = 364,
+     FLOAT_VALUE = 365,
+     CHAR_VALUE = 366,
+     STRING_VALUE = 367,
+     BOOLLIT = 368,
+     LITERAL = 369,
+     e1 = 370,
+     ELSE = 371,
+     e4 = 372,
+     e2 = 373,
+     e3 = 374,
+     e5 = 375,
+     e6 = 376,
+     e7 = 377,
+     POINT = 378,
+     SEMICOLON = 379,
+     e8 = 380,
+     e9 = 381
    };
 #endif
 /* Tokens.  */
@@ -228,48 +236,56 @@
 #define CLOSE_B 335
 #define OPEN 336
 #define CLOSE 337
-#define SEMICOLON 338
-#define COLON 339
-#define POINT 340
-#define COMMA 341
-#define PLUS 342
-#define MINUS 343
-#define MULT 344
-#define DIV 345
-#define AND 346
-#define OR 347
-#define QUES_MARK 348
-#define EXC_MARK 349
-#define MODULE 350
-#define DURA 351
-#define ASSIGN 352
-#define XOR 353
-#define LESS 354
-#define GREATER 355
-#define INT 356
-#define SHORT 357
-#define LONG 358
-#define FLOAT 359
-#define DOUBLE 360
-#define CHAR 361
-#define BYTE 362
-#define IDENTIFIER 363
-#define INTEGER_VALUE 364
-#define LONG_VALUE 365
-#define N_ID 366
-#define FLOAT_VALUE 367
-#define CHAR_VALUE 368
-#define STRING_VALUE 369
-#define BOOLLIT 370
-#define LITERAL 371
-#define e1 372
-#define ELSE 373
+#define COLON 338
+#define COMMA 339
+#define PLUS 340
+#define MINUS 341
+#define MULT 342
+#define DIV 343
+#define AND 344
+#define OR 345
+#define QUES_MARK 346
+#define EXC_MARK 347
+#define MODULE 348
+#define DURA 349
+#define ASSIGN 350
+#define XOR 351
+#define LESS 352
+#define GREATER 353
+#define INT 354
+#define SHORT 355
+#define LONG 356
+#define FLOAT 357
+#define DOUBLE 358
+#define CHAR 359
+#define BYTE 360
+#define IDENTIFIER 361
+#define INTEGER_VALUE 362
+#define LONG_VALUE 363
+#define N_ID 364
+#define FLOAT_VALUE 365
+#define CHAR_VALUE 366
+#define STRING_VALUE 367
+#define BOOLLIT 368
+#define LITERAL 369
+#define e1 370
+#define ELSE 371
+#define e4 372
+#define e2 373
+#define e3 374
+#define e5 375
+#define e6 376
+#define e7 377
+#define POINT 378
+#define SEMICOLON 379
+#define e8 380
+#define e9 381
 
 
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 28 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\yacc.y"
+#line 29 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\yacc.y"
 typedef union YYSTYPE {
 	struct R{
 		int i;
@@ -277,11 +293,15 @@ typedef union YYSTYPE {
 		char c;
 		char* str;
 		int myLineNo;
-		int myColno;
+		int myColNo;
 		}r;
+		class YaccSimpleType * yaccSimpleType;
+		class Variable * variable;
+		class Function * function;
+		class Type * type;
 	} YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 285 "yacc.hpp"
+#line 305 "yacc.hpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

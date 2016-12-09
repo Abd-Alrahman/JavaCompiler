@@ -34,6 +34,30 @@ public:
 	void setScope(Scope * m);
 	Scope * getScope();
 };
+class Function {
+private:
+	char* name;
+	char* modifier;
+	bool isStatic;
+	bool isFinal;
+	Scope * scope;
+	char* returnType;
+public:
+	Function();
+	~Function();
+	void setName(char* name);
+	char* getName();
+	void setModifier(char* modifier);
+	char* getModifier();
+	void setIsStatic(char* isStatic);
+	bool getIsStatic();
+	void setIsFinal(char* isFinal);
+	bool getIsFinal();
+	void setReturnType(char* returnType);
+	char* getReturnType();
+	void setScope(Scope* m);
+	Scope* getScope();
+};
 //=============================
 
 class SymbolTable

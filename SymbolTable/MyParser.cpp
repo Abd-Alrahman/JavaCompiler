@@ -31,7 +31,7 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v){
 Type * MyParser::createType(char* name, int lineno, int colno){
 	Type* t = (Type*)this->st->currScope->m->get(name);
 	if(t){
-		this->errRecovery->errQ->enqueue(lineno, colno, "Type is already exist", name);
+		this->errRecovery->errQ->enqueue(lineno, colno, "Class is already exist", name);
 		return 0;
 	}
 	t = new Type();

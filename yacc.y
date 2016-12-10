@@ -333,7 +333,10 @@ MethodDeclaration
 
 MethodDeclarator
 	: DeclaratorName OPEN_B ParameterList CLOSE_B { cout << "MethodDeclarator 1\n"; }
-	| DeclaratorName OPEN_B CLOSE_B				  { cout << "MethodDeclarator 2\n"; }
+	| DeclaratorName OPEN_B CLOSE_B				  {
+													cout << "MethodDeclarator 2\n";
+													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+												  }
 	| MethodDeclarator OP_DIM					  { cout << "MethodDeclarator 3\n"; }
 	;
 

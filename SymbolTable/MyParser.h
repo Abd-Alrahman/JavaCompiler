@@ -18,8 +18,8 @@ public:
 	Variable* addVariableToCurrentScope(Variable* v);
 	Type * createType(char* name, int lineno, int colno);
 	Type * finishTypeDeclaration(Type* t);
-	Type * createFunction(char* name, int lineno, int colno);
-	Type * finishFunctionDeclaration(Function* f);
+	Function * createFunction(char* name, int lineno, int colno);
+	Function * finishFunctionDeclaration(Function* f);
 
 };
 #endif

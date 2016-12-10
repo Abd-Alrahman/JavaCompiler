@@ -50,9 +50,11 @@ Function::Function(){
 	this->name[0] = '\0';
 	this->modifier = new char[255];
 	this->modifier[0] = '\0';
+	this->modifier = "public";
 	this->isFinal = false;
 	this->isStatic = false;
-	this->modifier = "public";
+	this->returnType = new char[255];
+	this->returnType[0] = '\0';
 	this->returnType = "void";
 	this->scope = new Scope();
 }

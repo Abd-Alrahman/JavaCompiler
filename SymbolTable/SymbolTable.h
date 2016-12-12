@@ -9,6 +9,43 @@ public:
 	MyMap * m;
 };
 //=============================
+class Modifier {
+private:
+	bool isPublic;
+	bool isPrivate;
+	bool isProtected;
+	bool isStatic;
+	bool isFinal;
+	bool isAbstract;
+	bool isNative;
+	bool isSynchronized;
+	bool isTransient;
+	bool isVolatile;
+public:
+	Modifier();
+	~Modifier();
+	void setIsPublic(bool isPublic);
+	bool getIsPublic();
+	void setIsPrivate(bool isPrivate);
+	bool getIsPrivate();
+	void setIsProtected(bool isProtected);
+	bool getIsProtected();
+	void setIsStatic(bool isStatic);
+	bool getIsStatic();
+	void setIsFinal(bool isFinal);
+	bool getIsFinal();
+	void setIsAbstract(bool isAbstract);
+	bool getIsAbstract();
+	void setIsNative(bool isNative);
+	bool getIsNative();
+	void setIsSynchronized(bool isSynchronized);
+	bool getIsSynchronized();
+	void setIsTransient(bool isTransient);
+	bool getIsTransient();
+	void setIsVolatile(bool isVolatile);
+	bool getIsVolatile();
+	void reset();
+};
 class Variable{
 private: 
 	char* name;
@@ -37,9 +74,16 @@ public:
 class Function {
 private:
 	char* name;
-	char* modifier;
+	bool isPublic;
+	bool isPrivate;
+	bool isProtected;
 	bool isStatic;
 	bool isFinal;
+	bool isAbstract;
+	bool isNative;
+	bool isSynchronized;
+	bool isTransient;
+	bool isVolatile;
 	Scope * scope;
 	char* returnType;
 public:
@@ -47,12 +91,26 @@ public:
 	~Function();
 	void setName(char* name);
 	char* getName();
-	void setModifier(char* modifier);
-	char* getModifier();
-	void setIsStatic(char* isStatic);
+	void setIsPublic(bool isPublic);
+	bool getIsPublic();
+	void setIsPrivate(bool isPrivate);
+	bool getIsPrivate();
+	void setIsProtected(bool isProtected);
+	bool getIsProtected();
+	void setIsStatic(bool isStatic);
 	bool getIsStatic();
-	void setIsFinal(char* isFinal);
+	void setIsFinal(bool isFinal);
 	bool getIsFinal();
+	void setIsAbstract(bool isAbstract);
+	bool getIsAbstract();
+	void setIsNative(bool isNative);
+	bool getIsNative();
+	void setIsSynchronized(bool isSynchronized);
+	bool getIsSynchronized();
+	void setIsTransient(bool isTransient);
+	bool getIsTransient();
+	void setIsVolatile(bool isVolatile);
+	bool getIsVolatile();
 	void setReturnType(char* returnType);
 	char* getReturnType();
 	void setScope(Scope* m);

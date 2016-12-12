@@ -21,13 +21,14 @@
 		}
 	};
 
-	MyParser * p = new MyParser();	
+	MyParser * p = new MyParser();
+	Modifier * modifier = new Modifier();
 %}
 
 
 
 %union{
-	struct R{
+	struct R {
 		int i;
 		float f;
 		char c;
@@ -252,16 +253,16 @@ Modifiers
 	;
 
 Modifier
-	: ABSTRACT     { cout << "Modifier ABSTRACT\n"; }
-	| FINAL		   { cout << "Modifier FINAL\n"; }
-	| PUBLIC	   { cout << "Modifier PUBLIC\n"; }
-	| PROTECTED	   { cout << "Modifier PROTECTED\n"; }
-	| PRIVATE	   { cout << "Modifier PRIVATE\n"; }
-	| STATIC	   { cout << "Modifier STATIC\n"; }
-	| TRANSIENT	   { cout << "Modifier TRANSIENT\n"; }
-	| VOLATILE	   { cout << "Modifier VOLATILE\n"; }
-	| NATIVE	   { cout << "Modifier NATIVE\n"; }
-	| SYNCHRONIZED { cout << "Modifier SYNCHRONIZED\n"; }
+	: ABSTRACT     { cout << "Modifier ABSTRACT\n";		modifier->setIsAbstract(true);}
+	| FINAL		   { cout << "Modifier FINAL\n";		modifier->setIsFinal(true);}
+	| PUBLIC	   { cout << "Modifier PUBLIC\n";		modifier->setIsPublic(true);}
+	| PROTECTED	   { cout << "Modifier PROTECTED\n";	modifier->setIsProtected(true);}
+	| PRIVATE	   { cout << "Modifier PRIVATE\n";		modifier->setIsPrivate(true);}
+	| STATIC	   { cout << "Modifier STATIC\n";		modifier->setIsStatic(true);}
+	| TRANSIENT	   { cout << "Modifier TRANSIENT\n";	modifier->setIsTransient(true);}
+	| VOLATILE	   { cout << "Modifier VOLATILE\n";		modifier->setIsVolatile(true);}
+	| NATIVE	   { cout << "Modifier NATIVE\n";		modifier->setIsNative(true);}
+	| SYNCHRONIZED { cout << "Modifier SYNCHRONIZED\n"; modifier->setIsSynchronized(true);}
 	;
 
 ClassWord
@@ -325,10 +326,22 @@ ArrayInitializers
 	;
 
 MethodDeclaration
-	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody { cout << "MethodDeclaration 1\n"; }
-	| Modifiers TypeSpecifier MethodDeclarator        MethodBody { cout << "MethodDeclaration 2\n"; }
-	|           TypeSpecifier MethodDeclarator Throws MethodBody { cout << "MethodDeclaration 3\n"; }
-	|           TypeSpecifier MethodDeclarator        MethodBody { cout << "MethodDeclaration 4\n"; }
+	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody {
+																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier, $<r.str>2);
+																	cout << "MethodDeclaration 1\n";
+																 }
+	| Modifiers TypeSpecifier MethodDeclarator        MethodBody {
+																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier, $<r.str>2);
+																	cout << "MethodDeclaration 2\n";
+																 }
+	|           TypeSpecifier MethodDeclarator Throws MethodBody {
+																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier, $<r.str>1);
+																	cout << "MethodDeclaration 3\n";
+																 }
+	|           TypeSpecifier MethodDeclarator        MethodBody {
+																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier, $<r.str>1);
+																	cout << "MethodDeclaration 4\n";
+																 }
 	;
 
 MethodDeclarator

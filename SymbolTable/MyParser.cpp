@@ -163,17 +163,22 @@ void MyParser::checkBrcktsEquality(int lineNo, int colNo) {
 	}
 }
 //========= Variable =================
-Variable* MyParser::insertVar(char* n, int lineNo, int colNo) {
-	Variable * v = st->insertVariableInCurrentScope(n);
-	if(!v){
+Variable* MyParser::insertVar(char* n, int lineNo, int colNo, Modifier* m) {
+	Variable * v = st->insertVariableInCurrentScope(n, m);
+	cout << "=================================================\n";
+	if(!v) {
 		cout << "Error variable " << n << " already defined!";
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", n);
 	}
 	cout << "Variable " << n << " has been created\n";
+	cout << "with return type" << m->getReturnType() << endl;
+	if (m->getIsFinal())
+		cout << "and it is Final" << endl;
+	cout << "=================================================\n";
 	return v;
 }
-Variable* MyParser::addVariableToCurrentScope(Variable* v){
-	if(v){
+Variable* MyParser::addVariableToCurrentScope(Variable* v) {
+	if(v) {
 		this->st->currScope->m->put(v->getName(), v);
 	}
 	return v;
@@ -257,7 +262,6 @@ Function * MyParser::finishFunctionDeclaration(Function* f, Modifier* m) {
 	else {
 		f->setIsConstructor(false);
 	}
-	m->reset();
 
 	this->st->currScope = this->st->currScope->parent;
 	cout << "================================================" << endl;
@@ -274,7 +278,7 @@ Function * MyParser::finishFunctionDeclaration(Function* f, Modifier* m) {
 	if (f->getIsSynchronized()) cout << "Synchronized" << endl;
 	if (f->getIsTransient()) cout << "Transient" << endl;
 	if (f->getIsVolatile()) cout << "Volatile" << endl;
-	if(!f->getIsConstructor()) if (f->getReturnType()) cout << "ReturnType: " << f->getReturnType() << endl;
+	cout << "ReturnType: " << f->getReturnType() << endl;
 	cout << "================================================" << endl;
 	return f;
 }

@@ -66,7 +66,7 @@ public:
 	MyParser(void);
 	~MyParser(void);
 	void checkBrcktsEquality(int lineNo, int colNo);
-	Variable* insertVar(char* n, int lineNo, int colNo);
+	Variable* insertVar(char* n, int lineNo, int colNo, Modifier* m);
 	Variable* addVariableToCurrentScope(Variable* v);
 	/*
 	DataMember* insertMem(char* n, int lineNo, int colNo, Modifier* m);

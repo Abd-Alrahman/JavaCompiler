@@ -1,4 +1,5 @@
 #include "SymbolTable.h"
+#include "MyParser.h"
 //============= Scope   ================
 Scope::Scope(){
 	this->m = new MyMap();
@@ -8,6 +9,8 @@ Scope::Scope(){
 Variable::Variable(){
 	this->name = new char[255];
 	this->name[0] = '\0';
+	this->type = new char[255];
+	this->type[0] = '\0';
 	this->isFinal = false;
 }
 
@@ -21,6 +24,14 @@ char* Variable::getName() {
 	return this->name;
 }
 
+void Variable::setType(char* type) {
+	strcat(this->type, type);
+}
+
+char* Variable::getType() {
+	return this->type;
+}
+
 void Variable::setIsFinal(bool isFinal) {
 	this->isFinal = isFinal;
 }
@@ -28,6 +39,7 @@ void Variable::setIsFinal(bool isFinal) {
 bool Variable::getIsFinal() {
 	return this->isFinal;
 }
+
 //=======================================
 //============ Data Member  ================
 /*
@@ -243,11 +255,10 @@ SymbolTable::SymbolTable(void){
 	this->currScope = this->rootScope;
 }
 
-SymbolTable::~SymbolTable(void){
-
+SymbolTable::~SymbolTable(void) {
 }
 
-Variable * SymbolTable::insertVariableInCurrentScope(char* name) {
+Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 	Variable * v = this->getVariableFromCurrentScope(name);
 	if(v) {
 		return 0;//item is exist previously
@@ -255,21 +266,31 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name) {
 	else {
 		v = new Variable();
 		v->setName(name);
+		v->setType(m->getReturnType());
+		v->setIsFinal(m->getIsFinal());
+		//m->reset();
 		this->currScope->m->put(name, v);
 	}
 	return v;
 }
 Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	Variable * v = (Variable*)this->currScope->m->get(name);
-	if(!v){
+	if(!v) {
+		return 0;
+	}
+	return v;
+}/*
+Variable * SymbolTable::getVariableFromCurrentScope(char* name){
+	Variable * v = (Variable*)this->currScope->m->get(name);
+	if (!v) {
 		Scope * temp = this->currScope->parent;
-		while(temp && !v){
+		while (temp && !v){
 			v = (Variable*)temp->m->get(name);
 			temp = temp->parent;
 		}
 	}
 	return v;
-}
+}*/
 //================= Data Member ====================
 /*
 DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name) {

@@ -2,6 +2,7 @@
 #ifndef __Symbol_Table__
 #define __Symbol_Table__
 #include "MyMap.h"
+
 class Scope{
 public:
 	Scope();
@@ -114,13 +115,13 @@ public:
 	Scope* getScope();
 };
 //=============================
-
+class Modifier;
 class SymbolTable
 {
 public:
 	Scope * currScope;
 	Scope * rootScope;
-	Variable * insertVariableInCurrentScope(char* name);
+	Variable * insertVariableInCurrentScope(char* name, Modifier* m);
 	Variable * getVariableFromCurrentScope(char* name);
 	/*
 	DataMember * insertDataMemberInCurrentScope(char* name);

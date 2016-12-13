@@ -340,6 +340,7 @@ MethodDeclaration
 																 }
 	|           TypeSpecifier MethodDeclarator        MethodBody {
 																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
+																	modifier->reset();
 																	cout << "MethodDeclaration 4\n";
 																 }
 	;
@@ -444,8 +445,16 @@ LocalVariableDeclarationOrStatement
 	;
 
 LocalVariableDeclarationStatement
-	: TypeSpecifier VariableDeclarators SEMICOLON		{ cout << "LocalVariableDeclarationStatement 1\n"; }
-    | FINAL TypeSpecifier VariableDeclarators SEMICOLON { cout << "LocalVariableDeclarationStatement 2\n"; }
+	:		TypeSpecifier VariableDeclarators SEMICOLON		{ 
+																$<variable>$ = p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+																modifier->reset();
+																cout << "LocalVariableDeclarationStatement 1\n"; 
+															}
+    | FINAL TypeSpecifier VariableDeclarators SEMICOLON		{  
+																$<variable>$ = p->insertVar($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+																modifier->reset();
+																cout << "LocalVariableDeclarationStatement 2\n"; 
+															}
 	;
 
 Statement

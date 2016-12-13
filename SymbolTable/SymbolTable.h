@@ -8,54 +8,48 @@ public:
 	Scope * parent;
 	MyMap * m;
 };
-//=============================
-class Modifier {
+class Variable{
+private: 
+	char* name;
+	char* type;
+	bool isFinal;
+public:
+	Variable();
+	~Variable();
+	void setName(char* n);
+	char* getName();
+	void setType(char* type);
+	char* getType();
+	void setIsFinal(bool isFinal);
+	bool getIsFinal();
+};/*
+class DataMember {
 private:
+	char* name;
+	char* type;
+	bool isFinal;
+	bool isStatic;
 	bool isPublic;
 	bool isPrivate;
 	bool isProtected;
-	bool isStatic;
-	bool isFinal;
-	bool isAbstract;
-	bool isNative;
-	bool isSynchronized;
-	bool isTransient;
-	bool isVolatile;
 public:
-	Modifier();
-	~Modifier();
+	DataMember();
+	~DataMember();
+	void setName(char* n);
+	char* getName();
+	void setType(char* type);
+	char* getType();
 	void setIsPublic(bool isPublic);
 	bool getIsPublic();
 	void setIsPrivate(bool isPrivate);
 	bool getIsPrivate();
 	void setIsProtected(bool isProtected);
 	bool getIsProtected();
-	void setIsStatic(bool isStatic);
-	bool getIsStatic();
 	void setIsFinal(bool isFinal);
 	bool getIsFinal();
-	void setIsAbstract(bool isAbstract);
-	bool getIsAbstract();
-	void setIsNative(bool isNative);
-	bool getIsNative();
-	void setIsSynchronized(bool isSynchronized);
-	bool getIsSynchronized();
-	void setIsTransient(bool isTransient);
-	bool getIsTransient();
-	void setIsVolatile(bool isVolatile);
-	bool getIsVolatile();
-	void reset();
-};
-class Variable{
-private: 
-	char* name;
-public:
-	Variable();
-	~Variable();
-	void setName(char* n);
-	char* getName();
-
-};
+	void setIsStatic(bool isStatic);
+	bool getIsStatic();
+};*/
 class Type {
 private:
 	char* name;
@@ -84,6 +78,7 @@ private:
 	bool isSynchronized;
 	bool isTransient;
 	bool isVolatile;
+	bool isConstructor;
 	Scope * scope;
 	char* returnType;
 public:
@@ -114,6 +109,8 @@ public:
 	void setReturnType(char* returnType);
 	char* getReturnType();
 	void setScope(Scope* m);
+	bool getIsConstructor();
+	void setIsConstructor(bool isConstructor);
 	Scope* getScope();
 };
 //=============================
@@ -125,6 +122,10 @@ public:
 	Scope * rootScope;
 	Variable * insertVariableInCurrentScope(char* name);
 	Variable * getVariableFromCurrentScope(char* name);
+	/*
+	DataMember * insertDataMemberInCurrentScope(char* name);
+	DataMember * getDataMemberFromCurrentScope(char* name);
+	*/
 	SymbolTable(void);
 	~SymbolTable(void);
 };

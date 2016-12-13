@@ -5,6 +5,7 @@ MyParser::MyParser(void)
 {
 	this->st = new SymbolTable();
 	this->errRecovery = new ErrorRecovery();
+	this->helper = new Helper();
 }
 
 MyParser::~MyParser(void)
@@ -12,7 +13,157 @@ MyParser::~MyParser(void)
 }
 
 
-Variable* MyParser::insertVar(char* n, int lineNo, int colNo){
+//============ Modifier =================
+Modifier::Modifier() {
+	this->isPublic = false;
+	this->isPrivate = false;
+	this->isProtected = false;
+	this->isStatic = false;
+	this->isFinal = false;
+	this->isAbstract = false;
+	this->isSynchronized = false;
+	this->isVolatile = false;
+	this->isTransient = false;
+	this->isNative = false;
+	this->returnType = new char[255];
+	this->returnType[0] = '\0';
+}
+
+Modifier::~Modifier() {}
+
+void Modifier::reset() {
+	this->isPublic = false;
+	this->isPrivate = false;
+	this->isProtected = false;
+	this->isStatic = false;
+	this->isFinal = false;
+	this->isAbstract = false;
+	this->isSynchronized = false;
+	this->isVolatile = false;
+	this->isTransient = false;
+	this->isNative = false;
+	this->returnType[0] = '\0';
+}
+
+void Modifier::setIsPublic(bool isPublic) {
+	this->isPublic = isPublic;
+}
+
+void Modifier::setIsPrivate(bool isPrivate) {
+	this->isPrivate = isPrivate;
+}
+
+void Modifier::setIsProtected(bool isProtected) {
+	this->isProtected = isProtected;
+}
+
+void Modifier::setIsStatic(bool isStatic){
+	this->isStatic = isStatic;
+}
+
+void Modifier::setIsFinal(bool isFinal){
+	this->isFinal = isFinal;
+}
+
+void Modifier::setIsAbstract(bool isAbstract){
+	this->isAbstract = isAbstract;
+}
+
+void Modifier::setIsNative(bool isNative){
+	this->isNative = isNative;
+}
+
+void Modifier::setIsSynchronized(bool isSynchronized) {
+	this->isSynchronized = isSynchronized;
+}
+
+void Modifier::setIsTransient(bool isTransient){
+	this->isTransient = isTransient;
+}
+
+void Modifier::setIsVolatile(bool isVolatile) {
+	this->isVolatile = isVolatile;
+}
+
+void Modifier::setReturnType(char* returnType) {
+	strcat(this->returnType, returnType);
+}
+
+bool Modifier::getIsPublic() {
+	return this->isPublic;
+}
+
+bool Modifier::getIsPrivate() {
+	return this->isPrivate;
+}
+
+bool Modifier::getIsProtected() {
+	return this->isProtected;
+}
+
+bool Modifier::getIsStatic() {
+	return this->isStatic;
+}
+
+bool Modifier::getIsFinal(){
+	return this->isFinal;
+}
+
+bool Modifier::getIsAbstract(){
+	return this->isAbstract;
+}
+
+bool Modifier::getIsNative(){
+	return this->isNative;
+}
+
+bool Modifier::getIsSynchronized() {
+	return this->isSynchronized;
+}
+
+bool Modifier::getIsTransient() {
+	return this->isTransient;
+}
+
+bool Modifier::getIsVolatile() {
+	return this->isVolatile;
+}
+
+char* Modifier::getReturnType() {
+	return this->returnType;
+}
+//================Helper====================
+Helper::Helper() {}
+Helper::~Helper() {}
+
+void Helper::brcktsCountInc() {
+	this->bracketsCount++;
+}
+
+void Helper::brcktsCountDec() {
+	this->bracketsCount--;
+}
+
+void Helper::setBracketsCount(int brcktsCount) {
+	this->bracketsCount = brcktsCount;
+}
+
+int Helper::getBracketsCount() {
+	return this->bracketsCount;
+}
+
+
+void MyParser::checkBrcktsEquality(int lineNo, int colNo) {
+	if (this->helper->getBracketsCount() > 0) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Unexpected end of file", "");
+	}
+	else if (this->helper->getBracketsCount() < 0)
+	{
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Unexpected {", "");
+	}
+}
+//========= Variable =================
+Variable* MyParser::insertVar(char* n, int lineNo, int colNo) {
 	Variable * v = st->insertVariableInCurrentScope(n);
 	if(!v){
 		cout << "Error variable " << n << " already defined!";
@@ -27,6 +178,32 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v){
 	}
 	return v;
 }
+//========= Data Member =================
+/*
+DataMember* MyParser::insertMem(char* n, int lineNo, int colNo, Modifier* m) {
+	DataMember * d = st->insertDataMemberInCurrentScope(n);
+	if (!d) {
+		cout << "==============================================\n";
+		cout << "Error data member " << n << " already defined!";
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", n);
+	}
+	cout << "Data member " << n << " has been created\n";
+	cout << "With the following modifiers:\n";
+	if (d->getIsFinal()) cout << "Final\n";
+	if (d->getIsStatic()) cout << "Static\n";
+	if (d->getIsPublic()) cout << "Public\n";
+	if (d->getIsPrivate()) cout << "Private\n";
+	if (d->getIsProtected()) cout << "Protected\n";
+	cout << "and return type: " << d->getType() << endl;
+	cout << "==============================================\n";
+	return d;
+}
+DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
+	if (d) {
+		this->st->currScope->m->put(d->getName(), d);
+	}
+	return d;
+}*/
 //========= Types =================
 Type * MyParser::createType(char* name, int lineno, int colno){
 	Type* t = (Type*)this->st->currScope->m->get(name);
@@ -57,20 +234,47 @@ Function * MyParser::createFunction(char* name, int lineno, int colno) {
 	}
 	f = new Function();
 	f->setName(name);
-	/*
-	f->setIsStatic(isStatic);
-	f->setIsFinal(isFinal);
-	f->setModifier(modifier);
-	f->setReturnType(returnType);
-	*/
 	f->getScope()->parent = this->st->currScope;
 	this->st->currScope->m->put(name, f);
 	this->st->currScope = f->getScope();
 	cout << "Function " << name << " has been created\n";
 	return f;
 }
-Function * MyParser::finishFunctionDeclaration(Function* f) {
+Function * MyParser::finishFunctionDeclaration(Function* f, Modifier* m) {
+	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
+	// Modifiers are not explicitly written
+	if (m->getIsPrivate() == false && m->getIsProtected() == false) {
+		f->setIsPublic(true);
+	}
+	f->setIsStatic(m->getIsStatic()); f->setIsAbstract(m->getIsAbstract()); f->setIsFinal(m->getIsFinal());
+	f->setIsTransient(m->getIsTransient()); f->setIsSynchronized(m->getIsSynchronized()); f->setIsVolatile(m->getIsVolatile());
+	f->setIsNative(m->getIsNative());
+	f->setReturnType(m->getReturnType());
+	Type* type = (Type*)this->st->currScope->parent->m->get(f->getName());
+	if (type->getName() == f->getName()) {
+		f->setIsConstructor(true);
+	}
+	else {
+		f->setIsConstructor(false);
+	}
+	m->reset();
+
 	this->st->currScope = this->st->currScope->parent;
+	cout << "================================================" << endl;
 	cout << "Function " << f->getName() << " has been closed\n";
+	cout << "with modifiers list:" << endl;
+	if (f->getIsConstructor()) cout << "Constructor" << endl;
+	if (f->getIsPublic()) cout << "Public" << endl;
+	if (f->getIsPrivate()) cout << "Private" << endl;
+	if (f->getIsProtected()) cout << "Protected" << endl;
+	if (f->getIsFinal()) cout << "Final" << endl;
+	if (f->getIsStatic()) cout << "Static"<< endl;
+	if (f->getIsAbstract()) cout << "Abstract" << endl;
+	if (f->getIsNative()) cout << "Native" << endl;
+	if (f->getIsSynchronized()) cout << "Synchronized" << endl;
+	if (f->getIsTransient()) cout << "Transient" << endl;
+	if (f->getIsVolatile()) cout << "Volatile" << endl;
+	if(!f->getIsConstructor()) if (f->getReturnType()) cout << "ReturnType: " << f->getReturnType() << endl;
+	cout << "================================================" << endl;
 	return f;
 }

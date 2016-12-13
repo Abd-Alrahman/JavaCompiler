@@ -387,10 +387,6 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
 							yylval.r.myColNo = colNo;
-							char * x=new char [255];
-							x[0] = '\0';
-							strcpy(x, yytext);
-							yylval.r.str = x;
 							return  VOID;
 						}
 

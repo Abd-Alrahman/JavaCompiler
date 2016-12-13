@@ -4,126 +4,90 @@ Scope::Scope(){
 	this->m = new MyMap();
 	this->parent = 0;
 }
-//============ Modifier =================
-Modifier::Modifier() {
-	this->isPublic = false;
-	this->isPrivate = false;
-	this->isProtected = false;
-	this->isStatic = false;
-	this->isFinal = false;
-	this->isAbstract = false;
-	this->isSynchronized = false;
-	this->isVolatile = false;
-	this->isTransient = false;
-	this->isNative = false;
-}
-
-Modifier::~Modifier() {}
-
-void Modifier::reset() {
-	this->isPublic = false;
-	this->isPrivate = false;
-	this->isProtected = false;
-	this->isStatic = false;
-	this->isFinal = false;
-	this->isAbstract = false;
-	this->isSynchronized = false;
-	this->isVolatile = false;
-	this->isTransient = false;
-	this->isNative = false;
-}
-
-void Modifier::setIsPublic(bool isPublic) {
-	this->isPublic = isPublic;
-}
-
-void Modifier::setIsPrivate(bool isPrivate) {
-	this->isPrivate = isPrivate;
-}
-
-void Modifier::setIsProtected(bool isProtected) {
-	this->isProtected = isProtected;
-}
-
-void Modifier::setIsStatic(bool isStatic){
-	this->isStatic = isStatic;
-}
-
-void Modifier::setIsFinal(bool isFinal){
-	this->isFinal = isFinal;
-}
-
-void Modifier::setIsAbstract(bool isAbstract){
-	this->isAbstract = isAbstract;
-}
-
-void Modifier::setIsNative(bool isNative){
-	this->isNative = isNative;
-}
-
-void Modifier::setIsSynchronized(bool isSynchronized) {
-	this->isSynchronized = isSynchronized;
-}
-
-void Modifier::setIsTransient(bool isTransient ){
-	this->isTransient = isTransient;
-}
-
-void Modifier::setIsVolatile(bool isVolatile) {
-	this->isVolatile = isVolatile;
-}
-
-bool Modifier::getIsPublic() {
-	return this->isPublic;
-}
-
-bool Modifier::getIsPrivate() {
-	return this->isPrivate;
-}
-
-bool Modifier::getIsProtected() {
-	return this->isProtected;
-}
-
-bool Modifier::getIsStatic() {
-	return this->isStatic;
-}
-
-bool Modifier::getIsFinal(){
-	return this->isFinal;
-}
-
-bool Modifier::getIsAbstract(){
-	return this->isAbstract;
-}
-
-bool Modifier::getIsNative(){
-	return this->isNative;
-}
-
-bool Modifier::getIsSynchronized() {
-	return this->isSynchronized;
-}
-
-bool Modifier::getIsTransient() {
-	return this->isTransient;
-}
-
-bool Modifier::getIsVolatile() {
-	return this->isVolatile;
-}
 //============ Variable  ================
 Variable::Variable(){
 	this->name = new char[255];
 	this->name[0] = '\0';
+	this->isFinal = false;
 }
-Variable::~Variable(){}
-void Variable::setName(char* n){
+
+Variable::~Variable() {}
+
+void Variable::setName(char* n) {
 	strcat(this->name, n);
 }
-char* Variable::getName(){
+
+char* Variable::getName() {
 	return this->name;
 }
+
+void Variable::setIsFinal(bool isFinal) {
+	this->isFinal = isFinal;
+}
+
+bool Variable::getIsFinal() {
+	return this->isFinal;
+}
+//=======================================
+//============ Data Member  ================
+/*
+DataMember::DataMember(){
+	this->name = new char[255];
+	this->name[0] = '\0';
+	this->type = new char[255];
+	this->type[0] = '\0';
+}
+
+DataMember::~DataMember() {}
+
+void DataMember::setName(char* n) {
+	strcat(this->name, n);
+}
+
+char* DataMember::getName() {
+	return this->name;
+}
+
+void DataMember::setIsPublic(bool isPublic) {
+	this->isPublic = isPublic;
+}
+
+void DataMember::setIsPrivate(bool isPrivate) {
+	this->isPrivate = isPrivate;
+}
+
+void DataMember::setIsProtected(bool isProtected) {
+	this->isProtected = isProtected;
+}
+
+void DataMember::setIsFinal(bool isFinal) {
+	this->isFinal = isFinal;
+}
+
+void DataMember::setIsStatic(bool isStatic) {
+	this->isStatic = isStatic;
+}
+
+bool DataMember::getIsPublic() {
+	return this->isPublic;
+}
+
+bool DataMember::getIsPrivate() {
+	return this->isPrivate;
+}
+
+bool DataMember::getIsProtected() {
+	return this->isProtected;
+}
+
+bool DataMember::getIsFinal() {
+	return this->isFinal;
+}
+
+bool DataMember::getIsStatic() {
+	return this->isStatic;
+}
+*/
 //=======================================
 //============== Type ===================
 Type::Type(){
@@ -160,7 +124,7 @@ Function::Function(){
 	this->scope = new Scope();
 }
 
-Function::~Function(){}
+Function::~Function() {}
 
 void Function::setName(char* name){
 	strcat(this->name, name);
@@ -214,6 +178,10 @@ void Function::setIsVolatile(bool isVolatile) {
 	this->isVolatile = isVolatile;
 }
 
+void Function::setIsConstructor(bool isConstructor) {
+	this->isConstructor = isConstructor;
+}
+
 bool Function::getIsPublic() {
 	return this->isPublic;
 }
@@ -265,6 +233,10 @@ char* Function::getName(){
 Scope * Function::getScope(){
 	return this->scope;
 }
+
+bool Function::getIsConstructor() {
+	return this->isConstructor;
+}
 //=======================================
 SymbolTable::SymbolTable(void){
 	this->rootScope = new Scope();
@@ -275,12 +247,12 @@ SymbolTable::~SymbolTable(void){
 
 }
 
-Variable * SymbolTable::insertVariableInCurrentScope(char* name){
+Variable * SymbolTable::insertVariableInCurrentScope(char* name) {
 	Variable * v = this->getVariableFromCurrentScope(name);
-	if(v){
+	if(v) {
 		return 0;//item is exist previously
 	}
-	else{
+	else {
 		v = new Variable();
 		v->setName(name);
 		this->currScope->m->put(name, v);
@@ -298,3 +270,39 @@ Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	}
 	return v;
 }
+//================= Data Member ====================
+/*
+DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name) {
+	DataMember * d = this->getDataMemberFromCurrentScope(name);
+	if (d) {
+		return 0;//item is exist previously
+	}
+	else {
+		d = new DataMember();
+		d->setName(name);
+		/*
+		d->setType(m->getReturnType());
+		d->setIsStatic(m->getIsStatic());
+		d->setIsFinal(m->getIsFinal());
+		d->setIsPublic(m->getIsPublic()); d->setIsPrivate(m->getIsPrivate()); d->setIsProtected(m->getIsProtected());
+		if (m->getIsPrivate() == false && m->getIsProtected() == false) {
+			d->setIsPublic(true);
+		}
+		m->reset();
+		
+		this->currScope->m->put(name, d);
+	}
+	return d;
+}
+
+DataMember * SymbolTable::getDataMemberFromCurrentScope(char* name) {
+	DataMember * d = (DataMember*)this->currScope->m->get(name);
+	if (!d) {
+		Scope * temp = this->currScope->parent;
+		while (temp && !d){
+			d = (DataMember*)temp->m->get(name);
+			temp = temp->parent;
+		}
+	}
+	return d;
+}*/

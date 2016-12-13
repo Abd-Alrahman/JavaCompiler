@@ -11,7 +11,6 @@
 	FlexLexer* lexer = new yyFlexLexer();
 	ErrorRecovery* err = new ErrorRecovery();
 
-
 	class Parser
 	{
 		public:
@@ -65,7 +64,7 @@
 %token OP_DIM
 %token ASS_MUL ASS_DIV ASS_MOD ASS_ADD ASS_SUB
 %token ASS_SHL ASS_SHR ASS_SHRR ASS_AND ASS_XOR ASS_OR
-%token OPEN_D CLOSE_D OPEN_B CLOSE_B OPEN CLOSE COLON COMMA
+%token OPEN_B CLOSE_B OPEN CLOSE COLON COMMA
 %token PLUS MINUS MULT DIV AND OR QUES_MARK EXC_MARK MODULE DURA ASSIGN
 %token XOR LESS GREATER
 %token INT SHORT LONG FLOAT DOUBLE CHAR BYTE
@@ -78,7 +77,7 @@
 %nonassoc e4
 %nonassoc e2
 %nonassoc e3 
-%nonassoc ABSTRACT CLASS FINAL INTERFACE NATIVE PRIVATE PROTECTED PUBLIC STATIC SYNCHRONIZED TRANSIENT  VOLATILE OPEN_D CLOSE_D 
+%nonassoc ABSTRACT CLASS FINAL INTERFACE NATIVE PRIVATE PROTECTED PUBLIC STATIC SYNCHRONIZED TRANSIENT VOLATILE OPEN_D CLOSE_D
 %nonassoc e5
 %nonassoc e6
 %nonassoc e7
@@ -87,7 +86,6 @@
 %nonassoc BOOLEAN VOID INT SHORT LONG FLOAT DOUBLE CHAR BYTE
 %nonassoc e9
 %nonassoc IDENTIFIER
-
 
 %start CompilationUnit
 
@@ -109,15 +107,15 @@ ClassNameList
 	;
 
 PrimitiveType
-	: BOOLEAN { cout << "PrimitiveType BOOLEAN\n"; }
-	| CHAR	  { cout << "PrimitiveType CHAR\n"; }
-	| BYTE	  { cout << "PrimitiveType BYTE\n"; }
-	| SHORT	  { cout << "PrimitiveType SHORT\n"; }
-	| INT	  { cout << "PrimitiveType INT\n"; }
-	| LONG	  { cout << "PrimitiveType LONG\n"; }
-	| FLOAT	  { cout << "PrimitiveType FLOAT\n"; }
-	| DOUBLE  { cout << "PrimitiveType DOUBLE\n"; }
-	| VOID	  { cout << "PrimitiveType VOID\n"; }
+	: BOOLEAN { cout << "PrimitiveType BOOLEAN\n";	modifier->setReturnType("boolean"); }
+	| CHAR	  { cout << "PrimitiveType CHAR\n";		modifier->setReturnType("char"); }
+	| BYTE	  { cout << "PrimitiveType BYTE\n";		modifier->setReturnType("byte"); }
+	| SHORT	  { cout << "PrimitiveType SHORT\n";	modifier->setReturnType("short"); }
+	| INT	  { cout << "PrimitiveType INT\n";		modifier->setReturnType("int"); }
+	| LONG	  { cout << "PrimitiveType LONG\n";		modifier->setReturnType("long"); }
+	| FLOAT	  { cout << "PrimitiveType FLOAT\n";	modifier->setReturnType("float"); }
+	| DOUBLE  { cout << "PrimitiveType DOUBLE\n";	modifier->setReturnType("double"); }
+	| VOID	  { cout << "PrimitiveType VOID\n";		modifier->setReturnType("void"); }
 	;
 
 SemiColons
@@ -180,15 +178,17 @@ QualifiedName
 	;
 
 TypeDeclaration
-	: ClassHeader OPEN_D FieldDeclarations CLOSE_D	{ cout << "TypeDeclaration 1\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
-	| ClassHeader OPEN_D CLOSE_D					{ cout << "TypeDeclaration 2\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
-	| ClassHeader CLOSE_D							{ 
+	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; $<type>$ = p->finishTypeDeclaration($<type>1); p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2); }
+	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; $<type>$ = p->finishTypeDeclaration($<type>1); p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2); }
+	| ClassHeader CLOSE_D						   { 
 														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" );
 														$<type>$ = p->finishTypeDeclaration($<type>1);
+														p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2);
 													}
 	| ClassHeader OPEN_D  %prec e2					{ 
 														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'}\'", "" );
 														$<type>$ = p->finishTypeDeclaration($<type>1);
+														p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2);
 													}
 	| ClassHeader %prec e4							{ 
 														err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'{}\'", "" );
@@ -298,7 +298,7 @@ FieldDeclaration
 FieldVariableDeclaration
 	: Modifiers TypeSpecifier VariableDeclarators	{ cout << "FieldVariableDeclaration 1\n"; }
 	|           TypeSpecifier VariableDeclarators	{ 
-														$<variable>$=p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+														
 														cout << "FieldVariableDeclaration 2\n";
 													}
 	;
@@ -327,30 +327,36 @@ ArrayInitializers
 
 MethodDeclaration
 	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier, $<r.str>2);
+																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier);
 																	cout << "MethodDeclaration 1\n";
 																 }
 	| Modifiers TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier, $<r.str>2);
+																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier);
 																	cout << "MethodDeclaration 2\n";
 																 }
 	|           TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier, $<r.str>1);
+																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
 																	cout << "MethodDeclaration 3\n";
 																 }
 	|           TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier, $<r.str>1);
+																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
 																	cout << "MethodDeclaration 4\n";
 																 }
 	;
 
 MethodDeclarator
-	: DeclaratorName OPEN_B ParameterList CLOSE_B { cout << "MethodDeclarator 1\n"; }
+	: DeclaratorName OPEN_B ParameterList CLOSE_B {
+													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+													cout << "MethodDeclarator 1\n";
+												  }
 	| DeclaratorName OPEN_B CLOSE_B				  {
 													cout << "MethodDeclarator 2\n";
 													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
 												  }
-	| MethodDeclarator OP_DIM					  { cout << "MethodDeclarator 3\n"; }
+	| MethodDeclarator OP_DIM					  {
+													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+													cout << "MethodDeclarator 3\n";
+												  }
 	;
 
 ParameterList
@@ -379,15 +385,33 @@ MethodBody
 	;
 
 ConstructorDeclaration
-	: Modifiers ConstructorDeclarator Throws Block { cout << "ConstructorDeclaration 1\n"; }
-	| Modifiers ConstructorDeclarator        Block { cout << "ConstructorDeclaration 2\n"; }
-	|           ConstructorDeclarator Throws Block { cout << "ConstructorDeclaration 3\n"; }
-	|           ConstructorDeclarator        Block { cout << "ConstructorDeclaration 4\n"; }
+	: Modifiers ConstructorDeclarator Throws Block {
+														$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
+														cout << "ConstructorDeclaration 1\n";
+												   }
+	| Modifiers ConstructorDeclarator        Block {
+														$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
+														cout << "ConstructorDeclaration 2\n";
+												   }
+	|           ConstructorDeclarator Throws Block {
+														$<function>$ = p->finishFunctionDeclaration($<function>1, modifier);
+														cout << "ConstructorDeclaration 3\n";
+												   }
+	|           ConstructorDeclarator        Block {
+														$<function>$ = p->finishFunctionDeclaration($<function>1, modifier);
+														cout << "ConstructorDeclaration 4\n";
+												   }
 	;
 
 ConstructorDeclarator
-	: IDENTIFIER OPEN_B ParameterList CLOSE_B { cout << "ConstructorDeclarator 1\n"; }
-	| IDENTIFIER OPEN_B CLOSE_B				  { cout << "ConstructorDeclarator 2\n"; }
+	: IDENTIFIER OPEN_B ParameterList CLOSE_B {
+												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+												cout << "ConstructorDeclarator 1\n";
+											  }
+	| IDENTIFIER OPEN_B CLOSE_B				  {
+												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+												cout << "ConstructorDeclarator 2\n";
+											  }
 	;
 
 StaticInitializer

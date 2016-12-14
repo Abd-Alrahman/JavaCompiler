@@ -59,6 +59,14 @@ char* DataMember::getName() {
 	return this->name;
 }
 
+void DataMember::setType(char* type) {
+	strcat(this->type, type);
+}
+
+char* DataMember::getType() {
+	return this->type;
+}
+
 void DataMember::setIsPublic(bool isPublic) {
 	this->isPublic = isPublic;
 }

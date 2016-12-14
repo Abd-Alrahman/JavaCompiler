@@ -23,7 +23,7 @@ public:
 	char* getType();
 	void setIsFinal(bool isFinal);
 	bool getIsFinal();
-};/*
+};
 class DataMember {
 private:
 	char* name;
@@ -50,7 +50,7 @@ public:
 	bool getIsFinal();
 	void setIsStatic(bool isStatic);
 	bool getIsStatic();
-};*/
+};
 class Type {
 private:
 	char* name;
@@ -123,10 +123,8 @@ public:
 	Scope * rootScope;
 	Variable * insertVariableInCurrentScope(char* name, Modifier* m);
 	Variable * getVariableFromCurrentScope(char* name);
-	/*
-	DataMember * insertDataMemberInCurrentScope(char* name);
+	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m);
 	DataMember * getDataMemberFromCurrentScope(char* name);
-	*/
 	SymbolTable(void);
 	~SymbolTable(void);
 };

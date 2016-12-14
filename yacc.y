@@ -37,6 +37,7 @@
 		}r;
 		class YaccSimpleType * yaccSimpleType;
 		class Variable * variable;
+		class DataMember * dm;
 		class Function * function;
 		class Type * type;
 	}
@@ -296,9 +297,12 @@ FieldDeclaration
 	;
 
 FieldVariableDeclaration
-	: Modifiers TypeSpecifier VariableDeclarators	{ cout << "FieldVariableDeclaration 1\n"; }
+	: Modifiers TypeSpecifier VariableDeclarators	{ 
+														$<dm>$ = p->insertMem($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+														cout << "FieldVariableDeclaration 1\n";
+													}
 	|           TypeSpecifier VariableDeclarators	{ 
-														
+														$<dm>$ = p->insertMem($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														cout << "FieldVariableDeclaration 2\n";
 													}
 	;
@@ -445,11 +449,12 @@ LocalVariableDeclarationOrStatement
 	;
 
 LocalVariableDeclarationStatement
-	:		TypeSpecifier VariableDeclarators SEMICOLON		{ 
+	:		TypeSpecifier VariableDeclarators SEMICOLON		{
 																$<variable>$ = p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 																cout << "LocalVariableDeclarationStatement 1\n"; 
 															}
-    | FINAL TypeSpecifier VariableDeclarators SEMICOLON		{  
+    | FINAL TypeSpecifier VariableDeclarators SEMICOLON		{ 
+																modifier->setIsFinal(true);
 																$<variable>$ = p->insertVar($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 																cout << "LocalVariableDeclarationStatement 2\n"; 
 															}

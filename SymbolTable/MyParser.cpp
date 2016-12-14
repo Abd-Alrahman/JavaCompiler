@@ -170,11 +170,12 @@ Variable* MyParser::insertVar(char* n, int lineNo, int colNo, Modifier* m) {
 	if(!v) {
 		cout << "Error variable " << n << " already defined!";
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", n);
+		return 0;
 	}
 	cout << "Variable " << n << " has been created\n";
 	cout << "with return type " << v->getType() << endl;
 	if (v->getIsFinal())
-		cout << "and it is Final" << endl;
+		cout << " and it is Final" << endl;
 	cout << "=================================================\n";
 	return v;
 }
@@ -185,13 +186,14 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 	return v;
 }
 //========= Data Member =================
-/*
 DataMember* MyParser::insertMem(char* n, int lineNo, int colNo, Modifier* m) {
-	DataMember * d = st->insertDataMemberInCurrentScope(n);
+	DataMember * d = st->insertDataMemberInCurrentScope(n, m);
+	cout << "==============================================\n";
 	if (!d) {
-		cout << "==============================================\n";
-		cout << "Error data member " << n << " already defined!";
+		
+		cout << "Error[" << lineNo << ", " << colNo << "]:  data member " << n << " already defined!";
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", n);
+		return 0;
 	}
 	cout << "Data member " << n << " has been created\n";
 	cout << "With the following modifiers:\n";
@@ -209,7 +211,7 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 		this->st->currScope->m->put(d->getName(), d);
 	}
 	return d;
-}*/
+}
 //========= Types =================
 Type * MyParser::createType(char* name, int lineno, int colno){
 	Type* t = (Type*)this->st->currScope->m->get(name);
@@ -250,7 +252,7 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 	f->setName(name);
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
 	// Modifiers are not explicitly written
-	if (m->getIsPrivate() == false && m->getIsProtected() == false) {
+	if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
 		f->setIsPublic(true);
 	}
 	f->setIsStatic(m->getIsStatic()); f->setIsAbstract(m->getIsAbstract()); f->setIsFinal(m->getIsFinal());

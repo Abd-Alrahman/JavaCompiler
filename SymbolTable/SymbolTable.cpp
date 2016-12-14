@@ -42,8 +42,7 @@ bool Variable::getIsFinal() {
 
 //=======================================
 //============ Data Member  ================
-/*
-DataMember::DataMember(){
+DataMember::DataMember() {
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->type = new char[255];
@@ -99,7 +98,6 @@ bool DataMember::getIsFinal() {
 bool DataMember::getIsStatic() {
 	return this->isStatic;
 }
-*/
 //=======================================
 //============== Type ===================
 Type::Type() {
@@ -279,7 +277,8 @@ Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 		return 0;
 	}
 	return v;
-}/*
+}
+/*
 Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	Variable * v = (Variable*)this->currScope->m->get(name);
 	if (!v) {
@@ -292,25 +291,22 @@ Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	return v;
 }*/
 //================= Data Member ====================
-/*
-DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name) {
-	DataMember * d = this->getDataMemberFromCurrentScope(name);
+DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m) {
+	DataMember * d = (DataMember*)this->getDataMemberFromCurrentScope(name);
 	if (d) {
 		return 0;//item is exist previously
 	}
 	else {
 		d = new DataMember();
 		d->setName(name);
-		/*
 		d->setType(m->getReturnType());
 		d->setIsStatic(m->getIsStatic());
 		d->setIsFinal(m->getIsFinal());
 		d->setIsPublic(m->getIsPublic()); d->setIsPrivate(m->getIsPrivate()); d->setIsProtected(m->getIsProtected());
-		if (m->getIsPrivate() == false && m->getIsProtected() == false) {
+		if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
 			d->setIsPublic(true);
 		}
 		m->reset();
-		
 		this->currScope->m->put(name, d);
 	}
 	return d;
@@ -319,11 +315,7 @@ DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name) {
 DataMember * SymbolTable::getDataMemberFromCurrentScope(char* name) {
 	DataMember * d = (DataMember*)this->currScope->m->get(name);
 	if (!d) {
-		Scope * temp = this->currScope->parent;
-		while (temp && !d){
-			d = (DataMember*)temp->m->get(name);
-			temp = temp->parent;
-		}
+		return 0;
 	}
 	return d;
-}*/
+}

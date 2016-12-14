@@ -327,19 +327,19 @@ ArrayInitializers
 
 MethodDeclaration
 	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier);
+																	$<function>$ = p->finishFunctionDeclaration($<function>3);
 																	cout << "MethodDeclaration 1\n";
 																 }
 	| Modifiers TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3, modifier);
+																	$<function>$ = p->finishFunctionDeclaration($<function>3);
 																	cout << "MethodDeclaration 2\n";
 																 }
 	|           TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
+																	$<function>$ = p->finishFunctionDeclaration($<function>2);
 																	cout << "MethodDeclaration 3\n";
 																 }
 	|           TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
+																	$<function>$ = p->finishFunctionDeclaration($<function>2);
 																	modifier->reset();
 																	cout << "MethodDeclaration 4\n";
 																 }
@@ -347,15 +347,15 @@ MethodDeclaration
 
 MethodDeclarator
 	: DeclaratorName OPEN_B ParameterList CLOSE_B {
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 													cout << "MethodDeclarator 1\n";
 												  }
 	| DeclaratorName OPEN_B CLOSE_B				  {
 													cout << "MethodDeclarator 2\n";
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												  }
 	| MethodDeclarator OP_DIM					  {
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 													cout << "MethodDeclarator 3\n";
 												  }
 	;
@@ -387,30 +387,30 @@ MethodBody
 
 ConstructorDeclaration
 	: Modifiers ConstructorDeclarator Throws Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
+														$<function>$ = p->finishFunctionDeclaration($<function>2);
 														cout << "ConstructorDeclaration 1\n";
 												   }
 	| Modifiers ConstructorDeclarator        Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>2, modifier);
+														$<function>$ = p->finishFunctionDeclaration($<function>2);
 														cout << "ConstructorDeclaration 2\n";
 												   }
 	|           ConstructorDeclarator Throws Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>1, modifier);
+														$<function>$ = p->finishFunctionDeclaration($<function>1);
 														cout << "ConstructorDeclaration 3\n";
 												   }
 	|           ConstructorDeclarator        Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>1, modifier);
+														$<function>$ = p->finishFunctionDeclaration($<function>1);
 														cout << "ConstructorDeclaration 4\n";
 												   }
 	;
 
 ConstructorDeclarator
 	: IDENTIFIER OPEN_B ParameterList CLOSE_B {
-												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "ConstructorDeclarator 1\n";
 											  }
 	| IDENTIFIER OPEN_B CLOSE_B				  {
-												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo);
+												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "ConstructorDeclarator 2\n";
 											  }
 	;
@@ -447,12 +447,10 @@ LocalVariableDeclarationOrStatement
 LocalVariableDeclarationStatement
 	:		TypeSpecifier VariableDeclarators SEMICOLON		{ 
 																$<variable>$ = p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-																modifier->reset();
 																cout << "LocalVariableDeclarationStatement 1\n"; 
 															}
     | FINAL TypeSpecifier VariableDeclarators SEMICOLON		{  
 																$<variable>$ = p->insertVar($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-																modifier->reset();
 																cout << "LocalVariableDeclarationStatement 2\n"; 
 															}
 	;
@@ -771,132 +769,6 @@ AssignmentExpression
 	| UnaryExpression AssignmentOperator AssignmentExpression { cout << "AssignmentExpression 2\n"; }
 	;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 AssignmentOperator
 	: ASSIGN   { cout << "AssignmentOperator ASSIGN\n"; }
 	| ASS_MUL  { cout << "AssignmentOperator ASS_MUL\n"; }
@@ -938,8 +810,9 @@ void main(void)
 	freopen("in.txt","r" ,stdin);
 	freopen("out.txt","w" ,stdout);
 
-	Parser* p = new Parser();
-	p->parse();
+	Parser* parser = new Parser();
+	parser->parse();
 	if(!err->errQ->isEmpty())						   
 		err->printErrQueue();
+	//p->errRecovery->printErrQueue();
 }

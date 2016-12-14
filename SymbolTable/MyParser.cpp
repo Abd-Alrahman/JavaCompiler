@@ -42,6 +42,7 @@ void Modifier::reset() {
 	this->isVolatile = false;
 	this->isTransient = false;
 	this->isNative = false;
+	this->returnType = new char[255];
 	this->returnType[0] = '\0';
 }
 
@@ -171,8 +172,8 @@ Variable* MyParser::insertVar(char* n, int lineNo, int colNo, Modifier* m) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", n);
 	}
 	cout << "Variable " << n << " has been created\n";
-	cout << "with return type" << m->getReturnType() << endl;
-	if (m->getIsFinal())
+	cout << "with return type " << v->getType() << endl;
+	if (v->getIsFinal())
 		cout << "and it is Final" << endl;
 	cout << "=================================================\n";
 	return v;
@@ -212,7 +213,8 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 //========= Types =================
 Type * MyParser::createType(char* name, int lineno, int colno){
 	Type* t = (Type*)this->st->currScope->m->get(name);
-	if(t){
+	cout << "=============== Class " << name << " opened ================" << endl;
+	if(t) {
 		this->errRecovery->errQ->enqueue(lineno, colno, "Class already exists", name);
 		return 0;
 	}
@@ -226,26 +228,26 @@ Type * MyParser::createType(char* name, int lineno, int colno){
 }
 Type * MyParser::finishTypeDeclaration(Type* t){
 	this->st->currScope = this->st->currScope->parent;
-	cout << "Class " << t->getName() << " has been closed\n";
+	if (t) {
+		cout << "=============== Class " << t->getName() << " closed ================" << endl;
+	}
 	return t;
 }
 
-//========= Functions =================
-Function * MyParser::createFunction(char* name, int lineno, int colno) {
+//========= Functions ===========
+Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier* m) {
 	Function* f = (Function*)this->st->currScope->m->get(name);
 	if (f) {
-		this->errRecovery->errQ->enqueue(lineno, colno, "Function already exists", name);
+		cout << "========================================\n";
+		cout << "Error[" << lineno << ", " << colno << "]: Function " << name << " already exists\n";
+		cout << "========================================\n";
+		this->errRecovery->errQ->enqueue(lineno, colno, "Function already exists ", name);
 		return 0;
 	}
 	f = new Function();
+
+	// Setting function modifiers
 	f->setName(name);
-	f->getScope()->parent = this->st->currScope;
-	this->st->currScope->m->put(name, f);
-	this->st->currScope = f->getScope();
-	cout << "Function " << name << " has been created\n";
-	return f;
-}
-Function * MyParser::finishFunctionDeclaration(Function* f, Modifier* m) {
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
 	// Modifiers are not explicitly written
 	if (m->getIsPrivate() == false && m->getIsProtected() == false) {
@@ -255,30 +257,52 @@ Function * MyParser::finishFunctionDeclaration(Function* f, Modifier* m) {
 	f->setIsTransient(m->getIsTransient()); f->setIsSynchronized(m->getIsSynchronized()); f->setIsVolatile(m->getIsVolatile());
 	f->setIsNative(m->getIsNative());
 	f->setReturnType(m->getReturnType());
-	Type* type = (Type*)this->st->currScope->parent->m->get(f->getName());
-	if (type->getName() == f->getName()) {
-		f->setIsConstructor(true);
+
+	// Checking if function is constructor
+	Type* t = (Type*)this->st->currScope->parent->m->get(name);
+	if (t) {
+		if (strcmp(t->getName(), name) == 0) {
+			f->setIsConstructor(true);
+		}
+		else {
+			f->setIsConstructor(false);
+		}
 	}
 	else {
 		f->setIsConstructor(false);
 	}
 
-	this->st->currScope = this->st->currScope->parent;
-	cout << "================================================" << endl;
-	cout << "Function " << f->getName() << " has been closed\n";
+	// Resetting the modifier
+	m->reset();
+
+	// Move to new scope
+	f->getScope()->parent = this->st->currScope;
+	this->st->currScope->m->put(name, f);
+	this->st->currScope = f->getScope();
+
+	// Print function details
+	cout << "=============== Function " << name << " opened ================" << endl;
+	cout << "has been created ";
 	cout << "with modifiers list:" << endl;
 	if (f->getIsConstructor()) cout << "Constructor" << endl;
 	if (f->getIsPublic()) cout << "Public" << endl;
 	if (f->getIsPrivate()) cout << "Private" << endl;
 	if (f->getIsProtected()) cout << "Protected" << endl;
 	if (f->getIsFinal()) cout << "Final" << endl;
-	if (f->getIsStatic()) cout << "Static"<< endl;
+	if (f->getIsStatic()) cout << "Static" << endl;
 	if (f->getIsAbstract()) cout << "Abstract" << endl;
 	if (f->getIsNative()) cout << "Native" << endl;
 	if (f->getIsSynchronized()) cout << "Synchronized" << endl;
 	if (f->getIsTransient()) cout << "Transient" << endl;
 	if (f->getIsVolatile()) cout << "Volatile" << endl;
-	cout << "ReturnType: " << f->getReturnType() << endl;
-	cout << "================================================" << endl;
+	cout << "and Return Type: " << f->getReturnType() << endl;
+
+	// Return the function
+	return f;
+}
+Function * MyParser::finishFunctionDeclaration(Function* f) {
+	if (f)
+		cout << "=============== Function " << f->getName() << " closed ================" << endl;
+	this->st->currScope = this->st->currScope->parent;
 	return f;
 }

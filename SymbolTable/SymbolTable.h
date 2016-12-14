@@ -3,13 +3,13 @@
 #define __Symbol_Table__
 #include "MyMap.h"
 
-class Scope{
+class Scope {
 public:
 	Scope();
 	Scope * parent;
 	MyMap * m;
 };
-class Variable{
+class Variable {
 private: 
 	char* name;
 	char* type;

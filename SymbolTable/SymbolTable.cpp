@@ -102,28 +102,28 @@ bool DataMember::getIsStatic() {
 */
 //=======================================
 //============== Type ===================
-Type::Type(){
+Type::Type() {
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->scope = new Scope();
 }
-Type::~Type(){}
-void Type::setName(char* n){
+Type::~Type() {}
+void Type::setName(char* n) {
 	strcat(this->name,n);
 }
 char* Type::getName(){
 	return this->name;
 }
-void Type::setInheritedType(Type* e){
+void Type::setInheritedType(Type* e) {
 	this->inheritedType = e;
 }
-Type* Type::getInheritedType(){
+Type* Type::getInheritedType() {
 	return this->inheritedType;
 }
-void Type::setScope(Scope * m){
+void Type::setScope(Scope * m) {
 	this->scope = m;
 }
-Scope * Type::getScope(){
+Scope * Type::getScope() {
 	return this->scope;
 }
 //=======================================
@@ -268,7 +268,7 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 		v->setName(name);
 		v->setType(m->getReturnType());
 		v->setIsFinal(m->getIsFinal());
-		//m->reset();
+		m->reset();
 		this->currScope->m->put(name, v);
 	}
 	return v;

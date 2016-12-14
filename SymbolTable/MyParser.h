@@ -73,7 +73,7 @@ public:
 	DataMember* addDataMemberToCurrentScope(DataMember* d);*/
 	Type * createType(char* name, int lineno, int colno);
 	Type * finishTypeDeclaration(Type* t);
-	Function * createFunction(char* name, int lineno, int colno);
-	Function * finishFunctionDeclaration(Function* f, Modifier* m);
+	Function * createFunction(char* name, int lineno, int colno, Modifier* m);
+	Function * finishFunctionDeclaration(Function* f);
 };
 #endif

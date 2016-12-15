@@ -59,6 +59,9 @@ public:
 //======================================================================
 class MyParser
 {
+private:
+	void setMethodData(Function* f, char* name, Modifier* m);
+	void printMethodData(Function* f, char* name);
 public:
 	SymbolTable * st;
 	ErrorRecovery * errRecovery;

@@ -247,7 +247,28 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 		return 0;
 	}
 	f = new Function();
+	this->setMethodData(f, name, m);
+	// Resetting the modifier
+	m->reset();
 
+	// Move to new scope
+	f->getScope()->parent = this->st->currScope;
+	this->st->currScope->m->put(name, f);
+	this->st->currScope = f->getScope();
+
+	this->printMethodData(f, name);
+
+	// Return the function
+	return f;
+}
+Function * MyParser::finishFunctionDeclaration(Function* f) {
+	if (f)
+		cout << "=============== Function " << f->getName() << " closed ================" << endl;
+	this->st->currScope = this->st->currScope->parent;
+	return f;
+}
+
+void MyParser::setMethodData(Function* f, char* name, Modifier* m) {
 	// Setting function modifiers
 	f->setName(name);
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
@@ -273,15 +294,9 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 	else {
 		f->setIsConstructor(false);
 	}
+}
 
-	// Resetting the modifier
-	m->reset();
-
-	// Move to new scope
-	f->getScope()->parent = this->st->currScope;
-	this->st->currScope->m->put(name, f);
-	this->st->currScope = f->getScope();
-
+void MyParser::printMethodData(Function* f, char* name) {
 	// Print function details
 	cout << "=============== Function " << name << " opened ================" << endl;
 	cout << "has been created ";
@@ -298,13 +313,4 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 	if (f->getIsTransient()) cout << "Transient" << endl;
 	if (f->getIsVolatile()) cout << "Volatile" << endl;
 	cout << "and Return Type: " << f->getReturnType() << endl;
-
-	// Return the function
-	return f;
-}
-Function * MyParser::finishFunctionDeclaration(Function* f) {
-	if (f)
-		cout << "=============== Function " << f->getName() << " closed ================" << endl;
-	this->st->currScope = this->st->currScope->parent;
-	return f;
 }

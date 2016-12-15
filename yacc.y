@@ -254,16 +254,26 @@ Modifiers
 	;
 
 Modifier
-	: ABSTRACT     { cout << "Modifier ABSTRACT\n";		modifier->setIsAbstract(true);}
-	| FINAL		   { cout << "Modifier FINAL\n";		modifier->setIsFinal(true);}
-	| PUBLIC	   { cout << "Modifier PUBLIC\n";		modifier->setIsPublic(true);}
-	| PROTECTED	   { cout << "Modifier PROTECTED\n";	modifier->setIsProtected(true);}
-	| PRIVATE	   { cout << "Modifier PRIVATE\n";		modifier->setIsPrivate(true);}
-	| STATIC	   { cout << "Modifier STATIC\n";		modifier->setIsStatic(true);}
-	| TRANSIENT	   { cout << "Modifier TRANSIENT\n";	modifier->setIsTransient(true);}
-	| VOLATILE	   { cout << "Modifier VOLATILE\n";		modifier->setIsVolatile(true);}
-	| NATIVE	   { cout << "Modifier NATIVE\n";		modifier->setIsNative(true);}
-	| SYNCHRONIZED { cout << "Modifier SYNCHRONIZED\n"; modifier->setIsSynchronized(true);}
+	: ABSTRACT     { cout << "Modifier ABSTRACT\n";		(!modifier->getIsAbstract()) ? modifier->setIsAbstract(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| FINAL		   { cout << "Modifier FINAL\n";		(!modifier->getIsFinal()) ? modifier->setIsFinal(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| PUBLIC	   { cout << "Modifier PUBLIC\n";		(!modifier->getIsPublic()) ? modifier->setIsPublic(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| PROTECTED	   { cout << "Modifier PROTECTED\n";	(!modifier->getIsProtected()) ? modifier->setIsProtected(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| PRIVATE	   { cout << "Modifier PRIVATE\n";		(!modifier->getIsPrivate()) ? modifier->setIsPrivate(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| STATIC	   { cout << "Modifier STATIC\n";		(!modifier->getIsStatic()) ? modifier->setIsStatic(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| TRANSIENT	   { cout << "Modifier TRANSIENT\n";	(!modifier->getIsTransient()) ? modifier->setIsTransient(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| VOLATILE	   { cout << "Modifier VOLATILE\n";		(!modifier->getIsVolatile()) ? modifier->setIsVolatile(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| NATIVE	   { cout << "Modifier NATIVE\n";		(!modifier->getIsNative()) ? modifier->setIsNative(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
+	| SYNCHRONIZED { cout << "Modifier SYNCHRONIZED\n"; (!modifier->getIsSynchronized()) ? modifier->setIsSynchronized(true)
+																					: err->errQ->enqueue($<r.myLineNo>1, $<r.myColNo>1, "Error :repeated modifier", ''); }
 	;
 
 ClassWord

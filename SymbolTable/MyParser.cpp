@@ -228,7 +228,7 @@ Type * MyParser::createType(char* name, int lineno, int colno){
 	cout << "Class " << name << " has been created\n";
 	return t;
 }
-Type * MyParser::finishTypeDeclaration(Type* t){
+Type * MyParser::finishTypeDeclaration(Type* t) {
 	this->st->currScope = this->st->currScope->parent;
 	if (t) {
 		cout << "=============== Class " << t->getName() << " closed ================" << endl;
@@ -246,8 +246,15 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 		this->errRecovery->errQ->enqueue(lineno, colno, "Function already exists ", name);
 		return 0;
 	}
+
 	f = new Function();
-	this->setMethodData(f, name, m);
+
+	if (!this->setMethodData(f, name, m, lineno, colno)) {
+		return 0;
+	}
+	// Printing function details
+	f->printDetails();
+
 	// Resetting the modifier
 	m->reset();
 
@@ -255,8 +262,6 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 	f->getScope()->parent = this->st->currScope;
 	this->st->currScope->m->put(name, f);
 	this->st->currScope = f->getScope();
-
-	this->printMethodData(f, name);
 
 	// Return the function
 	return f;
@@ -268,7 +273,7 @@ Function * MyParser::finishFunctionDeclaration(Function* f) {
 	return f;
 }
 
-void MyParser::setMethodData(Function* f, char* name, Modifier* m) {
+bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo) {
 	// Setting function modifiers
 	f->setName(name);
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
@@ -281,10 +286,18 @@ void MyParser::setMethodData(Function* f, char* name, Modifier* m) {
 	f->setIsNative(m->getIsNative());
 	f->setReturnType(m->getReturnType());
 
+	// Checking if function has different modifiers
+	if (f->illegalCombinationOfModifiers()) {
+		cout << "==================================================\n";
+		cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
+		cout << "==================================================\n";
+		return false;
+	}
+
 	// Checking if function is constructor
 	Type* t = (Type*)this->st->currScope->parent->m->get(name);
 	if (t) {
-		if (strcmp(t->getName(), name) == 0) {
+		if (strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
 			f->setIsConstructor(true);
 		}
 		else {
@@ -294,23 +307,5 @@ void MyParser::setMethodData(Function* f, char* name, Modifier* m) {
 	else {
 		f->setIsConstructor(false);
 	}
-}
-
-void MyParser::printMethodData(Function* f, char* name) {
-	// Print function details
-	cout << "=============== Function " << name << " opened ================" << endl;
-	cout << "has been created ";
-	cout << "with modifiers list:" << endl;
-	if (f->getIsConstructor()) cout << "Constructor" << endl;
-	if (f->getIsPublic()) cout << "Public" << endl;
-	if (f->getIsPrivate()) cout << "Private" << endl;
-	if (f->getIsProtected()) cout << "Protected" << endl;
-	if (f->getIsFinal()) cout << "Final" << endl;
-	if (f->getIsStatic()) cout << "Static" << endl;
-	if (f->getIsAbstract()) cout << "Abstract" << endl;
-	if (f->getIsNative()) cout << "Native" << endl;
-	if (f->getIsSynchronized()) cout << "Synchronized" << endl;
-	if (f->getIsTransient()) cout << "Transient" << endl;
-	if (f->getIsVolatile()) cout << "Volatile" << endl;
-	cout << "and Return Type: " << f->getReturnType() << endl;
+	return true;
 }

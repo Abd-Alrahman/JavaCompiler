@@ -54,6 +54,10 @@ public:
 class Type {
 private:
 	char* name;
+	bool isPublic;
+	bool isPrivate;
+	bool isProtected;
+	bool isFinal;
 	Type* inheritedType;
 	Scope * scope;
 public:
@@ -85,6 +89,8 @@ private:
 public:
 	Function();
 	~Function();
+	void printDetails();
+	bool illegalCombinationOfModifiers();
 	void setName(char* name);
 	char* getName();
 	void setIsPublic(bool isPublic);

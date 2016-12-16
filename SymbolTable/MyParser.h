@@ -60,8 +60,7 @@ public:
 class MyParser
 {
 private:
-	void setMethodData(Function* f, char* name, Modifier* m);
-	void printMethodData(Function* f, char* name);
+	bool setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo);
 public:
 	SymbolTable * st;
 	ErrorRecovery * errRecovery;

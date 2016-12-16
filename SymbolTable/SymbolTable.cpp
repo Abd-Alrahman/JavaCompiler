@@ -144,6 +144,34 @@ Function::Function(){
 
 Function::~Function() {}
 
+bool Function::illegalCombinationOfModifiers() {
+	if ((this->isPublic && this->isPrivate) ||
+		(this->isPublic && this->isProtected) ||
+		(this->isProtected && this->isPrivate)) {
+		return true;
+	}
+	return false;
+}
+
+void Function::printDetails() {
+	// Print function details
+	cout << "=============== Function " << this->name << " opened ================" << endl;
+	cout << "has been created ";
+	cout << "with modifiers list:" << endl;
+	if (this->isConstructor) cout << "Constructor" << endl;
+	if (this->isPublic) cout << "Public" << endl;
+	if (this->isPrivate) cout << "Private" << endl;
+	if (this->isProtected) cout << "Protected" << endl;
+	if (this->isFinal) cout << "Final" << endl;
+	if (this->isStatic) cout << "Static" << endl;
+	if (this->isAbstract) cout << "Abstract" << endl;
+	if (this->isNative) cout << "Native" << endl;
+	if (this->isSynchronized) cout << "Synchronized" << endl;
+	if (this->isTransient) cout << "Transient" << endl;
+	if (this->isVolatile) cout << "Volatile" << endl;
+	cout << "and Return Type: " << this->returnType << endl;
+}
+
 void Function::setName(char* name){
 	strcat(this->name, name);
 }

@@ -463,7 +463,7 @@ LocalVariableDeclarationStatement
 																$<variable>$ = p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 																cout << "LocalVariableDeclarationStatement 1\n"; 
 															}
-    | FINAL TypeSpecifier VariableDeclarators SEMICOLON		{ 
+    | FINAL TypeSpecifier VariableDeclarators SEMICOLON		{
 																modifier->setIsFinal(true);
 																$<variable>$ = p->insertVar($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 																cout << "LocalVariableDeclarationStatement 2\n"; 

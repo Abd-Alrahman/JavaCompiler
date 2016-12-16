@@ -229,6 +229,18 @@ Type * MyParser::createType(char* name, int lineno, int colno){
 	return t;
 }
 Type * MyParser::finishTypeDeclaration(Type* t) {
+	// Creating default constructor for class if doesn't exist.
+	Function* f = (Function*)this->st->currScope->m->get(t->getName());
+	if (!f) {
+		Function* f = new Function();
+		f->setIsPublic(true);
+		f->setIsConstructor(true);
+		f->setName(t->getName());
+		this->st->currScope->m->put(f->getName(), f);
+		cout << "==========================================================\n";
+		cout << "Default constructor has been created with name: " << f->getName() << endl;
+		cout << "==========================================================\n";
+	}
 	this->st->currScope = this->st->currScope->parent;
 	if (t) {
 		cout << "=============== Class " << t->getName() << " closed ================" << endl;
@@ -252,6 +264,7 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 	if (!this->setMethodData(f, name, m, lineno, colno)) {
 		return 0;
 	}
+
 	// Printing function details
 	f->printDetails();
 

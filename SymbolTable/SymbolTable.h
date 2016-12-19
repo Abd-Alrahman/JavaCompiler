@@ -23,6 +23,7 @@ public:
 	char* getType();
 	void setIsFinal(bool isFinal);
 	bool getIsFinal();
+	bool isPrimitiveType(char* type);
 };
 class DataMember {
 private:
@@ -50,6 +51,8 @@ public:
 	bool getIsFinal();
 	void setIsStatic(bool isStatic);
 	bool getIsStatic();
+	bool illegalCombinationOfModifiers();
+	void printDetails();
 };
 class Type {
 private:

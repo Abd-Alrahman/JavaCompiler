@@ -40,6 +40,16 @@ bool Variable::getIsFinal() {
 	return this->isFinal;
 }
 
+bool Variable::isPrimitiveType(char* type) {
+	char* primitives[] = { "boolean", "char", "byte", "short", "int", "long", "float", "double", "void" };
+	for (int i = 0; i < (sizeof(primitives) / sizeof(*primitives)); i++)
+	{
+		if (strcmp(type, primitives[i]) == 0)
+			return true;
+	}
+	return false;
+}
+
 //=======================================
 //============ Data Member  ================
 DataMember::DataMember() {
@@ -106,6 +116,28 @@ bool DataMember::getIsFinal() {
 bool DataMember::getIsStatic() {
 	return this->isStatic;
 }
+
+bool DataMember::illegalCombinationOfModifiers() {
+	if ((this->isPublic && this->isPrivate) ||
+		(this->isPublic && this->isProtected) ||
+		(this->isProtected && this->isPrivate)) {
+		return true;
+	}
+	return false;
+}
+
+void DataMember::printDetails(){
+	cout << "Data member " << this->name << " has been created\n";
+	cout << "With the following modifiers:\n";
+	if (this->isFinal) cout << "Final\n";
+	if (this->isStatic) cout << "Static\n";
+	if (this->isPublic) cout << "Public\n";
+	if (this->isPrivate) cout << "Private\n";
+	if (this->isProtected) cout << "Protected\n";
+	cout << "and return type: " << this->type << endl;
+	cout << "==============================================\n";
+}
+
 //=======================================
 //============== Type ===================
 Type::Type() {
@@ -298,9 +330,34 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 		return 0;//item is exist previously
 	}
 	else {
+		if (m->getIsAbstract() || m->getIsNative() || m->getIsPrivate() || m->getIsProtected() || m->getIsPublic() ||
+			m->getIsStatic() || m->getIsSynchronized() || m->getIsTransient() || m->getIsVolatile()) {
+			cout << "===========================================================\n";
+			cout << "Local variable can't has access modifier other than final.\n";
+			cout << "===========================================================\n";
+		}
 		v = new Variable();
 		v->setName(name);
-		v->setType(m->getReturnType());
+		if (v->isPrimitiveType(m->getReturnType())) {
+			v->setType(m->getReturnType());
+			cout << "Variable type is primitive" << endl;
+		}
+		else {
+			Type* t = (Type*)this->currScope->parent->parent->m->get(m->getReturnType());
+			if (t) {
+				if (strcmp(t->getName(), m->getReturnType()) == 0) {
+					v->setType(m->getReturnType());
+					cout << "object has been created\n";
+				}
+				else {
+					cout << "Class doesn't exist\n";
+				}
+			}
+			else {
+				cout << "Class doesn't exist\n";
+			}
+		}
+
 		v->setIsFinal(m->getIsFinal());
 		m->reset();
 		this->currScope->m->put(name, v);

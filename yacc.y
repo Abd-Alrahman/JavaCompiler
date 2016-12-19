@@ -99,7 +99,7 @@ TypeSpecifier
 
 TypeName
 	: PrimitiveType { cout << "TypeName 1\n"; }
-	| QualifiedName %prec e5 { cout << "TypeName 2\n"; }
+	| QualifiedName %prec e5 { cout << "TypeName 2\n"; modifier->setReturnType($<r.str>1); }
 	;
 
 ClassNameList
@@ -108,15 +108,15 @@ ClassNameList
 	;
 
 PrimitiveType
-	: BOOLEAN { cout << "PrimitiveType BOOLEAN\n";	modifier->setReturnType("boolean"); }
-	| CHAR	  { cout << "PrimitiveType CHAR\n";		modifier->setReturnType("char"); }
-	| BYTE	  { cout << "PrimitiveType BYTE\n";		modifier->setReturnType("byte"); }
-	| SHORT	  { cout << "PrimitiveType SHORT\n";	modifier->setReturnType("short"); }
-	| INT	  { cout << "PrimitiveType INT\n";		modifier->setReturnType("int"); }
-	| LONG	  { cout << "PrimitiveType LONG\n";		modifier->setReturnType("long"); }
-	| FLOAT	  { cout << "PrimitiveType FLOAT\n";	modifier->setReturnType("float"); }
-	| DOUBLE  { cout << "PrimitiveType DOUBLE\n";	modifier->setReturnType("double"); }
-	| VOID	  { cout << "PrimitiveType VOID\n";		modifier->setReturnType("void"); }
+	: BOOLEAN { cout << "PrimitiveType BOOLEAN\n"; modifier->setReturnType("boolean"); }
+	| CHAR	  { cout << "PrimitiveType CHAR\n"; modifier->setReturnType("char"); }
+	| BYTE	  { cout << "PrimitiveType BYTE\n"; modifier->setReturnType("byte"); }
+	| SHORT	  { cout << "PrimitiveType SHORT\n"; modifier->setReturnType("short"); }
+	| INT	  { cout << "PrimitiveType INT\n"; modifier->setReturnType("int"); }
+	| LONG	  { cout << "PrimitiveType LONG\n";modifier->setReturnType("long"); }
+	| FLOAT	  { cout << "PrimitiveType FLOAT\n"; modifier->setReturnType("float"); }
+	| DOUBLE  { cout << "PrimitiveType DOUBLE\n";modifier->setReturnType("double"); }
+	| VOID	  { cout << "PrimitiveType VOID\n"; modifier->setReturnType("void"); }
 	;
 
 SemiColons
@@ -199,52 +199,52 @@ TypeDeclaration
 
 ClassHeader
 	: Modifiers ClassWord IDENTIFIER Extends Interfaces { 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 1\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER Extends			{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 2\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER       Interfaces	{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 3\n"; 
 														}
 	|           ClassWord IDENTIFIER Extends Interfaces { 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 4\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER					{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 5\n"; 
 														}
 	| QualifiedName ClassWord IDENTIFIER				{ 
 															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'Modifier\' put givin ",$<r.str>1);
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														}
 	|           ClassWord IDENTIFIER Extends			{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 6\n"; 
 														}
 	|           ClassWord IDENTIFIER       Interfaces	{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 7\n"; 
 														}
 	|           ClassWord IDENTIFIER					{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 															cout << "ClassHeader 8\n"; 
 														}
 	| Modifiers ClassWord %prec e7			            { 
 															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 1","" );
-															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														}
 	|		    ClassWord %prec e7			            { 
 															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 2","" );
-															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														}
 	|           ClassWord Extends						{ 
 															err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"illegal start class","" );
-															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo);
+															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														}
 	;
 
@@ -459,15 +459,14 @@ LocalVariableDeclarationOrStatement
 	;
 
 LocalVariableDeclarationStatement
-	:		TypeSpecifier VariableDeclarators SEMICOLON		{
-																$<variable>$ = p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-																cout << "LocalVariableDeclarationStatement 1\n"; 
-															}
-    | FINAL TypeSpecifier VariableDeclarators SEMICOLON		{
-																modifier->setIsFinal(true);
-																$<variable>$ = p->insertVar($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-																cout << "LocalVariableDeclarationStatement 2\n"; 
-															}
+	:			TypeSpecifier VariableDeclarators SEMICOLON		{
+																	$<variable>$ = p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+																	cout << "LocalVariableDeclarationStatement 1\n"; 
+																}
+    | Modifiers TypeSpecifier VariableDeclarators SEMICOLON		{
+																	$<variable>$ = p->insertVar($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+																	cout << "LocalVariableDeclarationStatement 2\n"; 
+																}
 	;
 
 Statement

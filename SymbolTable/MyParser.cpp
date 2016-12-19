@@ -195,15 +195,16 @@ DataMember* MyParser::insertMem(char* n, int lineNo, int colNo, Modifier* m) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", n);
 		return 0;
 	}
-	cout << "Data member " << n << " has been created\n";
-	cout << "With the following modifiers:\n";
-	if (d->getIsFinal()) cout << "Final\n";
-	if (d->getIsStatic()) cout << "Static\n";
-	if (d->getIsPublic()) cout << "Public\n";
-	if (d->getIsPrivate()) cout << "Private\n";
-	if (d->getIsProtected()) cout << "Protected\n";
-	cout << "and return type: " << d->getType() << endl;
-	cout << "==============================================\n";
+	 
+
+	// Checking if function has different modifiers
+	if (d->illegalCombinationOfModifiers()) {
+		cout << "==================================================\n";
+		cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
+		cout << "==================================================\n";
+		return 0;
+	}
+	d->printDetails();
 	return d;
 }
 DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
@@ -213,7 +214,7 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 	return d;
 }
 //========= Types =================
-Type * MyParser::createType(char* name, int lineno, int colno){
+Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m){
 	Type* t = (Type*)this->st->currScope->m->get(name);
 	cout << "=============== Class " << name << " opened ================" << endl;
 	if(t) {
@@ -222,9 +223,11 @@ Type * MyParser::createType(char* name, int lineno, int colno){
 	}
 	t = new Type();
 	t->setName(name);
+	m->reset();
 	t->getScope()->parent = this->st->currScope;
 	this->st->currScope->m->put(name, t);
 	this->st->currScope = t->getScope();
+	
 	cout << "Class " << name << " has been created\n";
 	return t;
 }
@@ -262,14 +265,16 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 	f = new Function();
 
 	if (!this->setMethodData(f, name, m, lineno, colno)) {
+		// Resetting the modifier
+		m->reset();
 		return 0;
 	}
 
-	// Printing function details
-	f->printDetails();
-
 	// Resetting the modifier
 	m->reset();
+
+	// Printing function details
+	f->printDetails();
 
 	// Move to new scope
 	f->getScope()->parent = this->st->currScope;

@@ -181,7 +181,7 @@ Variable* MyParser::insertVar(char* n, int lineNo, int colNo, Modifier* m) {
 }
 Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 	if(v) {
-		this->st->currScope->m->put(v->getName(), v);
+		this->st->currScope->m->put(v->getName(), v, LOCALVARIABLE);
 	}
 	return v;
 }
@@ -209,7 +209,7 @@ DataMember* MyParser::insertMem(char* n, int lineNo, int colNo, Modifier* m) {
 }
 DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 	if (d) {
-		this->st->currScope->m->put(d->getName(), d);
+		this->st->currScope->m->put(d->getName(), d, DATAMEMBER);
 	}
 	return d;
 }
@@ -225,7 +225,7 @@ Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m){
 	t->setName(name);
 	m->reset();
 	t->getScope()->parent = this->st->currScope;
-	this->st->currScope->m->put(name, t);
+	this->st->currScope->m->put(name, t, TYPE);
 	this->st->currScope = t->getScope();
 	
 	cout << "Class " << name << " has been created\n";
@@ -239,7 +239,7 @@ Type * MyParser::finishTypeDeclaration(Type* t) {
 		f->setIsPublic(true);
 		f->setIsConstructor(true);
 		f->setName(t->getName());
-		this->st->currScope->m->put(f->getName(), f);
+		this->st->currScope->m->put(f->getName(), f, FUNCTION);
 		cout << "==========================================================\n";
 		cout << "Default constructor has been created with name: " << f->getName() << endl;
 		cout << "==========================================================\n";
@@ -278,7 +278,7 @@ Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier*
 
 	// Move to new scope
 	f->getScope()->parent = this->st->currScope;
-	this->st->currScope->m->put(name, f);
+	this->st->currScope->m->put(name, f, FUNCTION);
 	this->st->currScope = f->getScope();
 
 	// Return the function

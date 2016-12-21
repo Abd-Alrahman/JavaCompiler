@@ -3,6 +3,14 @@
 #define __Symbol_Table__
 #include "MyMap.h"
 
+enum structure {
+	TYPE = 0,
+	FUNCTION,
+	DATAMEMBER,
+	LOCALVARIABLE,
+	PARAMETER
+};
+
 class Scope {
 public:
 	Scope();
@@ -134,6 +142,7 @@ public:
 	Variable * getVariableFromCurrentScope(char* name);
 	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m);
 	DataMember * getDataMemberFromCurrentScope(char* name);
+	void print(Scope* scope);
 	SymbolTable(void);
 	~SymbolTable(void);
 };

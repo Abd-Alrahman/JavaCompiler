@@ -828,5 +828,6 @@ void main(void)
 	parser->parse();
 	if(!err->errQ->isEmpty())						   
 		err->printErrQueue();
+	p->st->print(p->st->rootScope);
 	//p->errRecovery->printErrQueue();
 }

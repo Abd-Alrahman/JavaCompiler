@@ -72,7 +72,7 @@ public:
 	Variable* addVariableToCurrentScope(Variable* v);
 	DataMember* insertMem(char* n, int lineNo, int colNo, Modifier* m);
 	DataMember* addDataMemberToCurrentScope(DataMember* d);
-	Type * createType(char* name, int lineno, int colno);
+	Type * createType(char* name, int lineno, int colno, Modifier* m);
 	Type * finishTypeDeclaration(Type* t);
 	Function * createFunction(char* name, int lineno, int colno, Modifier* m);
 	Function * finishFunctionDeclaration(Function* f);

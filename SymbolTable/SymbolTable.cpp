@@ -1,12 +1,12 @@
 #include "SymbolTable.h"
 #include "MyParser.h"
 //============= Scope   ================
-Scope::Scope(){
+Scope::Scope() {
 	this->m = new MyMap();
 	this->parent = 0;
 }
 //============ Variable  ================
-Variable::Variable(){
+Variable::Variable() {
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->type = new char[255];
@@ -316,7 +316,7 @@ bool Function::getIsConstructor() {
 	return this->isConstructor;
 }
 //=======================================
-SymbolTable::SymbolTable(void){
+SymbolTable::SymbolTable(void) {
 	this->rootScope = new Scope();
 	this->currScope = this->rootScope;
 }
@@ -360,7 +360,7 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 
 		v->setIsFinal(m->getIsFinal());
 		m->reset();
-		this->currScope->m->put(name, v);
+		this->currScope->m->put(name, v, LOCALVARIABLE);
 	}
 	return v;
 }
@@ -400,7 +400,7 @@ DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m
 			d->setIsPublic(true);
 		}
 		m->reset();
-		this->currScope->m->put(name, d);
+		this->currScope->m->put(name, d, DATAMEMBER);
 	}
 	return d;
 }
@@ -411,4 +411,43 @@ DataMember * SymbolTable::getDataMemberFromCurrentScope(char* name) {
 		return 0;
 	}
 	return d;
+}
+
+void SymbolTable::print(Scope* scope) {
+	if (scope) {
+		for (int i = 0; i < 71; i++)
+		{
+			if (scope->m->arr[i]) {
+				switch (scope->m->arr[i]->getStrc())
+				{
+				case TYPE: {
+							   cout << "\tClass " << scope->m->arr[i]->getName() << endl << "\t\t";
+							   Type* type = (Type*)scope->m->arr[i]->getElem();
+							   this->print(type->getScope());
+							   break;
+				}
+				case FUNCTION: {
+							   cout << "Function " << scope->m->arr[i]->getName() << endl << "\t\t";
+							   Function* function = (Function*)scope->m->arr[i]->getElem();
+							   this->print(function->getScope());
+							   break;
+				}
+				case DATAMEMBER: {
+									 cout << "Data Member: " << scope->m->arr[i]->getName();
+									 break;
+				}
+				case LOCALVARIABLE: {
+							   cout << "Local Variable " << scope->m->arr[i]->getName();
+							   break;
+				}
+				case PARAMETER: {
+										break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+		cout << "\n\t";
+	}
 }

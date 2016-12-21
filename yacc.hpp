@@ -103,49 +103,49 @@
      ASS_AND = 329,
      ASS_XOR = 330,
      ASS_OR = 331,
-     OPEN_D = 332,
-     CLOSE_D = 333,
-     OPEN_B = 334,
-     CLOSE_B = 335,
-     OPEN = 336,
-     CLOSE = 337,
-     COLON = 338,
-     COMMA = 339,
-     PLUS = 340,
-     MINUS = 341,
-     MULT = 342,
-     DIV = 343,
-     AND = 344,
-     OR = 345,
-     QUES_MARK = 346,
-     EXC_MARK = 347,
-     MODULE = 348,
-     DURA = 349,
-     ASSIGN = 350,
-     XOR = 351,
-     LESS = 352,
-     GREATER = 353,
-     INT = 354,
-     SHORT = 355,
-     LONG = 356,
-     FLOAT = 357,
-     DOUBLE = 358,
-     CHAR = 359,
-     BYTE = 360,
-     IDENTIFIER = 361,
-     INTEGER_VALUE = 362,
-     LONG_VALUE = 363,
-     N_ID = 364,
-     FLOAT_VALUE = 365,
-     CHAR_VALUE = 366,
-     STRING_VALUE = 367,
-     BOOLLIT = 368,
-     LITERAL = 369,
-     e1 = 370,
-     ELSE = 371,
-     e4 = 372,
-     e2 = 373,
-     e3 = 374,
+     OPEN_B = 332,
+     CLOSE_B = 333,
+     OPEN = 334,
+     CLOSE = 335,
+     COLON = 336,
+     COMMA = 337,
+     PLUS = 338,
+     MINUS = 339,
+     MULT = 340,
+     DIV = 341,
+     AND = 342,
+     OR = 343,
+     QUES_MARK = 344,
+     EXC_MARK = 345,
+     MODULE = 346,
+     DURA = 347,
+     ASSIGN = 348,
+     XOR = 349,
+     LESS = 350,
+     GREATER = 351,
+     INT = 352,
+     SHORT = 353,
+     LONG = 354,
+     FLOAT = 355,
+     DOUBLE = 356,
+     CHAR = 357,
+     BYTE = 358,
+     IDENTIFIER = 359,
+     INTEGER_VALUE = 360,
+     LONG_VALUE = 361,
+     N_ID = 362,
+     FLOAT_VALUE = 363,
+     CHAR_VALUE = 364,
+     STRING_VALUE = 365,
+     BOOLLIT = 366,
+     LITERAL = 367,
+     e1 = 368,
+     ELSE = 369,
+     e4 = 370,
+     e2 = 371,
+     e3 = 372,
+     CLOSE_D = 373,
+     OPEN_D = 374,
      e5 = 375,
      e6 = 376,
      e7 = 377,
@@ -230,49 +230,49 @@
 #define ASS_AND 329
 #define ASS_XOR 330
 #define ASS_OR 331
-#define OPEN_D 332
-#define CLOSE_D 333
-#define OPEN_B 334
-#define CLOSE_B 335
-#define OPEN 336
-#define CLOSE 337
-#define COLON 338
-#define COMMA 339
-#define PLUS 340
-#define MINUS 341
-#define MULT 342
-#define DIV 343
-#define AND 344
-#define OR 345
-#define QUES_MARK 346
-#define EXC_MARK 347
-#define MODULE 348
-#define DURA 349
-#define ASSIGN 350
-#define XOR 351
-#define LESS 352
-#define GREATER 353
-#define INT 354
-#define SHORT 355
-#define LONG 356
-#define FLOAT 357
-#define DOUBLE 358
-#define CHAR 359
-#define BYTE 360
-#define IDENTIFIER 361
-#define INTEGER_VALUE 362
-#define LONG_VALUE 363
-#define N_ID 364
-#define FLOAT_VALUE 365
-#define CHAR_VALUE 366
-#define STRING_VALUE 367
-#define BOOLLIT 368
-#define LITERAL 369
-#define e1 370
-#define ELSE 371
-#define e4 372
-#define e2 373
-#define e3 374
+#define OPEN_B 332
+#define CLOSE_B 333
+#define OPEN 334
+#define CLOSE 335
+#define COLON 336
+#define COMMA 337
+#define PLUS 338
+#define MINUS 339
+#define MULT 340
+#define DIV 341
+#define AND 342
+#define OR 343
+#define QUES_MARK 344
+#define EXC_MARK 345
+#define MODULE 346
+#define DURA 347
+#define ASSIGN 348
+#define XOR 349
+#define LESS 350
+#define GREATER 351
+#define INT 352
+#define SHORT 353
+#define LONG 354
+#define FLOAT 355
+#define DOUBLE 356
+#define CHAR 357
+#define BYTE 358
+#define IDENTIFIER 359
+#define INTEGER_VALUE 360
+#define LONG_VALUE 361
+#define N_ID 362
+#define FLOAT_VALUE 363
+#define CHAR_VALUE 364
+#define STRING_VALUE 365
+#define BOOLLIT 366
+#define LITERAL 367
+#define e1 368
+#define ELSE 369
+#define e4 370
+#define e2 371
+#define e3 372
+#define CLOSE_D 373
+#define OPEN_D 374
 #define e5 375
 #define e6 376
 #define e7 377
@@ -285,9 +285,9 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 29 "C:\\Users\\Dell-PC\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\yacc.y"
+#line 29 "C:\\Users\\Yara\\Documents\\Visual Studio 2013\\Projects\\JavaCompiler\\yacc.y"
 typedef union YYSTYPE {
-	struct R{
+	struct R {
 		int i;
 		float f;
 		char c;
@@ -297,11 +297,12 @@ typedef union YYSTYPE {
 		}r;
 		class YaccSimpleType * yaccSimpleType;
 		class Variable * variable;
+		class DataMember * dm;
 		class Function * function;
 		class Type * type;
 	} YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 305 "yacc.hpp"
+#line 306 "yacc.hpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

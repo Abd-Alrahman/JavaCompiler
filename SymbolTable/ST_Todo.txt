@@ -1,0 +1,24 @@
+1- Variable
+	- Missing type error.
+	- Prevent assigning for final variable.
+	- Trying defining object from a class.
+--------------
+2- Data Member
+	- Missing type error.
+	- Defining different modifiers.
+--------------
+3- Function
+	- Missing return type.
+	- Overriding problems.
+	- Check for return statment in methods and none ones for void's.
+	- All methods in an abstract class must be abstract.
+--------------
+4- Parametrs
+	-
+	-
+	-
+--------------
+Overriding.
+Inheritance.
+Problem with similar names when typing x1, x.
+Printing Errors From Queue in ST.

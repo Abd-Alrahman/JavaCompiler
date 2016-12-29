@@ -1,0 +1,27 @@
+1- Variable
+	- Modifiers with variables error other than final.
+	- Defining multiple variables for one type (int x, y, z).
+	- Repeated variable name.
+	- Determining if variable is final or not.
+--------------
+2- Data Member
+	- Default Public Modifier.
+	- Repeated data member name.
+	- Defining multiple dm's for one type.
+--------------
+3- Function
+	- Default Public Modifier.
+	- Repeated Modifier.
+	- Determining if method is a constructor.
+	- Repeated method name.
+	- Same name of class but with return type.
+	- Defining Different Modifiers.
+	- Creating default constructor if it doesn't exist.
+	- Same name of constructor with return type.
+--------------
+4- Parametrs
+	-
+	-
+	-
+---------------
+Printing Symbol Table.

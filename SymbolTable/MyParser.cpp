@@ -144,10 +144,11 @@ int Helper::getBracketsCount() {
 
 MyParser::MyParser(void)
 {
-	this->st = new SymbolTable();
-	this->errRecovery = new ErrorRecovery();
-	this->helper = new Helper();
-	this->names = new char*[20];
+	this->st			= new SymbolTable();
+	this->errRecovery	= new ErrorRecovery();
+	this->helper		= new Helper();
+	this->names			= new char*[20];
+	this->parameters	= new Parameter*[255];
 	this->initNames();
 }
 
@@ -158,16 +159,6 @@ void MyParser::initNames() {
 	{
 		this->names[i]	  = new char[255];
 		this->names[i][0] = '\0';
-	}
-}
-
-void MyParser::checkBrcktsEquality(int lineNo, int colNo) {
-	if (this->helper->getBracketsCount() > 0) {
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Unexpected end of file", "");
-	}
-	else if (this->helper->getBracketsCount() < 0)
-	{
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Unexpected {", "");
 	}
 }
 //========= Variable =================
@@ -200,6 +191,13 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 	}
 	return v;
 }
+
+//============== Parameter =================
+Parameter* MyParser::createParam(char* name, int lineNo, int colNo, Modifier* m) {
+	Parameter * p = st->createParam(name, m);
+	return p;
+}
+
 //========= Data Member =================
 void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
@@ -334,6 +332,20 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 		return false;
 	}
 
+	// Adding parameters List
+	if ((sizeof(this->parameters) / sizeof(**this->parameters)) > 0) {
+		f->parameters = new Parameter*[255];
+		for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
+		{
+			if (!f->parameters[i] && this->parameters[i]) {
+				f->parameters[i] = new Parameter(this->parameters[i]);
+				cout << "Parameter " << f->parameters[i]->getName() << " has been created.\n";
+				cout << "With type " << f->parameters[i]->getType();
+				delete this->parameters[i];
+			}
+		}
+	}
+
 	// Checking if function is constructor
 	Type* t = (Type*)this->st->currScope->parent->m->get(name);
 	if (t) {
@@ -372,5 +384,21 @@ void MyParser::resetNames() {
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
 	{
 		this->names[i][0] = '\0';
+	}
+}
+
+void MyParser::addToParameters(Parameter* parameter, int lineNo, int colNo) {
+	for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
+	{
+		if (strcmp(parameter->getName(), this->parameters[i]->getName()) == 0) {
+			this->errRecovery->errQ->enqueue(lineNo, colNo, "Parameter is already declared", parameter->getName());
+			cout << "-----------------------------------------\n";
+			cout << "Parameter " << parameter->getName() << " is already declared\n";
+			cout << "-----------------------------------------\n";
+		}
+		if (!this->parameters[i]) {
+			this->parameters[i] = new Parameter(parameter);
+			return;
+		}
 	}
 }

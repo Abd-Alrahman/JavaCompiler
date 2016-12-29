@@ -40,6 +40,7 @@
 		class DataMember * dm;
 		class Function * function;
 		class Type * type;
+		class Parameter * param;
 	}
 
 %token ABSTRACT ASSERT
@@ -179,17 +180,15 @@ QualifiedName
 	;
 
 TypeDeclaration
-	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; $<type>$ = p->finishTypeDeclaration($<type>1); p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2); }
-	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; $<type>$ = p->finishTypeDeclaration($<type>1); p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2); }
+	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
+	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
 	| ClassHeader CLOSE_D						   { 
 														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" );
 														$<type>$ = p->finishTypeDeclaration($<type>1);
-														p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2);
 													}
 	| ClassHeader OPEN_D  %prec e2					{ 
 														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'}\'", "" );
 														$<type>$ = p->finishTypeDeclaration($<type>1);
-														p->checkBrcktsEquality($<r.myLineNo>2, $<r.myColNo>2);
 													}
 	| ClassHeader %prec e4							{ 
 														err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'{}\'", "" );
@@ -382,9 +381,21 @@ ParameterList
 	;
 
 Parameter
-	: TypeSpecifier DeclaratorName			 { cout << "Parameter 1\n"; }
-	| TypeSpecifier DeclaratorName	ASSIGN	 { cout << "Parameter heheheh \n"; }
-    | FINAL TypeSpecifier DeclaratorName	 { cout << "Parameter 2\n"; } 
+	: TypeSpecifier DeclaratorName			 {
+												$<param>$ = p->createParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+												p->addToParameters($<param>$, yylval.r.myLineNo, yylval.r.myColNo);
+												cout << "Parameter 1\n";
+											 }
+	| TypeSpecifier DeclaratorName	ASSIGN	 {
+												$<param>$ = p->createParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+												p->addToParameters($<param>$, yylval.r.myLineNo, yylval.r.myColNo);
+												cout << "Parameter 2\n";
+											 }
+    | FINAL TypeSpecifier DeclaratorName	 {
+												$<param>$ = p->createParam($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+												p->addToParameters($<param>$, yylval.r.myLineNo, yylval.r.myColNo);
+												cout << "Parameter 3\n";
+											 }
 	;
 
 DeclaratorName

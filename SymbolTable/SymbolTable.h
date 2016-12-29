@@ -17,6 +17,23 @@ public:
 	Scope * parent;
 	MyMap * m;
 };
+class Parameter {
+private:
+	char* name;
+	char* type;
+	bool isFinal;
+public:
+	Parameter();
+	Parameter(Parameter* parameter);
+	~Parameter();
+	void setName(char* n);
+	char* getName();
+	void setType(char* type);
+	char* getType();
+	void setIsFinal(bool isFinal);
+	bool getIsFinal();
+	bool isPrimitiveType(char* type);
+};
 class Variable {
 private: 
 	char* name;
@@ -98,6 +115,7 @@ private:
 	Scope * scope;
 	char* returnType;
 public:
+	Parameter** parameters;
 	Function();
 	~Function();
 	void printDetails();
@@ -140,6 +158,8 @@ public:
 	Scope * rootScope;
 	Variable * insertVariableInCurrentScope(char* name, Modifier* m);
 	Variable * getVariableFromCurrentScope(char* name);
+	Parameter * createParam(char* name, Modifier* m);
+	Parameter * getParameterFromCurrentFunction(char* name);
 	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m);
 	DataMember * getDataMemberFromCurrentScope(char* name);
 	void print(Scope* scope);

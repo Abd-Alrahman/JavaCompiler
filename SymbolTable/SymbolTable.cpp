@@ -5,7 +5,7 @@ Scope::Scope() {
 	this->m = new MyMap();
 	this->parent = 0;
 }
-//============ Variable  ================
+//============ Variable ================
 Variable::Variable() {
 	this->name = new char[255];
 	this->name[0] = '\0';
@@ -50,7 +50,57 @@ bool Variable::isPrimitiveType(char* type) {
 	return false;
 }
 
-//=======================================
+//============= Parameter =================
+Parameter::Parameter() {
+	this->name = new char[255];
+	this->name[0] = '\0';
+	this->type = new char[255];
+	this->type[0] = '\0';
+	this->isFinal = false;
+}
+
+Parameter::Parameter(Parameter* parameter) {
+	strcat(this->name, parameter->name);
+	strcat(this->type, parameter->type);
+	this->isFinal = parameter->isFinal;
+}
+
+Parameter::~Parameter() {}
+
+void Parameter::setName(char* n) {
+	strcat(this->name, n);
+}
+
+char* Parameter::getName() {
+	return this->name;
+}
+
+void Parameter::setType(char* type) {
+	strcat(this->type, type);
+}
+
+char* Parameter::getType() {
+	return this->type;
+}
+
+void Parameter::setIsFinal(bool isFinal) {
+	this->isFinal = isFinal;
+}
+
+bool Parameter::getIsFinal() {
+	return this->isFinal;
+}
+
+bool Parameter::isPrimitiveType(char* type) {
+	char* primitives[] = { "boolean", "char", "byte", "short", "int", "long", "float", "double", "void" };
+	for (int i = 0; i < (sizeof(primitives) / sizeof(*primitives)); i++)
+	{
+		if (strcmp(type, primitives[i]) == 0)
+			return true;
+	}
+	return false;
+}
+
 //============ Data Member  ================
 DataMember::DataMember() {
 	this->name = new char[255];
@@ -149,18 +199,23 @@ Type::~Type() {}
 void Type::setName(char* n) {
 	strcat(this->name,n);
 }
+
 char* Type::getName(){
 	return this->name;
 }
+
 void Type::setInheritedType(Type* e) {
 	this->inheritedType = e;
 }
+
 Type* Type::getInheritedType() {
 	return this->inheritedType;
 }
+
 void Type::setScope(Scope * m) {
 	this->scope = m;
 }
+
 Scope * Type::getScope() {
 	return this->scope;
 }
@@ -384,6 +439,49 @@ Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	}
 	return v;
 }*/
+
+//================= Parameter ====================
+Parameter * SymbolTable::createParam(char* name, Modifier* m) {
+	if (m->getIsAbstract() || m->getIsNative() || m->getIsPrivate() || m->getIsProtected() || m->getIsPublic() ||
+		m->getIsStatic() || m->getIsSynchronized() || m->getIsTransient() || m->getIsVolatile()) {
+		cout << "=====================================================\n";
+		cout << "Parameter can't has access modifier other than final.\n";
+		cout << "=====================================================\n";
+	}
+	Parameter* p = new Parameter();
+	p->setName(name);
+	if (p->isPrimitiveType(m->getReturnType())) {
+		p->setType(m->getReturnType());
+		cout << "Parameter type is primitive" << endl;
+	}
+	else {
+		Type* t = (Type*)this->currScope->parent->m->get(m->getReturnType());
+		if (t) {
+			if (strcmp(t->getName(), m->getReturnType()) == 0) {
+				p->setType(m->getReturnType());
+				cout << "object has been created\n";
+			}
+			else {
+				cout << "Class doesn't exist\n";
+			}
+		}
+		else {
+			cout << "Class doesn't exist\n";
+		}
+	}
+
+	p->setIsFinal(m->getIsFinal());
+	m->reset();
+	return p;
+}
+
+Parameter * SymbolTable::getParameterFromCurrentFunction(char* name){
+	Parameter * p = (Parameter*)this->currScope->m->get(name);
+	if (!p) {
+		return 0;
+	}
+	return p;
+}
 //================= Data Member ====================
 DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m) {
 	DataMember * d = (DataMember*)this->getDataMemberFromCurrentScope(name);

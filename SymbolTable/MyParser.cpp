@@ -1,18 +1,6 @@
 #include "MyParser.h"
 #include <iostream>
 
-MyParser::MyParser(void)
-{
-	this->st = new SymbolTable();
-	this->errRecovery = new ErrorRecovery();
-	this->helper = new Helper();
-}
-
-MyParser::~MyParser(void)
-{
-}
-
-
 //============ Modifier =================
 Modifier::Modifier() {
 	this->isPublic = false;
@@ -154,6 +142,25 @@ int Helper::getBracketsCount() {
 }
 
 
+MyParser::MyParser(void)
+{
+	this->st = new SymbolTable();
+	this->errRecovery = new ErrorRecovery();
+	this->helper = new Helper();
+	this->names = new char*[20];
+	this->initNames();
+}
+
+MyParser::~MyParser(void) {}
+
+void MyParser::initNames() {
+	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
+	{
+		this->names[i]	  = new char[255];
+		this->names[i][0] = '\0';
+	}
+}
+
 void MyParser::checkBrcktsEquality(int lineNo, int colNo) {
 	if (this->helper->getBracketsCount() > 0) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Unexpected end of file", "");
@@ -164,20 +171,28 @@ void MyParser::checkBrcktsEquality(int lineNo, int colNo) {
 	}
 }
 //========= Variable =================
-Variable* MyParser::insertVar(char* n, int lineNo, int colNo, Modifier* m) {
-	Variable * v = st->insertVariableInCurrentScope(n, m);
-	cout << "=================================================\n";
-	if(!v) {
-		cout << "Error variable " << n << " already defined!";
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", n);
-		return 0;
+void MyParser::insertVar(int lineNo, int colNo, Modifier* m) {
+	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
+	{
+		if (this->names[i] && this->names[i][0]) {
+			Variable * v = st->insertVariableInCurrentScope(this->names[i], m);
+			cout << "=================================================\n";
+			if (!v) {
+				cout << "Error variable " << v->getName() << " already defined!";
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", v->getName());
+				return;
+			}
+			cout << "Variable " << v->getName() << " has been created\n";
+			cout << "with return type " << v->getType() << endl;
+			if (v->getIsFinal())
+				cout << " and it is Final" << endl;
+			cout << "=================================================\n";
+		}
+		else {
+			m->reset();
+			return;
+		}
 	}
-	cout << "Variable " << n << " has been created\n";
-	cout << "with return type " << v->getType() << endl;
-	if (v->getIsFinal())
-		cout << " and it is Final" << endl;
-	cout << "=================================================\n";
-	return v;
 }
 Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 	if(v) {
@@ -326,4 +341,29 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 		f->setIsConstructor(false);
 	}
 	return true;
+}
+
+char** MyParser::getNames() {
+	return this->names;
+}
+
+void MyParser::setNames(char** namesArr) {
+	this->names = namesArr;
+}
+
+void MyParser::addToNames(char* name) {
+	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
+	{
+		if (this->names && this->names[i] && !this->names[i][0]) {
+			strcat(this->names[i], name);
+			return;
+		}
+	}
+}
+
+void MyParser::resetNames() {
+	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
+	{
+		this->names[i][0] = '\0';
+	}
 }

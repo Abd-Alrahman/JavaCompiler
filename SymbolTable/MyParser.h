@@ -61,14 +61,16 @@ class MyParser
 {
 private:
 	bool setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo);
+	void MyParser::initNames();
 public:
 	SymbolTable * st;
 	ErrorRecovery * errRecovery;
 	Helper * helper;
+	char** names;
 	MyParser(void);
 	~MyParser(void);
 	void checkBrcktsEquality(int lineNo, int colNo);
-	Variable* insertVar(char* n, int lineNo, int colNo, Modifier* m);
+	void insertVar(int lineNo, int colNo, Modifier* m);
 	Variable* addVariableToCurrentScope(Variable* v);
 	DataMember* insertMem(char* n, int lineNo, int colNo, Modifier* m);
 	DataMember* addDataMemberToCurrentScope(DataMember* d);
@@ -76,5 +78,9 @@ public:
 	Type * finishTypeDeclaration(Type* t);
 	Function * createFunction(char* name, int lineno, int colno, Modifier* m);
 	Function * finishFunctionDeclaration(Function* f);
+	char** getNames();
+	void setNames(char** namesArr);
+	void addToNames(char* name);
+	void resetNames();
 };
 #endif

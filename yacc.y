@@ -310,10 +310,12 @@ FieldVariableDeclaration
 	: Modifiers TypeSpecifier VariableDeclarators	{ 
 														$<dm>$ = p->insertMem($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														cout << "FieldVariableDeclaration 1\n";
+														p->resetNames();
 													}
 	|           TypeSpecifier VariableDeclarators	{ 
 														$<dm>$ = p->insertMem($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														cout << "FieldVariableDeclaration 2\n";
+														p->resetNames();
 													}
 	;
 
@@ -323,8 +325,8 @@ VariableDeclarators
 	;
 
 VariableDeclarator
-	: DeclaratorName							{ cout << "VariableDeclarator 1\n"; }
-	| DeclaratorName ASSIGN VariableInitializer { cout << "VariableDeclarator 2\n"; }
+	: DeclaratorName							{ p->addToNames($<r.str>1); cout << "VariableDeclarator 1\n"; }
+	| DeclaratorName ASSIGN VariableInitializer { p-> addToNames($<r.str>1); cout << "VariableDeclarator 2\n"; }
 	;
 
 VariableInitializer
@@ -460,12 +462,14 @@ LocalVariableDeclarationOrStatement
 
 LocalVariableDeclarationStatement
 	:			TypeSpecifier VariableDeclarators SEMICOLON		{
-																	$<variable>$ = p->insertVar($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+																	p->insertVar(yylval.r.myLineNo, yylval.r.myColNo, modifier);
 																	cout << "LocalVariableDeclarationStatement 1\n"; 
+																	p->resetNames();
 																}
     | Modifiers TypeSpecifier VariableDeclarators SEMICOLON		{
-																	$<variable>$ = p->insertVar($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-																	cout << "LocalVariableDeclarationStatement 2\n"; 
+																	p->insertVar(yylval.r.myLineNo, yylval.r.myColNo, modifier);
+																	cout << "LocalVariableDeclarationStatement 2\n";
+																	p->resetNames();
 																}
 	;
 

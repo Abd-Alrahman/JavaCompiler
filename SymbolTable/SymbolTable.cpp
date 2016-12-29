@@ -126,7 +126,7 @@ bool DataMember::illegalCombinationOfModifiers() {
 	return false;
 }
 
-void DataMember::printDetails(){
+void DataMember::printDetails() {
 	cout << "Data member " << this->name << " has been created\n";
 	cout << "With the following modifiers:\n";
 	if (this->isFinal) cout << "Final\n";
@@ -204,11 +204,11 @@ void Function::printDetails() {
 	cout << "and Return Type: " << this->returnType << endl;
 }
 
-void Function::setName(char* name){
+void Function::setName(char* name) {
 	strcat(this->name, name);
 }
 
-void Function::setScope(Scope* m){
+void Function::setScope(Scope* m) {
 	this->scope = m;
 }
 
@@ -228,19 +228,19 @@ void Function::setIsProtected(bool isProtected) {
 	this->isProtected = isProtected;
 }
 
-void Function::setIsStatic(bool isStatic){
+void Function::setIsStatic(bool isStatic) {
 	this->isStatic = isStatic;
 }
 
-void Function::setIsFinal(bool isFinal){
+void Function::setIsFinal(bool isFinal) {
 	this->isFinal = isFinal;
 }
 
-void Function::setIsAbstract(bool isAbstract){
+void Function::setIsAbstract(bool isAbstract) {
 	this->isAbstract = isAbstract;
 }
 
-void Function::setIsNative(bool isNative){
+void Function::setIsNative(bool isNative) {
 	this->isNative = isNative;
 }
 
@@ -248,7 +248,7 @@ void Function::setIsSynchronized(bool isSynchronized) {
 	this->isSynchronized = isSynchronized;
 }
 
-void Function::setIsTransient(bool isTransient){
+void Function::setIsTransient(bool isTransient) {
 	this->isTransient = isTransient;
 }
 
@@ -276,15 +276,15 @@ bool Function::getIsStatic() {
 	return this->isStatic;
 }
 
-bool Function::getIsFinal(){
+bool Function::getIsFinal() {
 	return this->isFinal;
 }
 
-bool Function::getIsAbstract(){
+bool Function::getIsAbstract() {
 	return this->isAbstract;
 }
 
-bool Function::getIsNative(){
+bool Function::getIsNative() {
 	return this->isNative;
 }
 
@@ -304,11 +304,11 @@ char* Function::getReturnType() {
 	return this->returnType;
 }
 
-char* Function::getName(){
+char* Function::getName() {
 	return this->name;
 }
 
-Scope * Function::getScope(){
+Scope * Function::getScope() {
 	return this->scope;
 }
 
@@ -326,7 +326,7 @@ SymbolTable::~SymbolTable(void) {
 
 Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 	Variable * v = this->getVariableFromCurrentScope(name);
-	if(v) {
+	if (v) {
 		return 0;//item is exist previously
 	}
 	else {
@@ -359,11 +359,11 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 		}
 
 		v->setIsFinal(m->getIsFinal());
-		m->reset();
 		this->currScope->m->put(name, v, LOCALVARIABLE);
 	}
 	return v;
 }
+
 Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	Variable * v = (Variable*)this->currScope->m->get(name);
 	if(!v) {
@@ -371,6 +371,7 @@ Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	}
 	return v;
 }
+
 /*
 Variable * SymbolTable::getVariableFromCurrentScope(char* name){
 	Variable * v = (Variable*)this->currScope->m->get(name);
@@ -421,24 +422,25 @@ void SymbolTable::print(Scope* scope) {
 				switch (scope->m->arr[i]->getStrc())
 				{
 				case TYPE: {
-							   cout << "\tClass " << scope->m->arr[i]->getName() << endl << "\t\t";
+							   cout << "Class: " << scope->m->arr[i]->getName() << endl;
 							   Type* type = (Type*)scope->m->arr[i]->getElem();
 							   this->print(type->getScope());
 							   break;
 				}
 				case FUNCTION: {
-							   cout << "Function " << scope->m->arr[i]->getName() << endl << "\t\t";
+							   cout << "\tFunction: " << scope->m->arr[i]->getName() << endl;
 							   Function* function = (Function*)scope->m->arr[i]->getElem();
 							   this->print(function->getScope());
 							   break;
 				}
 				case DATAMEMBER: {
-									 cout << "Data Member: " << scope->m->arr[i]->getName();
-									 break;
+								cout << "\tData Member: " << scope->m->arr[i]->getName() << endl;
+								break;
 				}
 				case LOCALVARIABLE: {
-							   cout << "Local Variable " << scope->m->arr[i]->getName();
-							   break;
+								Variable* var = (Variable*)scope->m->arr[i]->getElem();
+							    cout << "\t\tLocal Variable: " << var->getName() << endl;
+							    break;
 				}
 				case PARAMETER: {
 										break;
@@ -448,6 +450,5 @@ void SymbolTable::print(Scope* scope) {
 				}
 			}
 		}
-		cout << "\n\t";
 	}
 }

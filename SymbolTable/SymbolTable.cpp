@@ -439,12 +439,12 @@ void SymbolTable::print(Scope* scope) {
 									break;
 				}
 				case LOCALVARIABLE: {
-										Variable* var = (Variable*)scope->m->arr[i]->getElem();
-										cout << "\t\tLocal Variable: " << var->getName() << endl;
-										break;
+									Variable* var = (Variable*)scope->m->arr[i]->getElem();
+									cout << "\t\tLocal Variable: " << var->getName() << endl;
+									break;
 				}
 				case PARAMETER: {
-										break;
+									break;
 				}
 				default:
 					break;

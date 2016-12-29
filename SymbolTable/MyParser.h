@@ -72,7 +72,7 @@ public:
 	void checkBrcktsEquality(int lineNo, int colNo);
 	void insertVar(int lineNo, int colNo, Modifier* m);
 	Variable* addVariableToCurrentScope(Variable* v);
-	DataMember* insertMem(char* n, int lineNo, int colNo, Modifier* m);
+	void insertMem(int lineNo, int colNo, Modifier* m);
 	DataMember* addDataMemberToCurrentScope(DataMember* d);
 	Type * createType(char* name, int lineno, int colno, Modifier* m);
 	Type * finishTypeDeclaration(Type* t);

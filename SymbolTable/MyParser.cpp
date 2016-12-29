@@ -201,17 +201,17 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 	return v;
 }
 //========= Data Member =================
-DataMember* MyParser::insertMem(char* n, int lineNo, int colNo, Modifier* m) {
+void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
 	{
 		if (this->names[i] && this->names[i][0]) {
-			DataMember * d = st->insertDataMemberInCurrentScope(n, m);
+			DataMember * d = st->insertDataMemberInCurrentScope(this->names[i], m);
 			cout << "==============================================\n";
 			if (!d) {
 
-				cout << "Error[" << lineNo << ", " << colNo << "]:  data member " << n << " already defined!";
-				this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", n);
-				return 0;
+				cout << "Error[" << lineNo << ", " << colNo << "]:  data member " << this->names[i] << " already defined!";
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", this->names[i]);
+				return;
 			}
 
 			// Checking if function has different modifiers
@@ -219,14 +219,13 @@ DataMember* MyParser::insertMem(char* n, int lineNo, int colNo, Modifier* m) {
 				cout << "==================================================\n";
 				cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
 				cout << "==================================================\n";
-				return 0;
+				return;
 			}
-			else {
-				d->printDetails();
-				m->reset();
-				return d;
-			}
-			
+			d->printDetails();
+		}
+		else {
+			m->reset();
+			return;
 		}
 	}
 }

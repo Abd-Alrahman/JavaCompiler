@@ -308,12 +308,12 @@ FieldDeclaration
 
 FieldVariableDeclaration
 	: Modifiers TypeSpecifier VariableDeclarators	{ 
-														$<dm>$ = p->insertMem($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+														p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														cout << "FieldVariableDeclaration 1\n";
 														p->resetNames();
 													}
 	|           TypeSpecifier VariableDeclarators	{ 
-														$<dm>$ = p->insertMem($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+														p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														cout << "FieldVariableDeclaration 2\n";
 														p->resetNames();
 													}

@@ -400,7 +400,7 @@ DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m
 		if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
 			d->setIsPublic(true);
 		}
-		m->reset();
+		
 		this->currScope->m->put(name, d, DATAMEMBER);
 	}
 	return d;
@@ -428,19 +428,20 @@ void SymbolTable::print(Scope* scope) {
 							   break;
 				}
 				case FUNCTION: {
-							   cout << "\tFunction: " << scope->m->arr[i]->getName() << endl;
-							   Function* function = (Function*)scope->m->arr[i]->getElem();
-							   this->print(function->getScope());
-							   break;
+								   cout << "\tFunction: " << scope->m->arr[i]->getName() << endl;
+								   Function* function = (Function*)scope->m->arr[i]->getElem();
+								   this->print(function->getScope());
+								   break;
 				}
 				case DATAMEMBER: {
-								cout << "\tData Member: " << scope->m->arr[i]->getName() << endl;
-								break;
+									DataMember* d = (DataMember*)scope->m->arr[i]->getElem();
+									cout << "\tData Member: " << d->getName() << endl;
+									break;
 				}
 				case LOCALVARIABLE: {
-								Variable* var = (Variable*)scope->m->arr[i]->getElem();
-							    cout << "\t\tLocal Variable: " << var->getName() << endl;
-							    break;
+										Variable* var = (Variable*)scope->m->arr[i]->getElem();
+										cout << "\t\tLocal Variable: " << var->getName() << endl;
+										break;
 				}
 				case PARAMETER: {
 										break;

@@ -3,6 +3,7 @@
 #define __My_Parser__
 #include "SymbolTable.h"
 #include "../ErrorRecovery/ErrorRecovery.h"
+
 //===================== Data Structures From Help in Yacc ==============
 class Modifier {
 private:
@@ -70,6 +71,7 @@ public:
 	Helper * helper;
 	char** names;
 	Parameter** parameters;
+	vector<Parameter*> params;
 	MyParser(void);
 	~MyParser(void);
 	void insertVar(int lineNo, int colNo, Modifier* m);

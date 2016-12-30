@@ -163,9 +163,8 @@ MyParser::MyParser(void)
 	this->errRecovery	= new ErrorRecovery();
 	this->helper		= new Helper();
 	this->names			= new char*[20];
-	this->parameters	= new Parameter*[255];
+	this->parameters	= new Parameter*[];
 	this->initNames();
-	this->initParameters();
 }
 
 MyParser::~MyParser(void) {}
@@ -409,7 +408,8 @@ void MyParser::resetNames() {
 }
 
 void MyParser::addToParameters(Parameter* parameter, int lineNo, int colNo) {
-	for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
+	cout << "arra size is " << (sizeof(this->parameters) / sizeof(**this->parameters)) << endl;
+	for each (Parameter* par in this->parameters)
 	{
 		if (strcmp(parameter->getName(), this->parameters[i]->getName()) == 0) {
 			this->errRecovery->errQ->enqueue(lineNo, colNo, "Parameter is already declared", parameter->getName());
@@ -422,4 +422,5 @@ void MyParser::addToParameters(Parameter* parameter, int lineNo, int colNo) {
 			return;
 		}
 	}
+	
 }

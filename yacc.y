@@ -22,6 +22,7 @@
 
 	MyParser * p = new MyParser();
 	Modifier * modifier = new Modifier();
+	Modifier * m;
 %}
 
 
@@ -361,8 +362,8 @@ MethodDeclaration
 	;
 
 MethodDeclarator
-	: DeclaratorName OPEN_B ParameterList CLOSE_B {
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+	: DeclaratorName OPEN_B { m = new Modifier(modifier); modifier->reset(); } ParameterList CLOSE_B {
+													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, m);
 													cout << "MethodDeclarator 1\n";
 												  }
 	| DeclaratorName OPEN_B CLOSE_B				  {

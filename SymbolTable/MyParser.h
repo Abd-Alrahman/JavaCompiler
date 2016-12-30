@@ -19,6 +19,7 @@ private:
 	char* returnType;
 public:
 	Modifier();
+	Modifier(Modifier* m);
 	~Modifier();
 	void setIsPublic(bool isPublic);
 	bool getIsPublic();
@@ -62,6 +63,7 @@ class MyParser
 private:
 	bool setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo);
 	void MyParser::initNames();
+	void MyParser::initParameters();
 public:
 	SymbolTable * st;
 	ErrorRecovery * errRecovery;

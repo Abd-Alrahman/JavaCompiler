@@ -17,6 +17,21 @@ Modifier::Modifier() {
 	this->returnType[0] = '\0';
 }
 
+Modifier::Modifier(Modifier* m) {
+	this->isPublic = m->isPublic;
+	this->isPrivate = m->isPrivate;
+	this->isProtected = m->isProtected;
+	this->isStatic = m->isStatic;
+	this->isFinal = m->isFinal;
+	this->isAbstract = m->isAbstract;
+	this->isSynchronized = m->isSynchronized;
+	this->isVolatile = m->isVolatile;
+	this->isTransient = m->isTransient;
+	this->isNative = m->isNative;
+	this->returnType = new char[255];
+	strcpy(this->returnType, m->returnType);
+}
+
 Modifier::~Modifier() {}
 
 void Modifier::reset() {
@@ -150,6 +165,7 @@ MyParser::MyParser(void)
 	this->names			= new char*[20];
 	this->parameters	= new Parameter*[255];
 	this->initNames();
+	this->initParameters();
 }
 
 MyParser::~MyParser(void) {}
@@ -159,6 +175,13 @@ void MyParser::initNames() {
 	{
 		this->names[i]	  = new char[255];
 		this->names[i][0] = '\0';
+	}
+}
+
+void MyParser::initParameters() {
+	for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
+	{
+		this->parameters[i] = NULL;
 	}
 }
 //========= Variable =================
@@ -333,16 +356,14 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	}
 
 	// Adding parameters List
-	if ((sizeof(this->parameters) / sizeof(**this->parameters)) > 0) {
-		f->parameters = new Parameter*[255];
-		for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
-		{
-			if (!f->parameters[i] && this->parameters[i]) {
-				f->parameters[i] = new Parameter(this->parameters[i]);
-				cout << "Parameter " << f->parameters[i]->getName() << " has been created.\n";
-				cout << "With type " << f->parameters[i]->getType();
-				delete this->parameters[i];
-			}
+	f->parameters = new Parameter*[];
+	for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
+	{
+		if (!f->parameters[i] && this->parameters[i]) {
+			f->parameters[i] = new Parameter(this->parameters[i]);
+			cout << "Parameter " << f->parameters[i]->getName() << " has been created.\n";
+			cout << "With type " << f->parameters[i]->getType();
+			delete this->parameters[i];
 		}
 	}
 

@@ -71,14 +71,14 @@ public:
 	Helper * helper;
 	char** names;
 	Parameter** parameters;
-	vector<Parameter*> params;
+	ParamList* pl;
 	MyParser(void);
 	~MyParser(void);
 	void insertVar(int lineNo, int colNo, Modifier* m);
 	Variable* addVariableToCurrentScope(Variable* v);
 	void insertMem(int lineNo, int colNo, Modifier* m);
 	DataMember* addDataMemberToCurrentScope(DataMember* d);
-	Parameter* createParam(char* name, int lineNo, int colNo, Modifier* m);
+	Parameter* insertParam(char* name, int lineNo, int colNo, Modifier* m);
 	Type * createType(char* name, int lineno, int colno, Modifier* m);
 	Type * finishTypeDeclaration(Type* t);
 	Function * createFunction(char* name, int lineno, int colno, Modifier* m);

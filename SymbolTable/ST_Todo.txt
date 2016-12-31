@@ -14,9 +14,6 @@
 	- All methods in an abstract class must be abstract.
 --------------
 4- Parametrs
-	-
-	-
-	-
 --------------
 Overriding.
 Inheritance.

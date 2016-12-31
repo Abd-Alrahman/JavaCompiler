@@ -5,6 +5,92 @@ Scope::Scope() {
 	this->m = new MyMap();
 	this->parent = 0;
 }
+//============ Param List ===============
+ParamList::ParamList() {
+	this->root		= NULL;
+	this->current	= this->root;
+	this->size		= 0;
+}
+
+ParamList::ParamList(ParamList* pl) {
+	this->root = pl->root;
+	this->current = pl->current;
+	this->size = pl->size;
+	pl->root = NULL;
+	pl->current = NULL;
+	pl->size = 0;
+}
+
+ParamList::~ParamList() {}
+
+Parameter* ParamList::find(char* name) {
+	Parameter* curr = this->root;
+	while (curr) {
+		if (strcmp(curr->getName(), name) == 0) {
+			return curr;
+		}
+		curr = curr->next;
+	}
+	return NULL;
+}
+
+Parameter* ParamList::add(Parameter* parameter) {
+	if (!this->find(parameter->getName())) {
+		if (!this->root) {
+			this->root = parameter;
+			this->root->next = NULL;
+			this->current = this->root;
+		}
+		else {
+			this->current->next = parameter;
+			this->current = current->next;
+			this->current->next = NULL;
+		}
+		this->size++;
+		return this->current;
+	}
+	return NULL;
+}
+
+bool ParamList::remove(char* name) {
+	Parameter* curr = this->root;
+	Parameter* prev = NULL;
+	while (strcmp(curr->getName(), name) != 0) {
+		prev = curr;
+		curr = curr->next;
+	}
+	if (curr) {
+		prev->next = curr->next;
+		if (curr == this->root) {
+			this->root = prev;
+		}
+		delete curr;
+		this->size--;
+		return true;
+	}
+	return false;
+}
+
+void ParamList::print() {
+	Parameter* current = this->root;
+	while (current) {
+		if (current->getIsFinal()) {
+			cout << "final ";
+		}
+		cout << current->getType() << " " << current->getName();
+		if (current->next) {
+			cout << ", ";
+			current = current->next;
+		}
+		else {
+			return;
+		}
+	}
+}
+
+bool ParamList::isEmpty() {
+	return (this->root == NULL);
+}
 //============ Variable ================
 Variable::Variable() {
 	this->name = new char[255];
@@ -57,9 +143,14 @@ Parameter::Parameter() {
 	this->type = new char[255];
 	this->type[0] = '\0';
 	this->isFinal = false;
+	this->next = NULL;
 }
 
 Parameter::Parameter(Parameter* parameter) {
+	this->name = new char[255];
+	this->name[0] = '\0';
+	this->type = new char[255];
+	this->type[0] = '\0';
 	strcat(this->name, parameter->name);
 	strcat(this->type, parameter->type);
 	this->isFinal = parameter->isFinal;
@@ -227,6 +318,7 @@ Function::Function(){
 	this->returnType = new char[255];
 	this->returnType[0] = '\0';
 	this->scope = new Scope();
+	this->pl = new ParamList();
 }
 
 Function::~Function() {}
@@ -526,9 +618,14 @@ void SymbolTable::print(Scope* scope) {
 							   break;
 				}
 				case FUNCTION: {
-								   cout << "\tFunction: " << scope->m->arr[i]->getName() << endl;
+								   cout << "\tFunction: " << scope->m->arr[i]->getName();
 								   Function* function = (Function*)scope->m->arr[i]->getElem();
+								   if (!function->pl->isEmpty()) {
+									   cout << " with parameters ";
+									   function->pl->print();
+								   }
 								   this->print(function->getScope());
+								   cout << endl;
 								   break;
 				}
 				case DATAMEMBER: {

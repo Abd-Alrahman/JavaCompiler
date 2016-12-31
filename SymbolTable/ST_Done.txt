@@ -20,8 +20,9 @@
 	- Same name of constructor with return type.
 --------------
 4- Parametrs
-	-
-	-
-	-
+	- Simple parameter.
+	- Final Parameter.
+	- Public parameter, or repeated modifier.
+	- Assigning parameter to function.
 ---------------
 Printing Symbol Table.

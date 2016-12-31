@@ -23,6 +23,7 @@ private:
 	char* type;
 	bool isFinal;
 public:
+	Parameter* next;
 	Parameter();
 	Parameter(Parameter* parameter);
 	~Parameter();
@@ -34,6 +35,22 @@ public:
 	bool getIsFinal();
 	bool isPrimitiveType(char* type);
 };
+class ParamList {
+private:
+	Parameter* current;
+	Parameter* root;
+public:
+	int size;
+	ParamList();
+	ParamList(ParamList* pl);
+	~ParamList();
+	Parameter* find(char* name);
+	Parameter* add(Parameter* parameter);
+	bool remove(char* name);
+	bool isEmpty();
+	void print();
+};
+
 class Variable {
 private: 
 	char* name;
@@ -115,6 +132,7 @@ private:
 	Scope * scope;
 	char* returnType;
 public:
+	ParamList* pl;
 	Parameter** parameters;
 	Function();
 	~Function();

@@ -383,18 +383,15 @@ ParameterList
 
 Parameter
 	: TypeSpecifier DeclaratorName			 {
-												$<param>$ = p->createParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												p->addToParameters($<param>$, yylval.r.myLineNo, yylval.r.myColNo);
+												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 1\n";
 											 }
 	| TypeSpecifier DeclaratorName	ASSIGN	 {
-												$<param>$ = p->createParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												p->addToParameters($<param>$, yylval.r.myLineNo, yylval.r.myColNo);
+												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 2\n";
 											 }
-    | FINAL TypeSpecifier DeclaratorName	 {
-												$<param>$ = p->createParam($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												p->addToParameters($<param>$, yylval.r.myLineNo, yylval.r.myColNo);
+    | Modifiers TypeSpecifier DeclaratorName	 {
+												$<param>$ = p->insertParam($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 3\n";
 											 }
 	;

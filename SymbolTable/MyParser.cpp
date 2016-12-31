@@ -1,6 +1,5 @@
 #include "MyParser.h"
 #include <iostream>
-
 //============ Modifier =================
 Modifier::Modifier() {
 	this->isPublic = false;
@@ -164,6 +163,7 @@ MyParser::MyParser(void)
 	this->helper		= new Helper();
 	this->names			= new char*[20];
 	this->parameters	= new Parameter*[];
+	this->pl			= new ParamList();
 	this->initNames();
 }
 
@@ -215,8 +215,21 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 }
 
 //============== Parameter =================
-Parameter* MyParser::createParam(char* name, int lineNo, int colNo, Modifier* m) {
+Parameter* MyParser::insertParam(char* name, int lineNo, int colNo, Modifier* m) {
 	Parameter * p = st->createParam(name, m);
+	char* paramName = new char[255];
+	strcpy(paramName, p->getName());
+	p = this->pl->add(p);
+	if (!p) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Parameter is already declared", paramName);
+	}
+	else {
+		cout << "Parameter " << p->getName() << " has been inserted in Parser with type " << p->getType();
+		if (p->getIsFinal()) {
+			cout << " and it's final";
+		}
+		cout << endl;
+	}
 	return p;
 }
 
@@ -355,15 +368,8 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	}
 
 	// Adding parameters List
-	f->parameters = new Parameter*[];
-	for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
-	{
-		if (!f->parameters[i] && this->parameters[i]) {
-			f->parameters[i] = new Parameter(this->parameters[i]);
-			cout << "Parameter " << f->parameters[i]->getName() << " has been created.\n";
-			cout << "With type " << f->parameters[i]->getType();
-			delete this->parameters[i];
-		}
+	if (!this->pl->isEmpty()) {
+		f->pl = new ParamList(this->pl);
 	}
 
 	// Checking if function is constructor
@@ -407,20 +413,7 @@ void MyParser::resetNames() {
 	}
 }
 
+
 void MyParser::addToParameters(Parameter* parameter, int lineNo, int colNo) {
-	cout << "arra size is " << (sizeof(this->parameters) / sizeof(**this->parameters)) << endl;
-	for each (Parameter* par in this->parameters)
-	{
-		if (strcmp(parameter->getName(), this->parameters[i]->getName()) == 0) {
-			this->errRecovery->errQ->enqueue(lineNo, colNo, "Parameter is already declared", parameter->getName());
-			cout << "-----------------------------------------\n";
-			cout << "Parameter " << parameter->getName() << " is already declared\n";
-			cout << "-----------------------------------------\n";
-		}
-		if (!this->parameters[i]) {
-			this->parameters[i] = new Parameter(parameter);
-			return;
-		}
-	}
 	
 }

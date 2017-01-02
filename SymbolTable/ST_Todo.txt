@@ -1,7 +1,7 @@
 0- Type
-	-
-	-
-	-
+	- Abstract class can't be instantiated.
+	- Abstract methods must be declared in abstract class.
+	- When inheriting from abstract class, all abstract methods must be implemented.
 -------------
 1- Variable
 	- Missing type error.
@@ -9,16 +9,18 @@
 --------------
 2- Data Member
 	- Missing type error.
+	- Can't be abstract.
 --------------
 3- Function
+	- Native methods can't have body.
 	- Missing return type.
 	- Overriding problems.
 	- Check for return statment in methods and none ones for void's.
 	- All methods in an abstract class must be abstract.
+	- Overloading problems.
+	- Check calling method if it exists.
 --------------
-4- Parametrs
+4- Parameters
 --------------
-Overriding.
-Inheritance.
 Problem with similar names when typing x1, x.
 Printing Errors From Queue in ST.

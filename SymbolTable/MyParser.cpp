@@ -341,9 +341,16 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 		return false;
 	}
 
+	// Assigning parent class
 	if (m->getReturnType() && m->getReturnType()[0]) {
 		Type* inheritedType = (Type*)this->st->getTypeParent(m->getReturnType());
 		if (inheritedType && inheritedType->strc == TYPE) {
+			// Check if parent class is final
+			if (inheritedType->getIsFinal()) {
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Final class can't be inherited from", "");
+				cout << "Final class can't be inherited from\n";
+				return false;
+			}
 			t->setInheritedType(inheritedType);
 		}
 	}
@@ -353,19 +360,19 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 }
 
 //========= Functions ===========
-Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier* m) {
+Function * MyParser::createFunction(char* name, Type* t, int lineNo, int colNo, Modifier* m) {
 	Function* f = (Function*)this->st->currScope->m->get(name);
 	if (f && f->strc == FUNCTION) {
 		cout << "========================================\n";
-		cout << "Error[" << lineno << ", " << colno << "]: Function " << name << " already exists\n";
+		cout << "Error[" << lineNo << ", " << colNo << "]: Function " << name << " already exists\n";
 		cout << "========================================\n";
-		this->errRecovery->errQ->enqueue(lineno, colno, "Function already exists ", name);
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Function already exists ", name);
 		return 0;
 	}
 
 	f = new Function();
 
-	if (!this->setMethodData(f, name, m, lineno, colno)) {
+	if (!this->setMethodData(f, t, name, m, lineNo, colNo)) {
 		// Resetting the modifier
 		m->reset();
 		return 0;
@@ -392,10 +399,11 @@ Function * MyParser::finishFunctionDeclaration(Function* f) {
 	return f;
 }
 
-bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo) {
+bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, int lineNo, int colNo) {
 	// Setting function modifiers
 	f->setName(name);
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
+
 	// Modifiers are not explicitly written
 	if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
 		f->setIsPublic(true);
@@ -424,6 +432,13 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	if (t) {
 		if (strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
 			f->setIsConstructor(true);
+			if (f->constructorModifiersError()) {
+				cout << "==============================\n";
+				cout << "Error in Constructor Modifiers\n";
+				cout << "==============================\n";
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Error in Constructor Modifiers", "");
+				return false;
+			}
 		}
 		else {
 			f->setIsConstructor(false);
@@ -432,6 +447,36 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	else {
 		f->setIsConstructor(false);
 	}
+
+	if (type->getInheritedType()) {
+		// Check for overriding
+		Function* parentF = (Function*)type->getInheritedType()->getScope()->m->get(name);
+		if (parentF->pl->size == f->pl->size && f->pl->equals(parentF->pl)) {
+			if (parentF && parentF->strc == FUNCTION) {
+				if (parentF->getIsFinal()) {
+					cout << "================================\n";
+					cout << "Error: Overriden method is final\n";
+					cout << "================================\n";
+					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Overriden method is final", "");
+					return false;
+				}
+				if (f->equals(parentF)) {
+					cout << "================\n";
+					cout << "Overriding state\n";
+					cout << "================\n";
+				}
+				else {
+					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Overriding error", "");
+					cout << "================\n";
+					cout << "Overriding error\n";
+					cout << "================\n";
+				}
+			}
+		}
+	}
+
+	// TODO: abstract methods must be in abstract classes.
+
 	return true;
 }
 

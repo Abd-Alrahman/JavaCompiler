@@ -23,6 +23,7 @@
 	MyParser * p = new MyParser();
 	Modifier * modifier = new Modifier();
 	Modifier * m;
+	Type * type;
 %}
 
 
@@ -181,56 +182,56 @@ QualifiedName
 	;
 
 TypeDeclaration
-	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
-	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; $<type>$ = p->finishTypeDeclaration($<type>1); }
+	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; type = p->finishTypeDeclaration(type); }
+	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; type = p->finishTypeDeclaration(type); }
 	| ClassHeader CLOSE_D						   { 
 														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" );
-														$<type>$ = p->finishTypeDeclaration($<type>1);
+														type = p->finishTypeDeclaration(type);
 													}
 	| ClassHeader OPEN_D  %prec e2					{ 
 														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'}\'", "" );
-														$<type>$ = p->finishTypeDeclaration($<type>1);
+														type = p->finishTypeDeclaration(type);
 													}
 	| ClassHeader %prec e4							{ 
 														err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'{}\'", "" );
-														$<type>$ = p->finishTypeDeclaration($<type>1);
+														type = p->finishTypeDeclaration(type);
 													}
 	;
 
 ClassHeader
 	: Modifiers ClassWord IDENTIFIER Extends Interfaces { 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
 															cout << "ClassHeader 1\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER Extends			{
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
 															cout << "ClassHeader 2\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER       Interfaces	{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 3\n"; 
 														}
 	|           ClassWord IDENTIFIER Extends Interfaces { 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
 															cout << "ClassHeader 4\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER					{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 5\n"; 
 														}
 	| QualifiedName ClassWord IDENTIFIER				{ 
 															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'Modifier\' but given ",$<r.str>1);
 														}
 	|           ClassWord IDENTIFIER Extends			{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
 															cout << "ClassHeader 6\n"; 
 														}
 	|           ClassWord IDENTIFIER       Interfaces	{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 7\n"; 
 														}
 	|           ClassWord IDENTIFIER					{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 8\n"; 
 														}
 	| Modifiers ClassWord %prec e7			            { 
@@ -358,16 +359,17 @@ MethodDeclaration
 	;
 
 MethodDeclarator
-	: DeclaratorName OPEN_B { m = new Modifier(modifier); modifier->reset(); } ParameterList CLOSE_B {
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, m);
+	: DeclaratorName OPEN_B						  { m = new Modifier(modifier); modifier->reset(); } 
+	  ParameterList CLOSE_B						  {
+													$<function>$ = p->createFunction($<r.str>1, type, yylval.r.myLineNo, yylval.r.myColNo, m);
 													cout << "MethodDeclarator 1\n";
 												  }
 	| DeclaratorName OPEN_B CLOSE_B				  {
 													cout << "MethodDeclarator 2\n";
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+													$<function>$ = p->createFunction($<r.str>1, type, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												  }
 	| MethodDeclarator OP_DIM					  {
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+													$<function>$ = p->createFunction($<r.str>1, type, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 													cout << "MethodDeclarator 3\n";
 												  }
 	;
@@ -427,11 +429,11 @@ ConstructorDeclaration
 
 ConstructorDeclarator
 	: IDENTIFIER OPEN_B ParameterList CLOSE_B {
-												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+												$<function>$ = p->createFunction($<r.str>1, type, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "ConstructorDeclarator 1\n";
 											  }
 	| IDENTIFIER OPEN_B CLOSE_B				  {
-												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+												$<function>$ = p->createFunction($<r.str>1, type, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "ConstructorDeclarator 2\n";
 											  }
 	;

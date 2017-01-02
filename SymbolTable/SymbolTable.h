@@ -35,6 +35,7 @@ public:
 	void setIsFinal(bool isFinal);
 	bool getIsFinal();
 	bool isPrimitiveType(char* type);
+	bool equals(Parameter* p);
 };
 class ParamList {
 private:
@@ -48,6 +49,7 @@ public:
 	Parameter* find(char* name);
 	Parameter* add(Parameter* parameter);
 	bool remove(char* name);
+	bool equals(ParamList* pl);
 	bool isEmpty();
 	void print();
 };
@@ -154,7 +156,9 @@ public:
 	Parameter** parameters;
 	Function();
 	~Function();
+	bool equals(Function* f);
 	void printDetails();
+	bool constructorModifiersError();
 	bool illegalCombinationOfModifiers();
 	void setName(char* name);
 	char* getName();

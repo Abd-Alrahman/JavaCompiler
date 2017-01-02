@@ -88,6 +88,19 @@ void ParamList::print() {
 	}
 }
 
+bool ParamList::equals(ParamList* pl) {
+	Parameter* plTemp = pl->root;
+	Parameter* thisTemp = this->root;
+	while (plTemp || thisTemp) {
+		if (!thisTemp->equals(plTemp)) {
+			return false;
+		}
+		plTemp	 = plTemp->next;
+		thisTemp = thisTemp->next;
+	}
+	return true;
+}
+
 bool ParamList::isEmpty() {
 	return (this->root == NULL);
 }
@@ -160,6 +173,14 @@ Parameter::Parameter(Parameter* parameter) {
 }
 
 Parameter::~Parameter() {}
+
+bool Parameter::equals(Parameter* p) {
+	if ((strcmp(this->type, p->type) == 0) && (this->isFinal == p->isFinal) &&
+		(this->strc == PARAMETER && p->strc == PARAMETER)) {
+		return true;
+	}
+	return false;
+}
 
 void Parameter::setName(char* n) {
 	strcat(this->name, n);
@@ -382,7 +403,7 @@ void Type::printDetails() {
 }
 //=======================================
 //=================Function==============
-Function::Function(){
+Function::Function() {
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->returnType = new char[255];
@@ -394,10 +415,31 @@ Function::Function(){
 
 Function::~Function() {}
 
+bool Function::equals(Function* f) {
+	if ((strcmp(this->name, f->name) == 0) && (strcmp(this->returnType, f->returnType) == 0) &&
+		(this->strc == f->strc == FUNCTION) && (this->pl->size == f->pl->size) &&
+		((this->isPublic == true && f->isPublic == true) ||
+		(this->isProtected == true && f->isProtected == true) ||
+		(this->isPrivate == true && f->isPrivate == true))) {
+		if (this->pl->equals(f->pl)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Function::constructorModifiersError() {
+	if ((this->isFinal && this->isConstructor) ||
+		(this->isAbstract && this->isConstructor)) {
+		return true;
+	}
+}
+
 bool Function::illegalCombinationOfModifiers() {
 	if ((this->isPublic && this->isPrivate) ||
 		(this->isPublic && this->isProtected) ||
-		(this->isProtected && this->isPrivate)) {
+		(this->isProtected && this->isPrivate) ||
+		(this->isFinal && this->isAbstract)) {
 		return true;
 	}
 	return false;
@@ -576,6 +618,7 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 		else {
 			Type* t = this->getTypeParent(m->getReturnType());
 			if (t && t->strc == TYPE) {
+				// TODO: abstract class can't be instantiated.
 				if (strcmp(t->getName(), m->getReturnType()) == 0) {
 					v->setType(m->getReturnType());
 					cout << "object has been created\n";

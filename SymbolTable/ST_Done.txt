@@ -4,6 +4,7 @@
 	- Illegal Combination of modifiers (public private - abstract final)
 	- Extending more than one class
 	- Creating default constructor for class.
+	- Final class can't be inherited from.
 -------------
 1- Variable
 	- Modifiers with variables error other than final.
@@ -27,6 +28,7 @@
 	- Defining Different Modifiers.
 	- Creating default constructor if it doesn't exist.
 	- Same name of constructor with return type.
+	- Constructor can't be abstract or final.
 --------------
 4- Parametrs
 	- Simple parameter.
@@ -34,4 +36,9 @@
 	- Public parameter, or repeated modifier.
 	- Assigning parameter to function.
 ---------------
+Overriding	-> Same parameters - different names - General state.
+			-> Error final overriding.
+			-> Error different parameters - number/type.
+			-> Different access modifiers.
+Inheritance.
 Printing Symbol Table.

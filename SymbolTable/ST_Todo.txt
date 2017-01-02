@@ -1,11 +1,14 @@
+0- Type
+	-
+	-
+	-
+-------------
 1- Variable
 	- Missing type error.
 	- Prevent assigning for final variable.
-	- Trying defining object from a class.
 --------------
 2- Data Member
 	- Missing type error.
-	- Defining different modifiers.
 --------------
 3- Function
 	- Missing return type.

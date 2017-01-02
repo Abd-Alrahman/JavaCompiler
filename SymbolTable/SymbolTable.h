@@ -23,6 +23,7 @@ private:
 	char* type;
 	bool isFinal;
 public:
+	enum structure strc;
 	Parameter* next;
 	Parameter();
 	Parameter(Parameter* parameter);
@@ -57,6 +58,7 @@ private:
 	char* type;
 	bool isFinal;
 public:
+	enum structure strc;
 	Variable();
 	~Variable();
 	void setName(char* n);
@@ -77,6 +79,7 @@ private:
 	bool isPrivate;
 	bool isProtected;
 public:
+	enum structure strc;
 	DataMember();
 	~DataMember();
 	void setName(char* n);
@@ -103,17 +106,31 @@ private:
 	bool isPrivate;
 	bool isProtected;
 	bool isFinal;
+	bool isAbstract;
 	Type* inheritedType;
 	Scope * scope;
 public:
+	enum structure strc;
 	Type();
 	~Type();
 	void setName(char* n);
 	char* getName();
 	void setInheritedType(Type* e);
 	Type* getInheritedType();
+	void setIsFinal(bool isFinal);
+	bool getIsFinal();
+	void setIsPublic(bool isPublic);
+	bool getIsPublic();
+	void setIsPrivate(bool isPrivate);
+	bool getIsPrivate();
+	void setIsProtected(bool isProtected);
+	bool getIsProtected();
+	void setIsAbstract(bool isAbstract);
+	bool getIsAbstract();
+	bool illegalCombinationOfModifiers();
 	void setScope(Scope * m);
 	Scope * getScope();
+	void printDetails();
 };
 class Function {
 private:
@@ -132,6 +149,7 @@ private:
 	Scope * scope;
 	char* returnType;
 public:
+	enum structure strc;
 	ParamList* pl;
 	Parameter** parameters;
 	Function();
@@ -174,6 +192,7 @@ class SymbolTable
 public:
 	Scope * currScope;
 	Scope * rootScope;
+	Type* getTypeParent(char* name);
 	Variable * insertVariableInCurrentScope(char* name, Modifier* m);
 	Variable * getVariableFromCurrentScope(char* name);
 	Parameter * createParam(char* name, Modifier* m);

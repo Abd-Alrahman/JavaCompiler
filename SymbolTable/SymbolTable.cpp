@@ -98,6 +98,7 @@ Variable::Variable() {
 	this->type = new char[255];
 	this->type[0] = '\0';
 	this->isFinal = false;
+	this->strc = LOCALVARIABLE;
 }
 
 Variable::~Variable() {}
@@ -144,6 +145,7 @@ Parameter::Parameter() {
 	this->type[0] = '\0';
 	this->isFinal = false;
 	this->next = NULL;
+	this->strc = PARAMETER;
 }
 
 Parameter::Parameter(Parameter* parameter) {
@@ -154,6 +156,7 @@ Parameter::Parameter(Parameter* parameter) {
 	strcat(this->name, parameter->name);
 	strcat(this->type, parameter->type);
 	this->isFinal = parameter->isFinal;
+	this->strc = parameter->strc;
 }
 
 Parameter::~Parameter() {}
@@ -198,6 +201,7 @@ DataMember::DataMember() {
 	this->name[0] = '\0';
 	this->type = new char[255];
 	this->type[0] = '\0';
+	this->strc = DATAMEMBER;
 }
 
 DataMember::~DataMember() {}
@@ -285,14 +289,28 @@ Type::Type() {
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->scope = new Scope();
+	this->inheritedType = NULL;
+	this->strc = TYPE;
 }
+
 Type::~Type() {}
+
 void Type::setName(char* n) {
 	strcat(this->name,n);
 }
 
 char* Type::getName(){
 	return this->name;
+}
+
+bool Type::illegalCombinationOfModifiers() {
+	if ((this->isPublic && this->isPrivate) ||
+		(this->isPublic && this->isProtected) ||
+		(this->isProtected && this->isPrivate) || 
+		(this->isAbstract && this->isFinal)) {
+		return true;
+	}
+	return false;
 }
 
 void Type::setInheritedType(Type* e) {
@@ -303,12 +321,64 @@ Type* Type::getInheritedType() {
 	return this->inheritedType;
 }
 
+void Type::setIsPublic(bool isPublic) {
+	this->isPublic = isPublic;
+}
+
+void Type::setIsPrivate(bool isPrivate) {
+	this->isPrivate = isPrivate;
+}
+
+void Type::setIsProtected(bool isProtected) {
+	this->isProtected = isProtected;
+}
+
+void Type::setIsFinal(bool isFinal) {
+	this->isFinal = isFinal;
+}
+
+bool Type::getIsFinal() {
+	return this->isFinal;
+}
+
+void Type::setIsAbstract(bool isAbstract) {
+	this->isAbstract = isAbstract;
+}
+
+bool Type::getIsAbstract() {
+	return this->isAbstract;
+}
+
+bool Type::getIsPublic() {
+	return this->isPublic;
+}
+
+bool Type::getIsPrivate() {
+	return this->isPrivate;
+}
+
+bool Type::getIsProtected() {
+	return this->isProtected;
+}
+
 void Type::setScope(Scope * m) {
 	this->scope = m;
 }
 
 Scope * Type::getScope() {
 	return this->scope;
+}
+
+void Type::printDetails() {
+	cout << "=============== Class " << this->name << " opened ================" << endl;
+	cout << "has been created ";
+	cout << "with modifiers list:" << endl;
+	if (this->isPublic) cout << "Public" << endl;
+	if (this->isPrivate) cout << "Private" << endl;
+	if (this->isProtected) cout << "Protected" << endl;
+	if (this->isFinal) cout << "Final" << endl;
+	if (this->isAbstract) cout << "Abstract" << endl;
+	if (this->inheritedType) cout << "Extends from " << this->inheritedType->name << endl;
 }
 //=======================================
 //=================Function==============
@@ -319,6 +389,7 @@ Function::Function(){
 	this->returnType[0] = '\0';
 	this->scope = new Scope();
 	this->pl = new ParamList();
+	this->strc = FUNCTION;
 }
 
 Function::~Function() {}
@@ -471,6 +542,19 @@ SymbolTable::SymbolTable(void) {
 SymbolTable::~SymbolTable(void) {
 }
 
+
+Type * SymbolTable::getTypeParent(char* name) {
+	Type * t = (Type*)this->currScope->m->get(name);
+	if (!t) {
+		Scope * temp = this->currScope->parent;
+		while (temp && !t){
+			t = (Type*)temp->m->get(name);
+			temp = temp->parent;
+		}
+	}
+	return t;
+}
+
 Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 	Variable * v = this->getVariableFromCurrentScope(name);
 	if (v) {
@@ -490,8 +574,8 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 			cout << "Variable type is primitive" << endl;
 		}
 		else {
-			Type* t = (Type*)this->currScope->parent->parent->m->get(m->getReturnType());
-			if (t) {
+			Type* t = this->getTypeParent(m->getReturnType());
+			if (t && t->strc == TYPE) {
 				if (strcmp(t->getName(), m->getReturnType()) == 0) {
 					v->setType(m->getReturnType());
 					cout << "object has been created\n";
@@ -539,6 +623,7 @@ Parameter * SymbolTable::createParam(char* name, Modifier* m) {
 		cout << "=====================================================\n";
 		cout << "Parameter can't has access modifier other than final.\n";
 		cout << "=====================================================\n";
+		return NULL;
 	}
 	Parameter* p = new Parameter();
 	p->setName(name);
@@ -547,8 +632,8 @@ Parameter * SymbolTable::createParam(char* name, Modifier* m) {
 		cout << "Parameter type is primitive" << endl;
 	}
 	else {
-		Type* t = (Type*)this->currScope->parent->m->get(m->getReturnType());
-		if (t) {
+		Type* t = this->getTypeParent(m->getReturnType());
+		if (t && t->strc == TYPE) {
 			if (strcmp(t->getName(), m->getReturnType()) == 0) {
 				p->setType(m->getReturnType());
 				cout << "object has been created\n";
@@ -577,7 +662,7 @@ Parameter * SymbolTable::getParameterFromCurrentFunction(char* name){
 //================= Data Member ====================
 DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m) {
 	DataMember * d = (DataMember*)this->getDataMemberFromCurrentScope(name);
-	if (d) {
+	if (d && d->strc == DATAMEMBER) {
 		return 0;//item is exist previously
 	}
 	else {
@@ -618,8 +703,12 @@ void SymbolTable::print(Scope* scope) {
 							   break;
 				}
 				case FUNCTION: {
-								   cout << "\tFunction: " << scope->m->arr[i]->getName();
 								   Function* function = (Function*)scope->m->arr[i]->getElem();
+								   if (!function->getIsConstructor())
+										cout << "\tFunction: ";
+								   else
+									   cout << "\tConstructor: ";
+								   cout << scope->m->arr[i]->getName();
 								   if (!function->pl->isEmpty()) {
 									   cout << " with parameters ";
 									   function->pl->print();

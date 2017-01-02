@@ -1,13 +1,22 @@
+0- Type
+	- Determining if class is final or not.
+	- Determining if variable is abstract or not.
+	- Illegal Combination of modifiers (public private - abstract final)
+	- Extending more than one class
+	- Creating default constructor for class.
+-------------
 1- Variable
 	- Modifiers with variables error other than final.
 	- Defining multiple variables for one type (int x, y, z).
 	- Repeated variable name.
 	- Determining if variable is final or not.
+	- Trying defining object from a class.
 --------------
 2- Data Member
 	- Default Public Modifier.
 	- Repeated data member name.
 	- Defining multiple dm's for one type.
+	- Defining different modifiers.
 --------------
 3- Function
 	- Default Public Modifier.

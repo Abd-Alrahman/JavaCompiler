@@ -101,7 +101,7 @@ TypeSpecifier
 
 TypeName
 	: PrimitiveType { cout << "TypeName 1\n"; }
-	| QualifiedName %prec e5 { cout << "TypeName 2\n"; modifier->setReturnType($<r.str>1); }
+	| QualifiedName %prec e5 { cout << "TypeName 2\n"; if (modifier->getReturnType() && !modifier->getReturnType()[0]) modifier->setReturnType($<r.str>1); }
 	;
 
 ClassNameList
@@ -199,52 +199,48 @@ TypeDeclaration
 
 ClassHeader
 	: Modifiers ClassWord IDENTIFIER Extends Interfaces { 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
 															cout << "ClassHeader 1\n"; 
 														}
-	| Modifiers ClassWord IDENTIFIER Extends			{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+	| Modifiers ClassWord IDENTIFIER Extends			{
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
 															cout << "ClassHeader 2\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER       Interfaces	{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 3\n"; 
 														}
 	|           ClassWord IDENTIFIER Extends Interfaces { 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
 															cout << "ClassHeader 4\n"; 
 														}
 	| Modifiers ClassWord IDENTIFIER					{ 
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 5\n"; 
 														}
 	| QualifiedName ClassWord IDENTIFIER				{ 
-															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'Modifier\' put givin ",$<r.str>1);
-															$<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'Modifier\' but given ",$<r.str>1);
 														}
 	|           ClassWord IDENTIFIER Extends			{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
 															cout << "ClassHeader 6\n"; 
 														}
 	|           ClassWord IDENTIFIER       Interfaces	{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 7\n"; 
 														}
 	|           ClassWord IDENTIFIER					{ 
-															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+															$<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 8\n"; 
 														}
 	| Modifiers ClassWord %prec e7			            { 
 															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 1","" );
-															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														}
 	|		    ClassWord %prec e7			            { 
 															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 2","" );
-															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														}
 	|           ClassWord Extends						{ 
 															err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"illegal start class","" );
-															$<type>$ = p->createType("undefined", yylval.r.myLineNo, yylval.r.myColNo, modifier);
 														}
 	;
 
@@ -450,8 +446,11 @@ NonStaticInitializer
 
 Extends
 	: EXTENDS TypeName		 { cout << "Extends 1\n"; }
-	| Extends COMMA TypeName { cout << "Extends 2\n"; }
-	| EXTENDS %prec e8       { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :illegal start of type ", "");}
+	| Extends COMMA TypeName {
+								cout << "Extends 2\n";
+								err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2, "Class can't extends more than one", "");
+							 }
+	| EXTENDS %prec e8       { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :illegal start of type ", ""); }
 	;
 
 Block

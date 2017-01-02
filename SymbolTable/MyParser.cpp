@@ -249,6 +249,7 @@ void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 
 			// Checking if function has different modifiers
 			if (d->illegalCombinationOfModifiers()) {
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
 				cout << "==================================================\n";
 				cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
 				cout << "==================================================\n";
@@ -269,47 +270,92 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 	return d;
 }
 //========= Types =================
-Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m){
+Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName) {
 	Type* t = (Type*)this->st->currScope->m->get(name);
-	cout << "=============== Class " << name << " opened ================" << endl;
-	if(t) {
+
+	if(t && t->strc == TYPE) {
 		this->errRecovery->errQ->enqueue(lineno, colno, "Class already exists", name);
 		return 0;
 	}
+
 	t = new Type();
-	t->setName(name);
+
+	// Set class data
+	if (!this->setTypeData(t, name, m, lineno, colno, inheritedTypeName)) {
+		m->reset();
+		return 0;
+	}
+
+	// Resetting Modifier
 	m->reset();
+
+	// Printing class details
+	t->printDetails();
+
 	t->getScope()->parent = this->st->currScope;
 	this->st->currScope->m->put(name, t, TYPE);
 	this->st->currScope = t->getScope();
-	
-	cout << "Class " << name << " has been created\n";
+
 	return t;
 }
+
 Type * MyParser::finishTypeDeclaration(Type* t) {
-	// Creating default constructor for class if doesn't exist.
-	Function* f = (Function*)this->st->currScope->m->get(t->getName());
-	if (!f) {
-		Function* f = new Function();
-		f->setIsPublic(true);
-		f->setIsConstructor(true);
-		f->setName(t->getName());
-		this->st->currScope->m->put(f->getName(), f, FUNCTION);
-		cout << "==========================================================\n";
-		cout << "Default constructor has been created with name: " << f->getName() << endl;
-		cout << "==========================================================\n";
+	if (t) {
+		// Creating default constructor for class if doesn't exist.
+		Function* f = (Function*)this->st->currScope->m->get(t->getName());
+		if (!f) {
+			Function* f = new Function();
+			f->setIsPublic(true);
+			f->setIsConstructor(true);
+			f->setName(t->getName());
+			this->st->currScope->m->put(f->getName(), f, FUNCTION);
+			cout << "==========================================================\n";
+			cout << "Default constructor has been created with name: " << f->getName() << endl;
+			cout << "==========================================================\n";
+		}
 	}
 	this->st->currScope = this->st->currScope->parent;
-	if (t) {
+	if (t)
 		cout << "=============== Class " << t->getName() << " closed ================" << endl;
-	}
 	return t;
+}
+
+bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName) {
+	// Setting class modifiers
+	t->setName(name);
+	t->setIsPublic(m->getIsPublic()); t->setIsPrivate(m->getIsPrivate()); t->setIsProtected(m->getIsProtected());
+	t->setIsFinal(m->getIsFinal());
+	t->setIsAbstract(m->getIsAbstract());
+
+	// Modifiers are not explicitly written
+	if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
+		t->setIsPublic(true);
+	}
+
+	// Checking if class has different modifiers
+	if (t->illegalCombinationOfModifiers()) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
+		cout << "==================================================\n";
+		cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
+		cout << "==================================================\n";
+		return false;
+	}
+
+	if (m->getReturnType() && m->getReturnType()[0]) {
+		Type* inheritedType = (Type*)this->st->getTypeParent(m->getReturnType());
+		if (inheritedType && inheritedType->strc == TYPE) {
+			t->setInheritedType(inheritedType);
+		}
+	}
+
+
+	return true;
 }
 
 //========= Functions ===========
 Function * MyParser::createFunction(char* name, int lineno, int colno, Modifier* m) {
 	Function* f = (Function*)this->st->currScope->m->get(name);
-	if (f) {
+	if (f && f->strc == FUNCTION) {
 		cout << "========================================\n";
 		cout << "Error[" << lineno << ", " << colno << "]: Function " << name << " already exists\n";
 		cout << "========================================\n";
@@ -361,6 +407,7 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 
 	// Checking if function has different modifiers
 	if (f->illegalCombinationOfModifiers()) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
 		cout << "==================================================\n";
 		cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
 		cout << "==================================================\n";

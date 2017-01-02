@@ -63,6 +63,7 @@ class MyParser
 {
 private:
 	bool setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo);
+	bool setTypeData(Type* f, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName);
 	void MyParser::initNames();
 	void MyParser::initParameters();
 public:
@@ -79,7 +80,7 @@ public:
 	void insertMem(int lineNo, int colNo, Modifier* m);
 	DataMember* addDataMemberToCurrentScope(DataMember* d);
 	Parameter* insertParam(char* name, int lineNo, int colNo, Modifier* m);
-	Type * createType(char* name, int lineno, int colno, Modifier* m);
+	Type * createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName);
 	Type * finishTypeDeclaration(Type* t);
 	Function * createFunction(char* name, int lineno, int colno, Modifier* m);
 	Function * finishFunctionDeclaration(Function* f);

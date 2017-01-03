@@ -161,6 +161,7 @@ public:
 	~Function();
 	bool equals(Function* f);
 	void printDetails();
+	bool isOverloadingState(Function* f);
 	bool constructorModifiersError();
 	bool illegalCombinationOfModifiers();
 	void setName(char* name);
@@ -196,10 +197,15 @@ public:
 class Modifier;
 class SymbolTable
 {
+private:
+	void checkAtTheEnd(Scope* scope, int index);
+	void checkFunctionOverriding(Scope* scope, int i, int index);
+	void checkTypeInheritance(Scope* scope, int index);
 public:
 	Scope * currScope;
 	Scope * rootScope;
 	Type* getTypeParent(char* name);
+	Type* getTypeParentByScope(Scope* scope, char* name);
 	Variable * insertVariableInCurrentScope(char* name, Modifier* m);
 	Variable * getVariableFromCurrentScope(char* name);
 	Parameter * createParam(char* name, Modifier* m);
@@ -207,9 +213,6 @@ public:
 	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m);
 	DataMember * getDataMemberFromCurrentScope(char* name);
 	void print(Scope* scope);
-	void checkAtTheEnd(Scope* scope, int index);
-	void checkFunctionOverriding(Scope* scope, int i, int index);
-	void checkTypeInheritance(Scope* scope, int index);
 	SymbolTable(void);
 	~SymbolTable(void);
 };

@@ -346,16 +346,7 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 
 //========= Functions ===========
 Function * MyParser::createFunction(char* name, Type* t, int lineNo, int colNo, Modifier* m) {
-	Function* f = (Function*)this->st->currScope->m->get(name);
-	if (f && f->strc == FUNCTION) {
-		cout << "========================================\n";
-		cout << "Error[" << lineNo << ", " << colNo << "]: Function " << name << " already exists\n";
-		cout << "========================================\n";
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Function already exists ", name);
-		return 0;
-	}
-
-	f = new Function();
+	Function* f = new Function();
 
 	if (!this->setMethodData(f, t, name, m, lineNo, colNo)) {
 		// Resetting the modifier
@@ -363,8 +354,22 @@ Function * MyParser::createFunction(char* name, Type* t, int lineNo, int colNo, 
 		return 0;
 	}
 
+	Function* existedFunc = (Function*)this->st->currScope->m->get(name);
+	if (existedFunc && existedFunc->strc == FUNCTION) {
+		if (f->isOverloadingState(existedFunc)) {
+			cout << "Overloading state!\n";
+			goto jmpOverReturnLbl;
+		}
+		m->reset();
+		cout << "========================================\n";
+		cout << "Error[" << lineNo << ", " << colNo << "]: Function " << name << " already exists\n";
+		cout << "========================================\n";
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Function already exists ", name);
+		return 0;
+	}
+
 	// Resetting the modifier
-	m->reset();
+	jmpOverReturnLbl:m->reset();
 
 	// Printing function details
 	f->printDetails();

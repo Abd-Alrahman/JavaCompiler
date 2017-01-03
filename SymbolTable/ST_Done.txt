@@ -28,6 +28,8 @@
 	- Creating default constructor if it doesn't exist.
 	- Same name of constructor with return type.
 	- Constructor can't be abstract or final.
+	- Overriding problems.
+	- Overloading problems.
 --------------
 4- Parametrs
 	- Simple parameter.
@@ -39,5 +41,9 @@ Overriding	-> Same parameters - different names - General state.
 			-> Error final overriding.
 			-> Error different parameters - number/type.
 			-> Different access modifiers.
+
+Overloading -> Different type of parameters.
+			-> Different number of parameters.
+			-> Different order of parameters.
 Inheritance.
 Printing Symbol Table.

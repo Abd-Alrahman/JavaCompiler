@@ -92,9 +92,11 @@ bool ParamList::equals(ParamList* pl) {
 	Parameter* plTemp = pl->root;
 	Parameter* thisTemp = this->root;
 	while (plTemp || thisTemp) {
-		if (!thisTemp->equals(plTemp)) {
+		if (plTemp == NULL || thisTemp == NULL)
 			return false;
-		}
+		if (thisTemp && plTemp)
+			if (!thisTemp->equals(plTemp))
+				return false;
 		plTemp	 = plTemp->next;
 		thisTemp = thisTemp->next;
 	}
@@ -436,6 +438,15 @@ bool Function::equals(Function* f) {
 	return false;
 }
 
+bool Function::isOverloadingState(Function* f) {
+	if (strcmp(this->name, f->name) == 0) {
+		if (!this->pl->equals(f->pl)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Function::constructorModifiersError() {
 	if ((this->isFinal && this->isConstructor) ||
 		(this->isAbstract && this->isConstructor)) {
@@ -598,6 +609,18 @@ Type * SymbolTable::getTypeParent(char* name) {
 	if (!t) {
 		Scope * temp = this->currScope->parent;
 		while (temp && !t){
+			t = (Type*)temp->m->get(name);
+			temp = temp->parent;
+		}
+	}
+	return t;
+}
+
+Type * SymbolTable::getTypeParentByScope(Scope* scope, char* name) {
+	Type * t = (Type*)scope->m->get(name);
+	if (!t) {
+		Scope * temp = scope->parent;
+		while (temp && !t) {
 			t = (Type*)temp->m->get(name);
 			temp = temp->parent;
 		}
@@ -775,7 +798,7 @@ void SymbolTable::checkFunctionOverriding(Scope* scope, int i, int index) {
 void SymbolTable::checkTypeInheritance(Scope* scope, int index) {
 	Type* type = (Type*)scope->m->arr[index]->getElem();
 	if (type->getParentName() && type->getParentName()[0]) {
-		Type* inheritedType = (Type*)this->getTypeParent(type->getParentName());
+		Type* inheritedType = (Type*)this->getTypeParentByScope(scope, type->getParentName());
 		if (inheritedType && inheritedType->strc == TYPE) {
 			if (inheritedType->getIsFinal()) {
 				cout << "Final class can't be inherited from\n";

@@ -9,9 +9,9 @@
 1- Variable
 	- Modifiers with variables error other than final.
 	- Defining multiple variables for one type (int x, y, z).
-	- Repeated variable name.
+	- Error Repeated variable name.
 	- Determining if variable is final or not.
-	- Trying defining object from a class.
+	- Trying defining object from a class. ??
 --------------
 2- Data Member
 	- Default Public Modifier.
@@ -24,7 +24,6 @@
 	- Repeated Modifier.
 	- Determining if method is a constructor.
 	- Repeated method name.
-	- Same name of class but with return type.
 	- Defining Different Modifiers.
 	- Creating default constructor if it doesn't exist.
 	- Same name of constructor with return type.

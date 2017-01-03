@@ -309,6 +309,8 @@ void DataMember::printDetails() {
 Type::Type() {
 	this->name = new char[255];
 	this->name[0] = '\0';
+	this->parentName = new char[255];
+	this->parentName[0] = '\0';
 	this->scope = new Scope();
 	this->inheritedType = NULL;
 	this->strc = TYPE;
@@ -322,6 +324,14 @@ void Type::setName(char* n) {
 
 char* Type::getName(){
 	return this->name;
+}
+
+void Type::setParentName(char* n) {
+	strcat(this->parentName, n);
+}
+
+char* Type::getParentName(){
+	return this->parentName;
 }
 
 bool Type::illegalCombinationOfModifiers() {
@@ -417,13 +427,11 @@ Function::~Function() {}
 
 bool Function::equals(Function* f) {
 	if ((strcmp(this->name, f->name) == 0) && (strcmp(this->returnType, f->returnType) == 0) &&
-		(this->strc == f->strc == FUNCTION) && (this->pl->size == f->pl->size) &&
+		(this->strc == FUNCTION && f->strc == FUNCTION) &&
 		((this->isPublic == true && f->isPublic == true) ||
 		(this->isProtected == true && f->isProtected == true) ||
 		(this->isPrivate == true && f->isPrivate == true))) {
-		if (this->pl->equals(f->pl)) {
-			return true;
-		}
+		return true;
 	}
 	return false;
 }
@@ -732,7 +740,84 @@ DataMember * SymbolTable::getDataMemberFromCurrentScope(char* name) {
 	return d;
 }
 
+void SymbolTable::checkFunctionOverriding(Scope* scope, int i, int index) {
+	Type* type = NULL;
+	if (scope->parent->m->arr[index])
+		type = (Type*)scope->parent->m->arr[index]->getElem();
+
+	Function* currFunc = (Function*)scope->m->arr[i]->getElem();
+	if (type && type->getInheritedType()) {
+		// Check for overriding
+		Function* parentFunc = (Function*)type->getInheritedType()->getScope()->m->get(currFunc->getName());
+		if (parentFunc && parentFunc->strc == FUNCTION) {
+			if (parentFunc->pl->size == currFunc->pl->size && currFunc->pl->equals(parentFunc->pl)) {
+				if (parentFunc->getIsFinal()) {
+					cout << "================================\n";
+					cout << "Error: Overriden method is final\n";
+					cout << "================================\n";
+				}
+				if (currFunc->equals(parentFunc)) {
+					cout << "================\n";
+					cout << "Overriding state\n";
+					cout << "================\n";
+				}
+				else {
+					cout << "================\n";
+					cout << "Overriding error\n";
+					cout << "================\n";
+				}
+			}
+		}
+	}
+	this->checkAtTheEnd(currFunc->getScope(), i);
+}
+
+void SymbolTable::checkTypeInheritance(Scope* scope, int index) {
+	Type* type = (Type*)scope->m->arr[index]->getElem();
+	if (type->getParentName() && type->getParentName()[0]) {
+		Type* inheritedType = (Type*)this->getTypeParent(type->getParentName());
+		if (inheritedType && inheritedType->strc == TYPE) {
+			if (inheritedType->getIsFinal()) {
+				cout << "Final class can't be inherited from\n";
+			}
+			else {
+				type->setInheritedType(inheritedType);
+			}
+			type->printDetails();
+			checkAtTheEnd(type->getScope(), index);
+		}
+		else {
+			cout << "Class doesn't exist.\n";
+		}
+	}	
+}
+
+void SymbolTable::checkAtTheEnd(Scope* scope, int index) {
+	if (scope) {
+		for (int i = 0; i < 71; i++)
+		{
+			if (scope->m->arr[i]) {
+				switch (scope->m->arr[i]->getStrc())
+				{
+					case TYPE: {
+						this->checkTypeInheritance(scope, i);
+						break;
+					}
+					case FUNCTION: 
+					{
+						this->checkFunctionOverriding(scope, i, index);
+						break;
+					}
+					default:
+						break;
+					}
+			}
+		}
+	}
+}
+
 void SymbolTable::print(Scope* scope) {
+	this->checkAtTheEnd(scope, 0);
 	if (scope) {
 		for (int i = 0; i < 71; i++)
 		{
@@ -746,19 +831,19 @@ void SymbolTable::print(Scope* scope) {
 							   break;
 				}
 				case FUNCTION: {
-								   Function* function = (Function*)scope->m->arr[i]->getElem();
-								   if (!function->getIsConstructor())
-										cout << "\tFunction: ";
-								   else
-									   cout << "\tConstructor: ";
-								   cout << scope->m->arr[i]->getName();
-								   if (!function->pl->isEmpty()) {
-									   cout << " with parameters ";
-									   function->pl->print();
-								   }
-								   this->print(function->getScope());
-								   cout << endl;
-								   break;
+								Function* function = (Function*)scope->m->arr[i]->getElem();
+								if (!function->getIsConstructor())
+									cout << "\tFunction: ";
+								else
+									cout << "\tConstructor: ";
+								cout << scope->m->arr[i]->getName();
+								if (!function->pl->isEmpty()) {
+									cout << " with parameters ";
+									function->pl->print();
+								}
+								this->print(function->getScope());
+								cout << endl;
+								break;
 				}
 				case DATAMEMBER: {
 									DataMember* d = (DataMember*)scope->m->arr[i]->getElem();

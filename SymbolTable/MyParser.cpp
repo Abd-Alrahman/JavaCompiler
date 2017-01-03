@@ -322,7 +322,7 @@ Type * MyParser::finishTypeDeclaration(Type* t) {
 
 bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName) {
 	// Setting class modifiers
-	t->setName(name);
+	t->setName(name); t->setParentName(m->getReturnType());
 	t->setIsPublic(m->getIsPublic()); t->setIsPrivate(m->getIsPrivate()); t->setIsProtected(m->getIsProtected());
 	t->setIsFinal(m->getIsFinal());
 	t->setIsAbstract(m->getIsAbstract());
@@ -340,21 +340,6 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 		cout << "==================================================\n";
 		return false;
 	}
-
-	// Assigning parent class
-	if (m->getReturnType() && m->getReturnType()[0]) {
-		Type* inheritedType = (Type*)this->st->getTypeParent(m->getReturnType());
-		if (inheritedType && inheritedType->strc == TYPE) {
-			// Check if parent class is final
-			if (inheritedType->getIsFinal()) {
-				this->errRecovery->errQ->enqueue(lineNo, colNo, "Final class can't be inherited from", "");
-				cout << "Final class can't be inherited from\n";
-				return false;
-			}
-			t->setInheritedType(inheritedType);
-		}
-	}
-
 
 	return true;
 }
@@ -431,7 +416,6 @@ bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, i
 	Type* t = (Type*)this->st->currScope->parent->m->get(name);
 	if (t) {
 		if (strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
-			f->setIsConstructor(true);
 			if (f->constructorModifiersError()) {
 				cout << "==============================\n";
 				cout << "Error in Constructor Modifiers\n";
@@ -439,6 +423,7 @@ bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, i
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Error in Constructor Modifiers", "");
 				return false;
 			}
+			f->setIsConstructor(true);
 		}
 		else {
 			f->setIsConstructor(false);
@@ -446,33 +431,6 @@ bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, i
 	}
 	else {
 		f->setIsConstructor(false);
-	}
-
-	if (type->getInheritedType()) {
-		// Check for overriding
-		Function* parentF = (Function*)type->getInheritedType()->getScope()->m->get(name);
-		if (parentF->pl->size == f->pl->size && f->pl->equals(parentF->pl)) {
-			if (parentF && parentF->strc == FUNCTION) {
-				if (parentF->getIsFinal()) {
-					cout << "================================\n";
-					cout << "Error: Overriden method is final\n";
-					cout << "================================\n";
-					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Overriden method is final", "");
-					return false;
-				}
-				if (f->equals(parentF)) {
-					cout << "================\n";
-					cout << "Overriding state\n";
-					cout << "================\n";
-				}
-				else {
-					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Overriding error", "");
-					cout << "================\n";
-					cout << "Overriding error\n";
-					cout << "================\n";
-				}
-			}
-		}
 	}
 
 	// TODO: abstract methods must be in abstract classes.
@@ -507,5 +465,4 @@ void MyParser::resetNames() {
 
 
 void MyParser::addToParameters(Parameter* parameter, int lineNo, int colNo) {
-	
 }

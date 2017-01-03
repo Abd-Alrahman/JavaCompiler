@@ -24,3 +24,4 @@
 --------------
 Problem with similar names when typing x1, x.
 Printing Errors From Queue in ST.
+Moving overriding & inheritance to the end of symbol table.

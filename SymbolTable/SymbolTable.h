@@ -104,6 +104,7 @@ public:
 class Type {
 private:
 	char* name;
+	char* parentName;
 	bool isPublic;
 	bool isPrivate;
 	bool isProtected;
@@ -117,6 +118,8 @@ public:
 	~Type();
 	void setName(char* n);
 	char* getName();
+	void setParentName(char* n);
+	char* getParentName();
 	void setInheritedType(Type* e);
 	Type* getInheritedType();
 	void setIsFinal(bool isFinal);
@@ -204,6 +207,9 @@ public:
 	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m);
 	DataMember * getDataMemberFromCurrentScope(char* name);
 	void print(Scope* scope);
+	void checkAtTheEnd(Scope* scope, int index);
+	void checkFunctionOverriding(Scope* scope, int i, int index);
+	void checkTypeInheritance(Scope* scope, int index);
 	SymbolTable(void);
 	~SymbolTable(void);
 };

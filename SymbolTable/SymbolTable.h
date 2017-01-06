@@ -37,21 +37,115 @@ public:
 	bool isPrimitiveType(char* type);
 	bool equals(Parameter* p);
 };
-class ParamList {
+
+template <class T>
+class List {
 private:
-	Parameter* current;
-	Parameter* root;
+	T* current;
+	T* root;
 public:
 	int size;
-	ParamList();
-	ParamList(ParamList* pl);
-	~ParamList();
-	Parameter* find(char* name);
-	Parameter* add(Parameter* parameter);
-	bool remove(char* name);
-	bool equals(ParamList* pl);
-	bool isEmpty();
-	void print();
+
+	List<T>::List() {
+		this->root = NULL;
+		this->current = this->root;
+		this->size = 0;
+	}
+
+	List<T>::List(List<T>* l) {
+		this->root = l->root;
+		this->current = l->current;
+		this->size = l->size;
+		l->root = NULL;
+		l->current = NULL;
+		l->size = 0;
+	}
+
+	List<T>::~List() {}
+
+	T* List<T>::find(char* name) {
+		T* curr = this->root;
+		while (curr) {
+			if (strcmp(curr->getName(), name) == 0) {
+				return curr;
+			}
+			curr = curr->next;
+		}
+		return NULL;
+	}
+
+	T* List<T>::add(T* t) {
+		if (!this->find(t->getName())) {
+			if (!this->root) {
+				this->root = t;
+				this->root->next = NULL;
+				this->current = this->root;
+			}
+			else {
+				this->current->next = t;
+				this->current = current->next;
+				this->current->next = NULL;
+			}
+			this->size++;
+			return this->current;
+		}
+		return NULL;
+	}
+
+	bool List<T>::remove(char* name) {
+		T* curr = this->root;
+		T* prev = NULL;
+		while (strcmp(curr->getName(), name) != 0) {
+			prev = curr;
+			curr = curr->next;
+		}
+		if (curr) {
+			prev->next = curr->next;
+			if (curr == this->root) {
+				this->root = prev;
+			}
+			delete curr;
+			this->size--;
+			return true;
+		}
+		return false;
+	}
+
+	bool List<T>::equals(List<T>* l) {
+		T* plTemp = l->root;
+		T* thisTemp = this->root;
+		while (plTemp || thisTemp) {
+			if (plTemp == NULL || thisTemp == NULL)
+				return false;
+			if (thisTemp && plTemp)
+			if (!thisTemp->equals(plTemp))
+				return false;
+			plTemp = plTemp->next;
+			thisTemp = thisTemp->next;
+		}
+		return true;
+	}
+
+	bool List<T>::isEmpty() {
+		return (this->root == NULL);
+	}
+
+	void List<T>::print() {
+		T* current = this->root;
+		while (current) {
+			if (current->getIsFinal()) {
+				cout << "final ";
+			}
+			cout << current->getType() << " " << current->getName();
+			if (current->next) {
+				cout << ", ";
+				current = current->next;
+			}
+			else {
+				return;
+			}
+		}
+	}
 };
 
 class Variable {
@@ -80,6 +174,7 @@ private:
 	bool isPublic;
 	bool isPrivate;
 	bool isProtected;
+	void initModifiers();
 public:
 	enum structure strc;
 	DataMember();
@@ -116,6 +211,7 @@ public:
 	enum structure strc;
 	Type();
 	~Type();
+	void checkForAbstraction();
 	void setName(char* n);
 	char* getName();
 	void setParentName(char* n);
@@ -153,14 +249,16 @@ private:
 	bool isConstructor;
 	Scope * scope;
 	char* returnType;
+	void initModifiers();
 public:
 	enum structure strc;
-	ParamList* pl;
+	List<Parameter>* pl;
 	Parameter** parameters;
 	Function();
 	~Function();
 	bool equals(Function* f);
 	void printDetails();
+	int checkMethodBody(bool methodBody);
 	bool isOverloadingState(Function* f);
 	bool constructorModifiersError();
 	bool illegalCombinationOfModifiers();
@@ -199,11 +297,14 @@ class SymbolTable
 {
 private:
 	void checkAtTheEnd(Scope* scope, int index);
-	void checkFunctionOverriding(Scope* scope, int i, int index);
+	void checkMethodOverriding(Scope* scope, int i, int index);
 	void checkTypeInheritance(Scope* scope, int index);
+	void checkCyclicInheritance(Scope* scope, int index);
+	void checkMainMethod(Scope* scope, int i, int index);
 public:
 	Scope * currScope;
 	Scope * rootScope;
+	bool hasMainMethod;
 	Type* getTypeParent(char* name);
 	Type* getTypeParentByScope(Scope* scope, char* name);
 	Variable * insertVariableInCurrentScope(char* name, Modifier* m);

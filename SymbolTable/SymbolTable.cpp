@@ -6,25 +6,29 @@ Scope::Scope() {
 	this->parent = 0;
 }
 //============ Param List ===============
-ParamList::ParamList() {
+/*template <class T>
+List<T>::List() {
 	this->root		= NULL;
 	this->current	= this->root;
 	this->size		= 0;
 }
 
-ParamList::ParamList(ParamList* pl) {
-	this->root = pl->root;
-	this->current = pl->current;
-	this->size = pl->size;
-	pl->root = NULL;
-	pl->current = NULL;
-	pl->size = 0;
+template <class T>
+List<T>::List(List<T>* l) {
+	this->root = l->root;
+	this->current = l->current;
+	this->size = l->size;
+	l->root = NULL;
+	l->current = NULL;
+	l->size = 0;
 }
 
-ParamList::~ParamList() {}
+template <class T>
+List<T>::~List() {}
 
-Parameter* ParamList::find(char* name) {
-	Parameter* curr = this->root;
+template <class T>
+T* List<T>::find(char* name) {
+	T* curr = this->root;
 	while (curr) {
 		if (strcmp(curr->getName(), name) == 0) {
 			return curr;
@@ -34,15 +38,16 @@ Parameter* ParamList::find(char* name) {
 	return NULL;
 }
 
-Parameter* ParamList::add(Parameter* parameter) {
-	if (!this->find(parameter->getName())) {
+template <class T>
+T* List<T>::add(T* t) {
+	if (!this->find(t->getName())) {
 		if (!this->root) {
-			this->root = parameter;
+			this->root = t;
 			this->root->next = NULL;
 			this->current = this->root;
 		}
 		else {
-			this->current->next = parameter;
+			this->current->next = t;
 			this->current = current->next;
 			this->current->next = NULL;
 		}
@@ -52,9 +57,10 @@ Parameter* ParamList::add(Parameter* parameter) {
 	return NULL;
 }
 
-bool ParamList::remove(char* name) {
-	Parameter* curr = this->root;
-	Parameter* prev = NULL;
+template <class T>
+bool List<T>::remove(char* name) {
+	T* curr = this->root;
+	T* prev = NULL;
 	while (strcmp(curr->getName(), name) != 0) {
 		prev = curr;
 		curr = curr->next;
@@ -71,8 +77,9 @@ bool ParamList::remove(char* name) {
 	return false;
 }
 
-void ParamList::print() {
-	Parameter* current = this->root;
+template <class T>
+void List<T>::print() {
+	T* current = this->root;
 	while (current) {
 		if (current->getIsFinal()) {
 			cout << "final ";
@@ -88,9 +95,10 @@ void ParamList::print() {
 	}
 }
 
-bool ParamList::equals(ParamList* pl) {
-	Parameter* plTemp = pl->root;
-	Parameter* thisTemp = this->root;
+template <class T>
+bool List<T>::equals(List<T>* l) {
+	T* plTemp = l->root;
+	T* thisTemp = this->root;
 	while (plTemp || thisTemp) {
 		if (plTemp == NULL || thisTemp == NULL)
 			return false;
@@ -103,9 +111,10 @@ bool ParamList::equals(ParamList* pl) {
 	return true;
 }
 
-bool ParamList::isEmpty() {
+template <class T>
+bool List<T>::isEmpty() {
 	return (this->root == NULL);
-}
+}*/
 //============ Variable ================
 Variable::Variable() {
 	this->name = new char[255];
@@ -225,9 +234,18 @@ DataMember::DataMember() {
 	this->type = new char[255];
 	this->type[0] = '\0';
 	this->strc = DATAMEMBER;
+	this->initModifiers();
 }
 
 DataMember::~DataMember() {}
+
+void DataMember::initModifiers() {
+	this->isFinal = false;
+	this->isStatic = false;
+	this->isPublic = false;
+	this->isPrivate = false;
+	this->isProtected = false;
+}
 
 void DataMember::setName(char* n) {
 	strcat(this->name, n);
@@ -319,6 +337,34 @@ Type::Type() {
 }
 
 Type::~Type() {}
+
+void Type::checkForAbstraction() {
+	// There is parent class
+	if (!this->inheritedType) {
+		return;
+	}
+	// Parent class is abstract
+	// This class is not abstract
+	if (!this->inheritedType->isAbstract || this->isAbstract) {
+		return;
+	}
+	else {
+		for each (MapElem* elem in this->inheritedType->scope->m->arr)
+		{
+			if (elem && elem->getStrc() == FUNCTION) {
+				Function* parentFunc = (Function*)elem->getElem();
+				// Get parent class functions and check if each one is abstract
+				if (parentFunc && parentFunc->getIsAbstract()) {
+					Function* thisFunc = (Function*)this->getScope()->m->get(parentFunc->getName());
+					// This class doesn't override parent class functions! (Abstract class overriden state)
+					if (!thisFunc) {
+						cout << "Error: " << this->name << " doesn't override abstract method " << parentFunc->getName() << endl;
+					}
+				}
+			}
+		}
+	}
+}
 
 void Type::setName(char* n) {
 	strcat(this->name,n);
@@ -421,8 +467,9 @@ Function::Function() {
 	this->returnType = new char[255];
 	this->returnType[0] = '\0';
 	this->scope = new Scope();
-	this->pl = new ParamList();
+	this->pl = new List<Parameter>();
 	this->strc = FUNCTION;
+	this->initModifiers();
 }
 
 Function::~Function() {}
@@ -464,6 +511,20 @@ bool Function::illegalCombinationOfModifiers() {
 	return false;
 }
 
+int Function::checkMethodBody(bool methodBody) {
+	if (!this->isConstructor) {
+		if ((this->isAbstract || this->isNative) && methodBody) {
+			cout << "Error: " << this->name << " Abstracts & native methods can not have a body\n";
+			return 0;
+		}
+		else if (!this->isAbstract && !this->isNative && !methodBody) {
+			cout << "Error: " << this->name << " Missing method body\n";
+			return 1;
+		}
+	}
+	return 2;
+}
+
 void Function::printDetails() {
 	// Print function details
 	cout << "=============== Function " << this->name << " opened ================" << endl;
@@ -481,6 +542,20 @@ void Function::printDetails() {
 	if (this->isTransient) cout << "Transient" << endl;
 	if (this->isVolatile) cout << "Volatile" << endl;
 	cout << "and Return Type: " << this->returnType << endl;
+}
+
+void Function::initModifiers() {
+	this->isPublic = false;
+	this->isPrivate = false;
+	this->isProtected = false;
+	this->isStatic = false;
+	this->isFinal = false;
+	this->isAbstract = false;
+	this->isNative = false;
+	this->isSynchronized = false;
+	this->isTransient = false;
+	this->isVolatile = false;
+	this->isConstructor = false;
 }
 
 void Function::setName(char* name) {
@@ -598,6 +673,7 @@ bool Function::getIsConstructor() {
 SymbolTable::SymbolTable(void) {
 	this->rootScope = new Scope();
 	this->currScope = this->rootScope;
+	this->hasMainMethod = false;
 }
 
 SymbolTable::~SymbolTable(void) {
@@ -608,8 +684,11 @@ Type * SymbolTable::getTypeParent(char* name) {
 	Type * t = (Type*)this->currScope->m->get(name);
 	if (!t) {
 		Scope * temp = this->currScope->parent;
-		while (temp && !t){
+		while (temp && !t) {
 			t = (Type*)temp->m->get(name);
+			if (t && t->strc == TYPE) {
+				return t;
+			}
 			temp = temp->parent;
 		}
 	}
@@ -763,9 +842,37 @@ DataMember * SymbolTable::getDataMemberFromCurrentScope(char* name) {
 	return d;
 }
 
-void SymbolTable::checkFunctionOverriding(Scope* scope, int i, int index) {
+void SymbolTable::checkMainMethod(Scope* scope, int i, int index) {
+	Function* function = NULL;
+	if (scope->m->arr[i]) {
+		function = (Function*)scope->m->arr[i]->getElem();
+	}
+	if (function && function->strc == FUNCTION) {
+		if ((strcmp(function->getName(), "main") == 0) &&
+			(function->getIsPublic() && function->getIsStatic())) {
+			if (scope->parent && scope->parent->m->arr[index]) {
+				Type* type = (Type*)scope->parent->m->arr[index]->getElem();
+				if (type && type->strc == TYPE && type->getIsPublic()) {
+					if (this->hasMainMethod) {
+						cout << "Error: main method already defined!\n";
+					}
+					else {
+						this->hasMainMethod = true;
+						cout << "Main method has been created\n";
+					}
+					return;
+				}
+			}
+		}
+	}
+}
+
+void SymbolTable::checkMethodOverriding(Scope* scope, int i, int index) {
 	Type* type = NULL;
-	if (scope->parent->m->arr[index])
+	if (!scope->parent) {
+		return;
+	}
+	if (scope->parent && scope->parent->m->arr[index])
 		type = (Type*)scope->parent->m->arr[index]->getElem();
 
 	Function* currFunc = (Function*)scope->m->arr[i]->getElem();
@@ -780,9 +887,10 @@ void SymbolTable::checkFunctionOverriding(Scope* scope, int i, int index) {
 					cout << "================================\n";
 				}
 				if (currFunc->equals(parentFunc)) {
-					cout << "================\n";
-					cout << "Overriding state\n";
-					cout << "================\n";
+					cout << "========================================================================================\n";
+					cout << "Overriding state between " << currFunc->getName()
+						 << " method from this class and " << parentFunc->getName() << " method from parent class\n";
+					cout << "========================================================================================\n";
 				}
 				else {
 					cout << "================\n";
@@ -805,14 +913,20 @@ void SymbolTable::checkTypeInheritance(Scope* scope, int index) {
 			}
 			else {
 				type->setInheritedType(inheritedType);
+				type->checkForAbstraction();
 			}
 			type->printDetails();
-			checkAtTheEnd(type->getScope(), index);
 		}
 		else {
 			cout << "Class doesn't exist.\n";
 		}
-	}	
+	}
+	checkAtTheEnd(type->getScope(), index);
+}
+
+void SymbolTable::checkCyclicInheritance(Scope* scope, int index) {
+	Type* type = (Type*)scope->m->arr[index]->getElem();
+	
 }
 
 void SymbolTable::checkAtTheEnd(Scope* scope, int index) {
@@ -824,11 +938,13 @@ void SymbolTable::checkAtTheEnd(Scope* scope, int index) {
 				{
 					case TYPE: {
 						this->checkTypeInheritance(scope, i);
+						this->checkCyclicInheritance(scope, i);
 						break;
 					}
 					case FUNCTION: 
 					{
-						this->checkFunctionOverriding(scope, i, index);
+						this->checkMainMethod(scope, i, index);
+						this->checkMethodOverriding(scope, i, index);
 						break;
 					}
 					default:
@@ -848,8 +964,10 @@ void SymbolTable::print(Scope* scope) {
 				switch (scope->m->arr[i]->getStrc())
 				{
 				case TYPE: {
-							   cout << "Class: " << scope->m->arr[i]->getName() << endl;
+							   cout << "Class: " << scope->m->arr[i]->getName();
 							   Type* type = (Type*)scope->m->arr[i]->getElem();
+							   if (type->getInheritedType()) cout << " extends from " << type->getParentName();
+							   cout << endl;
 							   this->print(type->getScope());
 							   break;
 				}
@@ -886,5 +1004,8 @@ void SymbolTable::print(Scope* scope) {
 				}
 			}
 		}
+	}
+	if (scope == this->rootScope && !this->hasMainMethod) {
+		cout << "Error: main method is missing from your program.\n";
 	}
 }

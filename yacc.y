@@ -296,7 +296,7 @@ FieldDeclarationOptSemi
 
 FieldDeclaration
 	: FieldVariableDeclaration SEMICOLON { cout << "FieldDeclaration 1\n"; }
-	| MethodDeclaration					 { cout << "FieldDeclaration 2\n"; }
+	| MethodDeclaration					 { bool methodBody = false; cout << "FieldDeclaration 2\n"; }
 	| ConstructorDeclaration			 { cout << "FieldDeclaration 3\n"; }
 	| StaticInitializer					 { cout << "FieldDeclaration 4\n"; }
     | NonStaticInitializer				 { cout << "FieldDeclaration 5\n"; }
@@ -340,19 +340,19 @@ ArrayInitializers
 
 MethodDeclaration
 	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3);
+																	$<function>$ = p->finishFunctionDeclaration($<function>3, p->methodBody);
 																	cout << "MethodDeclaration 1\n";
 																 }
 	| Modifiers TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3);
+																	$<function>$ = p->finishFunctionDeclaration($<function>3, p->methodBody);
 																	cout << "MethodDeclaration 2\n";
 																 }
 	|           TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2);
+																	$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
 																	cout << "MethodDeclaration 3\n";
 																 }
 	|           TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2);
+																	$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
 																	modifier->reset();
 																	cout << "MethodDeclaration 4\n";
 																 }
@@ -381,14 +381,17 @@ ParameterList
 
 Parameter
 	: TypeSpecifier DeclaratorName			 {
+												p->defaultParam = false;
 												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 1\n";
 											 }
-	| TypeSpecifier DeclaratorName	ASSIGN	 {
+	| TypeSpecifier DeclaratorName	ASSIGN	VariableInitializer {
+												p->defaultParam = true;
 												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 2\n";
 											 }
-    | Modifiers TypeSpecifier DeclaratorName	 {
+    | Modifiers TypeSpecifier DeclaratorName {
+												p->defaultParam = false;
 												$<param>$ = p->insertParam($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 3\n";
 											 }
@@ -404,25 +407,25 @@ Throws
 	;
 
 MethodBody
-	: Block		{ cout << "MethodBody 1\n"; }
-	| SEMICOLON { cout << "MethodBody 2\n"; }
+	: Block		{ p->methodBody = true; cout << "MethodBody 1\n"; }
+	| SEMICOLON { p->methodBody = false; cout << "MethodBody 2\n"; }
 	;
 
 ConstructorDeclaration
 	: Modifiers ConstructorDeclarator Throws Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>2);
+														$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
 														cout << "ConstructorDeclaration 1\n";
 												   }
 	| Modifiers ConstructorDeclarator        Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>2);
+														$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
 														cout << "ConstructorDeclaration 2\n";
 												   }
 	|           ConstructorDeclarator Throws Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>1);
+														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
 														cout << "ConstructorDeclaration 3\n";
 												   }
 	|           ConstructorDeclarator        Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>1);
+														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
 														cout << "ConstructorDeclaration 4\n";
 												   }
 	;

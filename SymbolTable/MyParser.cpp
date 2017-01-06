@@ -162,8 +162,10 @@ MyParser::MyParser(void)
 	this->errRecovery	= new ErrorRecovery();
 	this->helper		= new Helper();
 	this->names			= new char*[20];
-	this->parameters	= new Parameter*[];
-	this->pl			= new ParamList();
+	this->pl			= new List<Parameter>();
+	this->methodBody	= false;
+	this->defaultParam  = false;
+	this->defaultParamState = false;
 	this->initNames();
 }
 
@@ -174,13 +176,6 @@ void MyParser::initNames() {
 	{
 		this->names[i]	  = new char[255];
 		this->names[i][0] = '\0';
-	}
-}
-
-void MyParser::initParameters() {
-	for (int i = 0; i < (sizeof(this->parameters) / sizeof(**this->parameters)); i++)
-	{
-		this->parameters[i] = NULL;
 	}
 }
 //========= Variable =================
@@ -216,12 +211,24 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 
 //============== Parameter =================
 Parameter* MyParser::insertParam(char* name, int lineNo, int colNo, Modifier* m) {
+	if (this->defaultParamState && !this->defaultParam) {
+		cout << "========================================================================\n";
+		cout << "Error: Default argument " << name << " not at the end of the parameter list\n";
+		cout << "========================================================================\n";
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Default argument not at the end of the parameter list", name);
+		return NULL;
+	}
+	if (this->defaultParam) {
+		cout << "Default parameter state\n";
+		this->defaultParamState = true;
+	}
 	Parameter * p = st->createParam(name, m);
 	char* paramName = new char[255];
 	strcpy(paramName, p->getName());
 	p = this->pl->add(p);
 	if (!p) {
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Parameter is already declared", paramName);
+		cout << "Error: Parameter is already declared\n";
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: parameter is already declared", paramName);
 	}
 	else {
 		cout << "Parameter " << p->getName() << " has been inserted in Parser with type " << p->getType();
@@ -238,10 +245,17 @@ void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
 	{
 		if (this->names[i] && this->names[i][0]) {
+			// Check for native, abstract and synchronized.
 			DataMember * d = st->insertDataMemberInCurrentScope(this->names[i], m);
+			if (m->getIsAbstract() || m->getIsNative() || m->getIsSynchronized()) {
+				cout << "Error[" << lineNo << ", " << colNo << "]: " << this->names[i] << " Modifier native, abstract & synchronized are not allowed here\n";
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Modifier native, abstract & synchronized are not allowed here", "");
+				m->reset();
+				return;
+			}
+			m->reset();
 			cout << "==============================================\n";
 			if (!d) {
-
 				cout << "Error[" << lineNo << ", " << colNo << "]:  data member " << this->names[i] << " already defined!";
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", this->names[i]);
 				return;
@@ -271,7 +285,7 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 }
 //========= Types =================
 Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName) {
-	Type* t = (Type*)this->st->currScope->m->get(name);
+	Type* t = (Type*)this->st->getTypeParent(name);
 
 	if(t && t->strc == TYPE) {
 		this->errRecovery->errQ->enqueue(lineno, colno, "Class already exists", name);
@@ -332,6 +346,13 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 		t->setIsPublic(true);
 	}
 
+	// Check if outer class is public
+	if ((this->st->currScope == this->st->rootScope) && !t->getIsPublic()) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Modifier private is not allowed here", "");
+		cout << "Error: Modifier private is not allowed here\n";
+		return false;
+	}
+
 	// Checking if class has different modifiers
 	if (t->illegalCombinationOfModifiers()) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
@@ -382,9 +403,18 @@ Function * MyParser::createFunction(char* name, Type* t, int lineNo, int colNo, 
 	// Return the function
 	return f;
 }
-Function * MyParser::finishFunctionDeclaration(Function* f) {
-	if (f)
+Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
+	if (f) {
 		cout << "=============== Function " << f->getName() << " closed ================" << endl;
+		int methodBodyState = f->checkMethodBody(methodBody);
+		if (methodBodyState == 0) {
+			this->errRecovery->errQ->enqueue(0, 0, "Error: Abstracts & native methods can not have a body", f->getName());
+		}
+		else if (methodBodyState == 1) {
+			this->errRecovery->errQ->enqueue(0, 0, "Error: Missing method body", f->getName());
+		}
+
+	}
 	this->st->currScope = this->st->currScope->parent;
 	return f;
 }
@@ -403,6 +433,13 @@ bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, i
 	f->setIsNative(m->getIsNative());
 	f->setReturnType(m->getReturnType());
 
+	// Check if method is abstract
+	if (f->getIsAbstract() && type && !type->getIsAbstract()) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Class is not abstract ", type->getName());
+		cout << "Error[" << lineNo << ", " << colNo << "]: Class " << type->getName() << " is not abstract\n";
+		return false;
+	}
+
 	// Checking if function has different modifiers
 	if (f->illegalCombinationOfModifiers()) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
@@ -414,32 +451,31 @@ bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, i
 
 	// Adding parameters List
 	if (!this->pl->isEmpty()) {
-		f->pl = new ParamList(this->pl);
+		f->pl = new List<Parameter>(this->pl);
 	}
 
 	// Checking if function is constructor
-	Type* t = (Type*)this->st->currScope->parent->m->get(name);
-	if (t) {
-		if (strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
-			if (f->constructorModifiersError()) {
-				cout << "==============================\n";
-				cout << "Error in Constructor Modifiers\n";
-				cout << "==============================\n";
-				this->errRecovery->errQ->enqueue(lineNo, colNo, "Error in Constructor Modifiers", "");
-				return false;
+	if (this->st->currScope->parent) {
+		Type* t = (Type*)this->st->currScope->parent->m->get(name);
+		if (t && t->strc == TYPE) {
+			if (strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
+				if (f->constructorModifiersError()) {
+					cout << "==============================\n";
+					cout << "Error in Constructor Modifiers\n";
+					cout << "==============================\n";
+					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error in Constructor Modifiers", "");
+					return false;
+				}
+				f->setIsConstructor(true);
 			}
-			f->setIsConstructor(true);
+			else {
+				f->setIsConstructor(false);
+			}
 		}
 		else {
 			f->setIsConstructor(false);
 		}
 	}
-	else {
-		f->setIsConstructor(false);
-	}
-
-	// TODO: abstract methods must be in abstract classes.
-
 	return true;
 }
 
@@ -466,8 +502,4 @@ void MyParser::resetNames() {
 	{
 		this->names[i][0] = '\0';
 	}
-}
-
-
-void MyParser::addToParameters(Parameter* parameter, int lineNo, int colNo) {
 }

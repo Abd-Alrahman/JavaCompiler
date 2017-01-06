@@ -1,8 +1,13 @@
 0- Type
 	- Abstract class can't be instantiated.
-	- Abstract methods must be declared in abstract class.
-	- When inheriting from abstract class, all abstract methods must be implemented.
 	- Implementing interfaces.
+	- Cyclic inheritanc
+		eg1: a extends a
+		eg2: a extends b
+			 b extends a
+		eg3: a extends b
+			 b extends c
+			 c extends a
 -------------
 1- Variable
 	- Missing type error.
@@ -10,13 +15,10 @@
 --------------
 2- Data Member
 	- Missing type error.
-	- Can't be abstract.
 --------------
 3- Function
-	- Native methods can't have body.
 	- Missing return type.
 	- Check for return statment in methods and none ones for void's.
-	- All methods in an abstract class must be abstract.
 	- Check calling method if it exists.
 --------------
 4- Parameters

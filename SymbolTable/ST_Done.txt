@@ -5,6 +5,7 @@
 	- Extending more than one class
 	- Creating default constructor for class.
 	- Final class can't be inherited from.
+	- Inheriting from abstract class then all abstract methods must be implemented.
 -------------
 1- Variable
 	- Modifiers with variables error other than final.
@@ -18,6 +19,7 @@
 	- Repeated data member name.
 	- Defining multiple dm's for one type.
 	- Defining different modifiers.
+	- Abstract, native & synchronized are not allowed for data member.
 --------------
 3- Function
 	- Default Public Modifier.
@@ -30,12 +32,17 @@
 	- Constructor can't be abstract or final.
 	- Overriding problems.
 	- Overloading problems.
+	- Abstract methods must be declared in abstract class.
+	- Native & abstract methods can't have body.
+	- Missing method body.
+	- Missing main method.
 --------------
 4- Parametrs
 	- Simple parameter.
 	- Final Parameter.
 	- Public parameter, or repeated modifier.
 	- Assigning parameter to function.
+	- Default argument state with ordering.
 ---------------
 Overriding	-> Same parameters - different names - General state.
 			-> Error final overriding.

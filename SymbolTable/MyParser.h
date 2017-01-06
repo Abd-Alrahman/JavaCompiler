@@ -71,8 +71,10 @@ public:
 	ErrorRecovery * errRecovery;
 	Helper * helper;
 	char** names;
-	Parameter** parameters;
-	ParamList* pl;
+	List<Parameter>* pl;
+	bool methodBody;
+	bool defaultParam;
+	bool defaultParamState;
 	MyParser(void);
 	~MyParser(void);
 	void insertVar(int lineNo, int colNo, Modifier* m);
@@ -83,9 +85,8 @@ public:
 	Type * createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName);
 	Type * finishTypeDeclaration(Type* t);
 	Function * createFunction(char* name, Type* t, int lineno, int colno, Modifier* m);
-	Function * finishFunctionDeclaration(Function* f);
+	Function * finishFunctionDeclaration(Function* f, bool methodBody);
 	Parameter** getParameters();
-	void addToParameters(Parameter* parameter, int lineNo, int colNo);
 	char** getNames();
 	void setNames(char** namesArr);
 	void addToNames(char* name);

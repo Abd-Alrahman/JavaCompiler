@@ -62,7 +62,7 @@ public:
 class MyParser
 {
 private:
-	bool setMethodData(Function* f, Type* t, char* name, Modifier* m, int lineNo, int colNo);
+	bool setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo);
 	bool setTypeData(Type* f, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName);
 	void MyParser::initNames();
 	void MyParser::initParameters();
@@ -71,7 +71,7 @@ public:
 	ErrorRecovery * errRecovery;
 	Helper * helper;
 	char** names;
-	List<Parameter>* pl;
+	ParamList* pl;
 	bool methodBody;
 	bool defaultParam;
 	bool defaultParamState;
@@ -84,7 +84,7 @@ public:
 	Parameter* insertParam(char* name, int lineNo, int colNo, Modifier* m);
 	Type * createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName);
 	Type * finishTypeDeclaration(Type* t);
-	Function * createFunction(char* name, Type* t, int lineno, int colno, Modifier* m);
+	Function * createFunction(char* name, int lineno, int colno, Modifier* m);
 	Function * finishFunctionDeclaration(Function* f, bool methodBody);
 	Parameter** getParameters();
 	char** getNames();

@@ -162,7 +162,7 @@ MyParser::MyParser(void)
 	this->errRecovery	= new ErrorRecovery();
 	this->helper		= new Helper();
 	this->names			= new char*[20];
-	this->pl			= new List<Parameter>();
+	this->pl			= new ParamList();
 	this->methodBody	= false;
 	this->defaultParam  = false;
 	this->defaultParamState = false;
@@ -366,15 +366,16 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 }
 
 //========= Functions ===========
-Function * MyParser::createFunction(char* name, Type* t, int lineNo, int colNo, Modifier* m) {
+Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier* m) {
 	Function* f = new Function();
 
-	if (!this->setMethodData(f, t, name, m, lineNo, colNo)) {
+	if (!this->setMethodData(f, name, m, lineNo, colNo)) {
 		// Resetting the modifier
 		m->reset();
 		return 0;
 	}
 
+	// Check for overloading state
 	Function* existedFunc = (Function*)this->st->currScope->m->get(name);
 	if (existedFunc && existedFunc->strc == FUNCTION) {
 		if (f->isOverloadingState(existedFunc)) {
@@ -408,9 +409,11 @@ Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
 		cout << "=============== Function " << f->getName() << " closed ================" << endl;
 		int methodBodyState = f->checkMethodBody(methodBody);
 		if (methodBodyState == 0) {
+			cout << "Error: Abstracts & native methods can not have a body" << endl;
 			this->errRecovery->errQ->enqueue(0, 0, "Error: Abstracts & native methods can not have a body", f->getName());
 		}
 		else if (methodBodyState == 1) {
+			cout << "Error: Missing method body" << endl;
 			this->errRecovery->errQ->enqueue(0, 0, "Error: Missing method body", f->getName());
 		}
 
@@ -419,7 +422,7 @@ Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
 	return f;
 }
 
-bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, int lineNo, int colNo) {
+bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo) {
 	// Setting function modifiers
 	f->setName(name);
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
@@ -433,13 +436,6 @@ bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, i
 	f->setIsNative(m->getIsNative());
 	f->setReturnType(m->getReturnType());
 
-	// Check if method is abstract
-	if (f->getIsAbstract() && type && !type->getIsAbstract()) {
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Class is not abstract ", type->getName());
-		cout << "Error[" << lineNo << ", " << colNo << "]: Class " << type->getName() << " is not abstract\n";
-		return false;
-	}
-
 	// Checking if function has different modifiers
 	if (f->illegalCombinationOfModifiers()) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
@@ -451,7 +447,7 @@ bool MyParser::setMethodData(Function* f, Type* type, char* name, Modifier* m, i
 
 	// Adding parameters List
 	if (!this->pl->isEmpty()) {
-		f->pl = new List<Parameter>(this->pl);
+		f->pl = new ParamList(this->pl);
 	}
 
 	// Checking if function is constructor

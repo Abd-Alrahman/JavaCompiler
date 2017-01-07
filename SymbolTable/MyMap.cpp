@@ -67,6 +67,18 @@ void MyMap::put(char* name, void* element, enum structure strc) {
 	this->arr[index] = newMapElem;
 }
 
+enum structure MyMap::getStrc(int index) {
+	return this->arr[index]->getStrc();
+}
+
+MapElem* MyMap::getFromArr(int index) {
+	return this->arr[index];
+}
+
+void* MyMap::getElemFromArr(int index) {
+	return this->arr[index]->getElem();
+}
+
 void* MyMap::get(char* name) {
 	int index = this->hash(name);
 	MapElem * temp = this->arr[index];

@@ -37,117 +37,22 @@ public:
 	bool isPrimitiveType(char* type);
 	bool equals(Parameter* p);
 };
-
-template <class T>
-class List {
+class ParamList {
 private:
-	T* current;
-	T* root;
+	Parameter* current;
+	Parameter* root;
 public:
 	int size;
-
-	List<T>::List() {
-		this->root = NULL;
-		this->current = this->root;
-		this->size = 0;
-	}
-
-	List<T>::List(List<T>* l) {
-		this->root = l->root;
-		this->current = l->current;
-		this->size = l->size;
-		l->root = NULL;
-		l->current = NULL;
-		l->size = 0;
-	}
-
-	List<T>::~List() {}
-
-	T* List<T>::find(char* name) {
-		T* curr = this->root;
-		while (curr) {
-			if (strcmp(curr->getName(), name) == 0) {
-				return curr;
-			}
-			curr = curr->next;
-		}
-		return NULL;
-	}
-
-	T* List<T>::add(T* t) {
-		if (!this->find(t->getName())) {
-			if (!this->root) {
-				this->root = t;
-				this->root->next = NULL;
-				this->current = this->root;
-			}
-			else {
-				this->current->next = t;
-				this->current = current->next;
-				this->current->next = NULL;
-			}
-			this->size++;
-			return this->current;
-		}
-		return NULL;
-	}
-
-	bool List<T>::remove(char* name) {
-		T* curr = this->root;
-		T* prev = NULL;
-		while (strcmp(curr->getName(), name) != 0) {
-			prev = curr;
-			curr = curr->next;
-		}
-		if (curr) {
-			prev->next = curr->next;
-			if (curr == this->root) {
-				this->root = prev;
-			}
-			delete curr;
-			this->size--;
-			return true;
-		}
-		return false;
-	}
-
-	bool List<T>::equals(List<T>* l) {
-		T* plTemp = l->root;
-		T* thisTemp = this->root;
-		while (plTemp || thisTemp) {
-			if (plTemp == NULL || thisTemp == NULL)
-				return false;
-			if (thisTemp && plTemp)
-			if (!thisTemp->equals(plTemp))
-				return false;
-			plTemp = plTemp->next;
-			thisTemp = thisTemp->next;
-		}
-		return true;
-	}
-
-	bool List<T>::isEmpty() {
-		return (this->root == NULL);
-	}
-
-	void List<T>::print() {
-		T* current = this->root;
-		while (current) {
-			if (current->getIsFinal()) {
-				cout << "final ";
-			}
-			cout << current->getType() << " " << current->getName();
-			if (current->next) {
-				cout << ", ";
-				current = current->next;
-			}
-			else {
-				return;
-			}
-		}
-	}
+	ParamList();
+	ParamList(ParamList* pl);
+	~ParamList();
+	Parameter* find(char* name);
+	Parameter* add(Parameter* parameter);
+	bool remove(char* name);
+	bool equals(ParamList* pl);
+	bool isEmpty();
+	void print();
 };
-
 class Variable {
 private: 
 	char* name;
@@ -208,10 +113,12 @@ private:
 	Type* inheritedType;
 	Scope * scope;
 public:
+	Type* next;
 	enum structure strc;
 	Type();
 	~Type();
 	void checkForAbstraction();
+	bool isCyclicInheritance();
 	void setName(char* n);
 	char* getName();
 	void setParentName(char* n);
@@ -232,6 +139,23 @@ public:
 	void setScope(Scope * m);
 	Scope * getScope();
 	void printDetails();
+	bool equals(Type* type);
+};
+class TypeList {
+private:
+	Type* current;
+	Type* root;
+public:
+	int size;
+	TypeList();
+	TypeList(TypeList* tl);
+	~TypeList();
+	Type* find(char* name);
+	Type* add(Type* type);
+	bool remove(char* name);
+	bool equals(TypeList* tl);
+	bool isEmpty();
+	void print();
 };
 class Function {
 private:
@@ -252,7 +176,7 @@ private:
 	void initModifiers();
 public:
 	enum structure strc;
-	List<Parameter>* pl;
+	ParamList* pl;
 	Parameter** parameters;
 	Function();
 	~Function();
@@ -293,18 +217,26 @@ public:
 };
 //=============================
 class Modifier;
+class ErrorRecovery;
 class SymbolTable
 {
 private:
-	void checkAtTheEnd(Scope* scope, int index);
-	void checkMethodOverriding(Scope* scope, int i, int index);
-	void checkTypeInheritance(Scope* scope, int index);
-	void checkCyclicInheritance(Scope* scope, int index);
-	void checkMainMethod(Scope* scope, int i, int index);
+	void checkMethodOverriding(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery);
+	void checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRecovery* errRecovery);
+	void checkAbstractMethod(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery);
+	void checkMainMethod(Scope* scope, int i, MapElem* elem);
+	void checkNexts(Scope* scope, int i, ErrorRecovery* errRecovery);
+
+	void printNexts(Scope* scope, int index, ErrorRecovery* errRecovery);
+	Type* printTypeHeader(Scope* scope, int index);
+	Function* printMethodHeader(Scope* scope, int index, ErrorRecovery* errRecovery);
+	DataMember* printDmHeader(Scope* scope, int index);
+	Variable* printVarHeader(Scope* scope, int index);
 public:
 	Scope * currScope;
 	Scope * rootScope;
 	bool hasMainMethod;
+	void checkAtTheEnd(Scope* scope, MapElem* elem, ErrorRecovery* errRecovery);
 	Type* getTypeParent(char* name);
 	Type* getTypeParentByScope(Scope* scope, char* name);
 	Variable * insertVariableInCurrentScope(char* name, Modifier* m);
@@ -313,7 +245,7 @@ public:
 	Parameter * getParameterFromCurrentFunction(char* name);
 	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m);
 	DataMember * getDataMemberFromCurrentScope(char* name);
-	void print(Scope* scope);
+	void print(Scope* scope, ErrorRecovery* errRecovery);
 	SymbolTable(void);
 	~SymbolTable(void);
 };

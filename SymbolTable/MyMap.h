@@ -29,4 +29,7 @@ public:
 	~MyMap(void);
 	void put(char* name, void* item, enum structure strc);
 	void* get(char* name);
+	enum structure getStrc(int index);
+	void* getElemFromArr(int index);
+	MapElem* getFromArr(int index);
 };

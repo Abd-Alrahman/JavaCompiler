@@ -223,6 +223,7 @@ class SymbolTable
 private:
 	void checkMethodOverriding(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery);
 	void checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRecovery* errRecovery);
+	void checkInnerInheritance(Scope* scope, Type* type, ErrorRecovery* errRecovery);
 	void checkAbstractMethod(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery);
 	void checkMainMethod(Scope* scope, int i, MapElem* elem);
 	void checkNexts(Scope* scope, int i, ErrorRecovery* errRecovery);

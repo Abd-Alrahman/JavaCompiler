@@ -288,6 +288,7 @@ Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m, char
 	Type* t = (Type*)this->st->getTypeParent(name);
 
 	if(t && t->strc == TYPE) {
+		cout << "Class " << name << " already exists\n";
 		this->errRecovery->errQ->enqueue(lineno, colno, "Class already exists", name);
 		return 0;
 	}

@@ -1,13 +1,6 @@
 0- Type
 	- Abstract class can't be instantiated.
 	- Implementing interfaces.
-	- Cyclic inheritanc
-		eg1: a extends a
-		eg2: a extends b
-			 b extends a
-		eg3: a extends b
-			 b extends c
-			 c extends a
 -------------
 1- Variable
 	- Missing type error.
@@ -23,5 +16,4 @@
 --------------
 4- Parameters
 --------------
-Problem with similar names when typing x1, x.
 Printing Errors From Queue in ST.

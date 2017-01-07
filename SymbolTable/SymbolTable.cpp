@@ -1041,6 +1041,70 @@ void SymbolTable::checkMethodOverriding(Scope* scope, int i, MapElem* elem, Erro
 	this->checkAtTheEnd(currFunc->getScope(), scope->m->getFromArr(i), errRecovery);
 }
 
+void SymbolTable::checkInnerInheritance(Scope* scope, Type* type, ErrorRecovery* errRecovery) {
+	if (scope->parent && type->getParentName() && type->getParentName()[0]) {
+		// Inner1 in Outer1 extends Inner2 in Outer2 && Outer1 extends Outer2
+		for (int i = 0; i < 71; i++)
+		{
+			if (scope->parent->m->arr[i]) {
+				switch (scope->parent->m->getStrc(i)) {
+				case TYPE: {
+							   // Getting outer2 first
+							   Type* outer2 = (Type*)scope->parent->m->getElemFromArr(i);
+							   MapElem* elem = NULL;
+							   // Checking if outer2 does not have a parent 
+							   if (outer2->getParentName() && !outer2->getParentName()[0]) {
+								   // Getting next nodes
+								   elem = scope->parent->m->getFromArr(i)->getNext();
+								   while (elem) {
+									   outer2 = (Type*)elem->getElem();
+									   if (outer2 && outer2->getParentName() && outer2->getParentName()[0]) {
+										   break;
+									   }
+									   elem = elem->getNext();
+								   }
+							   }
+							   // Checking if outer2 exsits && has a parent
+							   if (outer2 && outer2->getParentName() && outer2->getParentName()[0]) {
+								   // Checking if outer2 parent (outer1) exists
+								   Type* outer1 = (Type*)scope->parent->m->get(outer2->getParentName());
+								   if (outer1) {
+									   // Getting the inner class from outer1, where inner1 is the name that
+									   // type extends
+									   Type* inner1 = (Type*)outer1->getScope()->m->get(type->getParentName());
+									   if (inner1) {
+										   // Error: it's Final!
+										   if (inner1->getIsFinal()) {
+											   cout << "Error: final class can't be inherited from, " << inner1->getName() << endl;
+											   errRecovery->errQ->enqueue(0, 0, "Final class can't be inherited from", inner1->getName());
+										   }
+										   // Inner inheritance state!
+										   else {
+											   cout << type->getName() << " extended successfully from " << inner1->getName() << endl;
+											   type->setInheritedType(inner1);
+											   type->checkForAbstraction();
+											   type->isCyclicInheritance();
+										   }
+									   }
+									   else {
+										   errRecovery->errQ->enqueue(0, 0, "class does not exist", type->getParentName());
+										   cout << "Class " << type->getParentName() << " does not exist.\n";
+									   }
+								   }
+							   }
+							   else {
+								   cout << "Class " << type->getParentName() << " does not exist or can't be inherited From\n";
+								   errRecovery->errQ->enqueue(0, 0, "Class does not exist or can't be inherited", type->getParentName());
+								   continue;
+							   }
+				}
+					break;
+				}
+			}
+		}
+	}
+}
+
 void SymbolTable::checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRecovery* errRecovery) {
 	Type* type = (Type*)currElem->getElem();
 	if (type->getParentName() && type->getParentName()[0]) {
@@ -1061,39 +1125,39 @@ void SymbolTable::checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRec
 		else {
 			cout << "Class doesn't exist.\n";
 		}
-		
+		this->checkInnerInheritance(scope, type, errRecovery);
 	}
-	checkAtTheEnd(type->getScope(), currElem, errRecovery);
+	this->checkAtTheEnd(type->getScope(), currElem, errRecovery);
 }
 
 void SymbolTable::checkNexts(Scope* scope, int i, ErrorRecovery* errRecovery) {
-	MapElem* elem = scope->m->getFromArr(i)->getNext();
-	while (elem) {
-		switch (elem->getStrc())
-		{
-		case TYPE: {
-					   Type* type = (Type*)elem->getElem();
-					   this->checkTypeInheritance(scope, elem, errRecovery);
-					   //this->checkAtTheEnd(scope, elem, errRecovery);
-					   break;
+	if (scope && scope->m->arr[i]) {
+		MapElem* elem = scope->m->getFromArr(i)->getNext();
+		while (elem) {
+			switch (elem->getStrc())
+			{
+			case TYPE: {
+						   Type* type = (Type*)elem->getElem();
+						   this->checkTypeInheritance(scope, elem, errRecovery);
+						   break;
+			}
+			case FUNCTION: {
+							   Function* function = (Function*)elem->getElem();
+							   break;
+			}
+			case DATAMEMBER: {
+								 this->checkNexts(scope, i, errRecovery);
+								 break;
+			}
+			case LOCALVARIABLE: {
+									this->checkNexts(scope, i, errRecovery);
+									break;
+			}
+			default:
+				break;
+			}
+			elem = elem->getNext();
 		}
-		case FUNCTION: {
-					   Function* function = (Function*)elem->getElem();
-					   //this->checkAtTheEnd(scope, elem, errRecovery);
-					   break;
-		}
-		case DATAMEMBER: {
-					   this->checkNexts(scope, i, errRecovery);
-					   break;
-		}
-		case LOCALVARIABLE: {
-					   this->checkNexts(scope, i, errRecovery);
-					   break;
-		}
-		default:
-			break;
-		}
-		elem = elem->getNext();
 	}
 }
 

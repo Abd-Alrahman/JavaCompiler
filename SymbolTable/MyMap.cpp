@@ -1,7 +1,9 @@
 #include "MyMap.h"
 
 void MapElem::setName(char* name) {
-	this->name = name;
+	this->name = new char[255];
+	this->name[0] = '\0';
+	strcat(this->name, name);
 }
 
 char* MapElem::getName() {

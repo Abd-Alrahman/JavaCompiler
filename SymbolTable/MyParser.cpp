@@ -158,14 +158,16 @@ int Helper::getBracketsCount() {
 
 MyParser::MyParser(void)
 {
-	this->st			= new SymbolTable();
-	this->errRecovery	= new ErrorRecovery();
-	this->helper		= new Helper();
-	this->names			= new char*[20];
-	this->pl			= new ParamList();
-	this->methodBody	= false;
-	this->defaultParam  = false;
+	this->st				= new SymbolTable();
+	this->errRecovery		= new ErrorRecovery();
+	this->helper			= new Helper();
+	this->names				= new char*[20];
+	this->pl				= new ParamList();
+	this->methodBody		= false;
+	this->defaultParam		= false;
 	this->defaultParamState = false;
+	this->rawClassName		= new char[255];
+	this->rawClassName[0]	= '\0';
 	this->initNames();
 }
 
@@ -190,6 +192,10 @@ void MyParser::insertVar(int lineNo, int colNo, Modifier* m) {
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", v->getName());
 				return;
 			}
+			if (m->getReturnType() && !m->getReturnType()[0]) {
+				cout << "Error: missing return type for variable\n";
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: missing return type for variable", v->getName());
+			}
 			cout << "Variable " << v->getName() << " has been created\n";
 			cout << "with return type " << v->getType() << endl;
 			if (v->getIsFinal())
@@ -212,14 +218,11 @@ Variable* MyParser::addVariableToCurrentScope(Variable* v) {
 //============== Parameter =================
 Parameter* MyParser::insertParam(char* name, int lineNo, int colNo, Modifier* m) {
 	if (this->defaultParamState && !this->defaultParam) {
-		cout << "========================================================================\n";
-		cout << "Error: Default argument " << name << " not at the end of the parameter list\n";
-		cout << "========================================================================\n";
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Default argument not at the end of the parameter list", name);
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Argument must have default value", name);
 		return NULL;
 	}
 	if (this->defaultParam) {
-		cout << "Default parameter state\n";
+		this->errRecovery->stateQ->enqueue(lineNo, colNo, "State: Default parameter state", name);
 		this->defaultParamState = true;
 	}
 	Parameter * p = st->createParam(name, m);
@@ -228,14 +231,15 @@ Parameter* MyParser::insertParam(char* name, int lineNo, int colNo, Modifier* m)
 	p = this->pl->add(p);
 	if (!p) {
 		cout << "Error: Parameter is already declared\n";
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: parameter is already declared", paramName);
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Parameter is already declared", paramName);
 	}
 	else {
-		cout << "Parameter " << p->getName() << " has been inserted in Parser with type " << p->getType();
+		cout << "=====================================================================\n";
+		cout << "Parameter " << p->getName() << " has been inserted in Symbol Table with type " << p->getType();
 		if (p->getIsFinal()) {
 			cout << " and it's final";
 		}
-		cout << endl;
+		cout << "\n=====================================================================\n";
 	}
 	return p;
 }
@@ -288,7 +292,6 @@ Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m, char
 	Type* t = (Type*)this->st->getTypeParent(name);
 
 	if(t && t->strc == TYPE) {
-		cout << "Class " << name << " already exists\n";
 		this->errRecovery->errQ->enqueue(lineno, colno, "Class already exists", name);
 		return 0;
 	}
@@ -315,21 +318,26 @@ Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m, char
 }
 
 Type * MyParser::finishTypeDeclaration(Type* t) {
-	if (t) {
+	if (t && t->strc == TYPE) {
 		// Creating default constructor for class if doesn't exist.
 		Function* f = (Function*)this->st->currScope->m->get(t->getName());
+		if (f && f->strc != FUNCTION) {
+			goto constructor;
+		}
 		if (!f) {
-			Function* f = new Function();
+			constructor:Function* f = new Function();
 			f->setIsPublic(true);
 			f->setIsConstructor(true);
 			f->setName(t->getName());
 			this->st->currScope->m->put(f->getName(), f, FUNCTION);
+
 			cout << "==========================================================\n";
 			cout << "Default constructor has been created with name: " << f->getName() << endl;
 			cout << "==========================================================\n";
 		}
 	}
-	this->st->currScope = this->st->currScope->parent;
+	if (this->st->currScope && this->st->currScope->parent)
+		this->st->currScope = this->st->currScope->parent;
 	if (t)
 		cout << "=============== Class " << t->getName() << " closed ================" << endl;
 	return t;
@@ -338,6 +346,7 @@ Type * MyParser::finishTypeDeclaration(Type* t) {
 bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName) {
 	// Setting class modifiers
 	t->setName(name); t->setParentName(m->getReturnType());
+	t->setFileName(this->rawClassName);
 	t->setIsPublic(m->getIsPublic()); t->setIsPrivate(m->getIsPrivate()); t->setIsProtected(m->getIsProtected());
 	t->setIsFinal(m->getIsFinal());
 	t->setIsAbstract(m->getIsAbstract());
@@ -347,10 +356,19 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 		t->setIsPublic(true);
 	}
 
+	// Check File Name
+	if (this->st->currScope == this->st->rootScope) {
+		if (this->rawClassName && this->rawClassName[0] && t->getIsPublic()) {
+			if (strcmp(t->getName(), this->rawClassName) != 0) {
+				this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Class name does not match file name!", t->getName());
+			}
+		}
+	}
+
 	// Check if outer class is public
 	if ((this->st->currScope == this->st->rootScope) && !t->getIsPublic()) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Modifier private is not allowed here", "");
-		cout << "Error: Modifier private is not allowed here\n";
+		cout << "Error: Modifier private/protected is not allowed here\n";
 		return false;
 	}
 
@@ -405,6 +423,7 @@ Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier*
 	// Return the function
 	return f;
 }
+
 Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
 	if (f) {
 		cout << "=============== Function " << f->getName() << " closed ================" << endl;
@@ -417,9 +436,8 @@ Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
 			cout << "Error: Missing method body" << endl;
 			this->errRecovery->errQ->enqueue(0, 0, "Error: Missing method body", f->getName());
 		}
-
+		this->st->currScope = this->st->currScope->parent;
 	}
-	this->st->currScope = this->st->currScope->parent;
 	return f;
 }
 
@@ -451,11 +469,15 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 		f->pl = new ParamList(this->pl);
 	}
 
+	// Resetting MyParser default parameter data members
+	this->defaultParam = false;
+	this->defaultParamState = false;
+
 	// Checking if function is constructor
-	if (this->st->currScope->parent) {
+	if (this->st->currScope && this->st->currScope->parent) {
 		Type* t = (Type*)this->st->currScope->parent->m->get(name);
 		if (t && t->strc == TYPE) {
-			if (strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
+			 if(strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
 				if (f->constructorModifiersError()) {
 					cout << "==============================\n";
 					cout << "Error in Constructor Modifiers\n";
@@ -463,7 +485,9 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error in Constructor Modifiers", "");
 					return false;
 				}
-				f->setIsConstructor(true);
+				else {
+					f->setIsConstructor(true);
+				}
 			}
 			else {
 				f->setIsConstructor(false);
@@ -473,6 +497,13 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 			f->setIsConstructor(false);
 		}
 	}
+
+	// Missing Return Type
+	if (!f->getIsConstructor() && f->getReturnType() && !f->getReturnType()[0]) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Missing return type", "");
+		cout << "Missing return type" << endl;
+	}
+
 	return true;
 }
 

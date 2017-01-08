@@ -67,6 +67,7 @@ private:
 	void MyParser::initNames();
 	void MyParser::initParameters();
 public:
+	char* rawClassName;
 	SymbolTable * st;
 	ErrorRecovery * errRecovery;
 	Helper * helper;

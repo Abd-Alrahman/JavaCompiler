@@ -3,12 +3,15 @@
 		#include <iostream>
 		#include <istream>
 		#include <ostream>		
-		#include <FlexLexer.h>	
+		#include <FlexLexer.h>
+		#include <stack>	
 		int lineNo = 1;
 		int colNo = 1;
 		int i;
         float f;
         double d;
+		int numopen = 0;
+		int numclose = 0;
 %}
 %option c++
 %option noyywrap
@@ -33,6 +36,7 @@ Comment1        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment2        [\/][\/].*
 Comment		({Comment1}|{Comment2})
 Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
+
 
 
 %%
@@ -386,7 +390,7 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 "void"					{
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
-							yylval.r.myColNo = colNo;
+							yylval.r.myColNo = colNo; 
 							return  VOID;
 						}
 
@@ -401,8 +405,10 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 							colNo += strlen(yytext);
 							yylval.r.myLineNo= lineNo; 
 							yylval.r.myColNo = colNo; 
-							return  STATIC;
+							return  WHILE;
 						}
+
+
 
 "++"					{
 							colNo += strlen(yytext);
@@ -486,6 +492,13 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 							yylval.r.myLineNo= lineNo; 
 							yylval.r.myColNo = colNo; 
 							return  ASS_MUL;
+						}
+
+"$$"					{
+							colNo += strlen(yytext);
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo; 
+							return  OP_DIM;
 						}
 
 "/="					{
@@ -580,47 +593,6 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 							//return SPACE;
 						}
 
-"{"						{
-							colNo += strlen(yytext); 
-							yylval.r.myLineNo= lineNo; 
-							yylval.r.myColNo = colNo;
-							return OPEN_D;
-						}
-
-"}"						{
-							colNo += strlen(yytext); 
-							yylval.r.myLineNo= lineNo; 
-							yylval.r.myColNo = colNo;
-							return CLOSE_D;
-						}
-
-"("						{
-							colNo += strlen(yytext); 
-							yylval.r.myLineNo= lineNo; 
-							yylval.r.myColNo = colNo;
-							return OPEN_B;
-						}
-
-")"						{
-							colNo += strlen(yytext); 
-							yylval.r.myLineNo= lineNo; 
-							yylval.r.myColNo = colNo;
-							return CLOSE_B;
-						}
-
-"["						{
-							colNo += strlen(yytext); 
-							yylval.r.myLineNo= lineNo; 
-							yylval.r.myColNo = colNo;
-							return OPEN;
-						}
-
-"]"						{
-							colNo += strlen(yytext); 
-							yylval.r.myLineNo= lineNo; 
-							yylval.r.myColNo = colNo;
-							return CLOSE;
-						}
 
 ";"						{
 							colNo += strlen(yytext); 
@@ -757,6 +729,15 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 							return INT;
 						}
 
+"String"					{
+							colNo += strlen(yytext); 
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo; 
+							return STRING;
+						}
+
+
+
 "short"					{
 							colNo += strlen(yytext); 
 							yylval.r.myLineNo= lineNo; 
@@ -826,7 +807,7 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 \/\*                                        { BEGIN multilinecomment; }
 <multilinecomment>[^*\n]*					{lineNo++;}
 <multilinecomment>"*"+[^*/\n]*				{lineNo++;}
-<multilinecomment>"*"+"/"                   { cout<<"\t it is a Multi Line Comment \n";
+<multilinecomment>"*"+"/"                   { cout<<"/*Multi\n Line\n Comment*/\n";
 				   							yylval.r.myLineNo= lineNo; BEGIN INITIAL;
  }
 
@@ -908,12 +889,61 @@ Dimension	[\[]({CR}|{LF}|{FF}|{TAB}|{BLK}|{BLANK}|{Comment})*[\]]
 							return	STRING_VALUE;
 						}
 
+
 {Single_line_comment}	{
 							yylval.r.myColNo = colNo;
 							yylval.r.myLineNo = lineNo;
 							colNo += strlen(yytext);
 							//cout<<"\t comment\n";
 						}
+
+[{]*					{
+							colNo += strlen(yytext); 
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo; 
+							numopen = strlen(yytext); 
+							yylval.r.mynumopen = numopen;
+							return  OPEN_D;
+						}
+
+
+[}]*					{
+							colNo += strlen(yytext); 
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo; 
+							numclose = strlen(yytext); 
+							yylval.r.mynumclose = numclose;
+							return  CLOSE_D;
+						}
+
+[(]*						{
+							colNo += strlen(yytext); 
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo;
+							return OPEN_B;
+						}
+
+[)]*						{
+							colNo += strlen(yytext); 
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo;
+							return CLOSE_B;
+						}
+
+[[]*						{
+							colNo += strlen(yytext); 
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo;
+							return OPEN;
+						}
+
+[]]*						{
+							colNo += strlen(yytext); 
+							yylval.r.myLineNo= lineNo; 
+							yylval.r.myColNo = colNo;
+							return CLOSE;
+						}
+
 
 
 %%

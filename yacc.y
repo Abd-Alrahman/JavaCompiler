@@ -4,6 +4,11 @@
 	using namespace std;
 	#include <FlexLexer.h>
 	#include "SymbolTable/MyParser.h"
+	#include<io.h>
+	#include<vector>
+	#include<string>
+	#include <fstream>
+
 	int yylex(void);
 	int yyparse();
 	void yyerror(char *);
@@ -24,6 +29,11 @@
 	Modifier * modifier = new Modifier();
 	Modifier * m;
 	Type * type;
+
+
+	int numo = 0;
+	int numc = 0;
+
 %}
 
 
@@ -36,6 +46,8 @@
 		char* str;
 		int myLineNo;
 		int myColNo;
+		int mynumopen;
+		int mynumclose;
 		}r;
 		class YaccSimpleType * yaccSimpleType;
 		class Variable * variable;
@@ -43,60 +55,71 @@
 		class Function * function;
 		class Type * type;
 		class Parameter * param;
+
+
 	}
 
 %token ABSTRACT ASSERT
-%token BOOLEAN BREAK BYVALUE
-%token CASE CAST CATCH CLASS CONST CONTINUE
+%token BREAK BYVALUE
+%token CASE CAST CLASS CONST CONTINUE
 %token DEFAULT DO
 %token ENUM EXTENDS
-%token FINAL FINALLY FOR FUTURE
+%token FINAL FOR FUTURE
 %token GENERIC GOTO
 %token IF IMPLEMENTS IMPORT INNER INSTANCEOF INTERFACE
-%token NATIVE NEW JNULL
+%token NATIVE
 %token OPERATOR OUTER
 %token PACKAGE PRIVATE PROTECTED PUBLIC
 %token REST RETURN
-%token STATIC SUPER SWITCH SYNCHRONIZED
+%token STATIC SWITCH SYNCHRONIZED
 %token THIS THROW THROWS TRANSIENT TRY
-%token VAR VOID VOLATILE
+%token VAR VOLATILE
 %token WHILE
 %token OP_INC OP_DEC
 %token OP_SHL OP_SHR OP_SHRR
 %token OP_GE OP_LE OP_EQ OP_NE
 %token OP_LAND OP_LOR
-%token OP_DIM
 %token ASS_MUL ASS_DIV ASS_MOD ASS_ADD ASS_SUB
 %token ASS_SHL ASS_SHR ASS_SHRR ASS_AND ASS_XOR ASS_OR
-%token OPEN_B CLOSE_B OPEN CLOSE COLON COMMA
-%token PLUS MINUS MULT DIV AND OR QUES_MARK EXC_MARK MODULE DURA ASSIGN
+%token CLOSE_B OPEN CLOSE COLON COMMA
+%token PLUS MINUS MULT DIV AND OR QUES_MARK MODULE ASSIGN
 %token XOR LESS GREATER
-%token INT SHORT LONG FLOAT DOUBLE CHAR BYTE
-%token IDENTIFIER
-%token INTEGER_VALUE LONG_VALUE N_ID FLOAT_VALUE CHAR_VALUE STRING_VALUE
-%token BOOLLIT LITERAL
+%token N_ID 
 
 %nonassoc e1
+%nonassoc e15
 %nonassoc ELSE
 %nonassoc e4
 %nonassoc e2
 %nonassoc e3 
-%nonassoc ABSTRACT CLASS FINAL INTERFACE NATIVE PRIVATE PROTECTED PUBLIC STATIC SYNCHRONIZED TRANSIENT VOLATILE OPEN_D CLOSE_D
+%nonassoc ABSTRACT CLASS FINAL INTERFACE NATIVE PRIVATE PROTECTED PUBLIC STATIC SYNCHRONIZED TRANSIENT  VOLATILE CLOSE_D 
 %nonassoc e5
 %nonassoc e6
 %nonassoc e7
-%nonassoc SEMICOLON POINT
+%nonassoc POINT
 %nonassoc e8
-%nonassoc BOOLEAN VOID INT SHORT LONG FLOAT DOUBLE CHAR BYTE
 %nonassoc e9
-%nonassoc IDENTIFIER
+%nonassoc e10
+%nonassoc BOOLEAN NEW JNULL SUPER THIS VOID OPEN_B EXC_MARK DURA INT STRING SHORT LONG FLOAT DOUBLE CHAR BYTE 
+%nonassoc INTEGER_VALUE LONG_VALUE FLOAT_VALUE CHAR_VALUE STRING_VALUE BOOLLIT LITERAL
+%nonassoc e11
+%nonassoc e16 e21
+%nonassoc SEMICOLON
+%nonassoc e12 e13
+%nonassoc OPEN_D
+%nonassoc e14 
+%nonassoc IDENTIFIER OP_DIM
+%nonassoc e17
+%nonassoc e18
+%nonassoc e19
+%nonassoc FINALLY CATCH 
 
 %start CompilationUnit
 
 %%
 
 TypeSpecifier
-	: TypeName   	{ cout << "TypeSpecifier 1\n"; }
+	: TypeName %prec e14  	{ cout << "TypeSpecifier 1\n"; }
 	| TypeName Dims { cout << "TypeSpecifier 2\n"; }
 	;
 
@@ -120,6 +143,7 @@ PrimitiveType
 	| FLOAT	  { cout << "PrimitiveType FLOAT\n"; modifier->setReturnType("float"); }
 	| DOUBLE  { cout << "PrimitiveType DOUBLE\n";modifier->setReturnType("double"); }
 	| VOID	  { cout << "PrimitiveType VOID\n"; modifier->setReturnType("void"); }
+	| STRING  { cout << "PrimitiveType STRING\n"; modifier->setReturnType("String"); }
 	;
 
 SemiColons
@@ -129,6 +153,11 @@ SemiColons
 
 CompilationUnit
 	: ProgramFile {
+					if( numo != numc ){
+						err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error in brackets", "" );
+					}else{
+						cout << "brackets amazing" << endl;
+					}
 					cout <<"-----------\nTHE END !\n";
 					YYABORT;
 				  }
@@ -182,8 +211,18 @@ QualifiedName
 	;
 
 TypeDeclaration
-	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; type = $<type>1 = p->finishTypeDeclaration($<type>1); }
-	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n"; type = $<type>1 = p->finishTypeDeclaration($<type>1); }
+	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; 
+													 numo += $<r.mynumopen>4;
+													 numc += $<r.mynumclose>4;														
+													 type = $<type>1 = p->finishTypeDeclaration($<type>1); 
+													 
+												   }
+	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n";
+														numo += $<r.mynumopen>3 ;
+														numc += $<r.mynumclose>3;
+													 type = $<type>1 = p->finishTypeDeclaration($<type>1); 
+												   }
+
 	| ClassHeader CLOSE_D						   { 
 														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" );
 													}
@@ -293,7 +332,10 @@ FieldDeclarationOptSemi
 
 FieldDeclaration
 	: FieldVariableDeclaration SEMICOLON { cout << "FieldDeclaration 1\n"; }
-	| MethodDeclaration					 { bool methodBody = false; cout << "FieldDeclaration 2\n"; }
+	| FieldVariableDeclaration %prec e11 { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected semicolon","");}
+	| MethodDeclaration					 { bool methodBody = false; 
+										   cout << "FieldDeclaration 2\n"; 
+										 }
 	| ConstructorDeclaration			 { cout << "FieldDeclaration 3\n"; }
 	| StaticInitializer					 { cout << "FieldDeclaration 4\n"; }
     | NonStaticInitializer				 { cout << "FieldDeclaration 5\n"; }
@@ -340,10 +382,18 @@ MethodDeclaration
 																	$<function>$ = p->finishFunctionDeclaration($<function>3, p->methodBody);
 																	cout << "MethodDeclaration 1\n";
 																 }
+	| Modifiers TypeSpecifier Modifiers MethodDeclarator Throws MethodBody { 
+																			 $<function>$ = p->finishFunctionDeclaration($<function>4, p->methodBody);
+																			 err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error modifier return type", $<r.str>1);
+																		   }
 	| Modifiers TypeSpecifier MethodDeclarator        MethodBody {
 																	$<function>$ = p->finishFunctionDeclaration($<function>3, p->methodBody);
 																	cout << "MethodDeclaration 2\n";
 																 }
+	| Modifiers TypeSpecifier Modifiers  MethodDeclarator    MethodBody {
+																		   $<function>$ = p->finishFunctionDeclaration($<function>4, p->methodBody);
+																		   err->errQ->enqueue($<r.myLineNo>5,$<r.myColNo>5,"Error modifier return type", $<r.str>1);
+																		}
 	|           TypeSpecifier MethodDeclarator Throws MethodBody {
 																	$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
 																	cout << "MethodDeclaration 3\n";
@@ -382,7 +432,7 @@ Parameter
 												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 1\n";
 											 }
-	| TypeSpecifier DeclaratorName	ASSIGN	VariableInitializer {
+	| TypeSpecifier DeclaratorName	ASSIGN	ComplexPrimaryNoParenthesis {
 												p->defaultParam = true;
 												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
 												cout << "Parameter 2\n";
@@ -404,7 +454,7 @@ Throws
 	;
 
 MethodBody
-	: Block		{ p->methodBody = true; cout << "MethodBody 1\n"; }
+	: Block		{ cout << "MethodBody 1\n"; }
 	| SEMICOLON { p->methodBody = false; cout << "MethodBody 2\n"; }
 	;
 
@@ -413,7 +463,7 @@ ConstructorDeclaration
 														$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
 														cout << "ConstructorDeclaration 1\n";
 												   }
-	| Modifiers ConstructorDeclarator        Block {
+	| Modifiers ConstructorDeclarator Block		   {
 														$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
 														cout << "ConstructorDeclaration 2\n";
 												   }
@@ -421,9 +471,13 @@ ConstructorDeclaration
 														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
 														cout << "ConstructorDeclaration 3\n";
 												   }
-	|           ConstructorDeclarator        Block {
+	|           ConstructorDeclarator Block		   {
 														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
 														cout << "ConstructorDeclaration 4\n";
+												   }
+	|           ConstructorDeclarator { p->methodBody = false; } SEMICOLON	   {
+														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
+														cout << "ConstructorDeclaration 5\n";
 												   }
 	;
 
@@ -456,10 +510,10 @@ Extends
 	;
 
 Block
-	: OPEN_D LocalVariableDeclarationsAndStatements CLOSE_D { cout << "Block 1\n"; }
-	| OPEN_D CLOSE_D										{ cout << "Block 2\n"; }
+	: OPEN_D LocalVariableDeclarationsAndStatements CLOSE_D { p->methodBody = true; cout << "Block 1\n"; }
+	| OPEN_D CLOSE_D										{ p->methodBody = true; cout << "Block 2\n"; }
     ;
-
+	
 LocalVariableDeclarationsAndStatements
 	: LocalVariableDeclarationOrStatement { cout << "LocalVariableDeclarationsAndStatements\n"; }
 	| LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
@@ -482,7 +536,7 @@ LocalVariableDeclarationStatement
 																	p->resetNames();
 																}
 	;
-
+	
 Statement
 	: EmptyStatement				{ cout << "Statement 1\n"; }
 	| LabelStatement				{ cout << "Statement 2\n"; }
@@ -510,15 +564,23 @@ ExpressionStatement
 
 SelectionStatement
 	: IF OPEN_B Expression CLOSE_B Statement %prec e1		{ cout << "SelectionStatement 1\n"; }
+	| IF OPEN_B CLOSE_B Statement %prec e15                    { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : if without expression ","");}
     | IF OPEN_B Expression CLOSE_B Statement ELSE Statement { cout << "SelectionStatement 2\n"; }
+	| IF OPEN_B CLOSE_B Statement ELSE Statement     { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : ifelse without expression ","");}
     | SWITCH OPEN_B Expression CLOSE_B Block				{ cout << "SelectionStatement 3\n"; }
+	| SWITCH OPEN_B CLOSE_B Block				{ err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error :illegal switch ", "");}
     ;
 
 IterationStatement
 	: WHILE OPEN_B Expression CLOSE_B Statement				 { cout << "IterationStatement 1\n"; }
+	| WHILE OPEN_B CLOSE_B Statement				         { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : WHILE without expression ","");}
 	| DO Statement WHILE OPEN_B Expression CLOSE_B SEMICOLON { cout << "IterationStatement 2\n"; }
+	| DO Statement WHILE OPEN_B CLOSE_B SEMICOLON			 { err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error : dowhile without expression ","");}
+	| DO Statement WHILE OPEN_B CLOSE_B %prec e16            { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : dowhile without expression and missing semicolon ","");}
 	| FOR OPEN_B ForInit ForExpr ForIncr CLOSE_B Statement	 { cout << "IterationStatement 3\n"; }
 	| FOR OPEN_B ForInit ForExpr         CLOSE_B Statement	 { cout << "IterationStatement 4\n"; }
+	| FOR OPEN_B TypeName IDENTIFIER COLON IDENTIFIER CLOSE_B Statement	 { cout << "IterationStatement 5\n"; }
+	| DO Statement WHILE OPEN_B Expression CLOSE_B	%prec e21		 { err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error : dowhile missing semicolon ","");}
 	;
 
 ForInit
@@ -553,8 +615,10 @@ JumpStatement
 
 GuardingStatement
 	: SYNCHRONIZED OPEN_B Expression CLOSE_B Statement { cout << "GuardingStatement 1\n"; }
-	| TRY Block Finally								   { cout << "GuardingStatement 2\n"; }
-	| TRY Block Catches								   { cout << "GuardingStatement 3\n"; }
+	| TRY Block Finally	%prec e18					   { cout << "GuardingStatement 2\n"; }
+	| TRY Block %prec e17                              {err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :Expected try catch or try finally", "" );}
+	| TRY Block Catches	%prec e19					   { cout << "GuardingStatement 3\n"; }
+	| CatchHeader								       {err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Expected try catch or try catch finally", "" );}
 	| TRY Block Catches Finally						   { cout << "GuardingStatement 4\n"; }
 	;
 
@@ -588,7 +652,7 @@ NotJustName
 	;
 
 ComplexPrimary
-	: OPEN_B Expression CLOSE_B	  { cout << "ComplexPrimary 1\n"; }
+	: OPEN_B Expression CLOSE_B	%prec e10  { cout << "ComplexPrimary 1\n"; }
 	| ComplexPrimaryNoParenthesis { cout << "ComplexPrimary 2\n"; }
 	;
 
@@ -644,10 +708,10 @@ NewAllocationExpression
     : PlainNewAllocationExpression					   { cout << "NewAllocationExpression 1\n"; }
     | QualifiedName POINT PlainNewAllocationExpression { cout << "NewAllocationExpression 2\n"; }
     ;
-
+	
 PlainNewAllocationExpression
-    : ArrayAllocationExpression									 { cout << "PlainNewAllocationExpression 1\n"; }
-    | ClassAllocationExpression									 { cout << "PlainNewAllocationExpression 2\n"; }
+    : ArrayAllocationExpression	%prec e13					     { cout << "PlainNewAllocationExpression 1\n"; }
+    | ClassAllocationExpression	%prec e12						 { cout << "PlainNewAllocationExpression 2\n"; }
     | ArrayAllocationExpression OPEN_D CLOSE_D					 { cout << "PlainNewAllocationExpression 3\n"; }
     | ClassAllocationExpression OPEN_D CLOSE_D					 { cout << "PlainNewAllocationExpression 4\n"; }
     | ArrayAllocationExpression OPEN_D ArrayInitializers CLOSE_D { cout << "PlainNewAllocationExpression 5\n"; }
@@ -710,7 +774,7 @@ ArithmeticUnaryOperator
 	: PLUS	{ cout << "ArithmeticUnaryOperator PLUS\n"; }
 	| MINUS { cout << "ArithmeticUnaryOperator MINUS\n"; }
 	;
-
+	
 CastExpression
 	: UnaryExpression										{ cout << "CastExpression 1\n"; }
 	| OPEN_B PrimitiveTypeExpression CLOSE_B CastExpression { cout << "CastExpression 2\n"; }
@@ -835,15 +899,68 @@ int yylex()
 }
 void main(void)
 {
+	freopen("out.txt","w" ,stdout);
 	Parser* parser = new Parser();
+	vector<char*> nameFiles;
+	_finddata_t data;
+	int ff = _findfirst("Classes/*.java", &data);
+	int numFile = sizeof(data.size) / 2;
 
-	freopen("in.txt", "r", stdin);
-	freopen("out.txt","w", stdout);
-	parser->parse();
+	if (ff != -1)
+	{
+		int res = 0;
 
-	if(!err->errQ->isEmpty())						   
-		err->printErrQueue();
-	p->st->checkAtTheEnd(p->st->rootScope, NULL, p->errRecovery);
-	p->st->print(p->st->rootScope, p->errRecovery);
-	//p->errRecovery->printErrQueue();
+		while (res != -1)
+		{
+			char* nna = data.name;
+			char * mma = new char[255];
+			mma[0] = 0;
+			strcpy(mma, nna);
+			nameFiles.push_back(mma);
+			res = _findnext(ff, &data);
+		}
+
+		_findclose(ff);
+		ifstream * f = new ifstream();
+		char * path;
+
+		for (int i = 0; i < nameFiles.size(); i++)
+		{
+			char* rawName = new char[255];
+			rawName[0] = '\0';
+			int dotIndex;
+			strcat(rawName, nameFiles[i]);
+			for (int j = 0; j < sizeof(rawName) / sizeof(*rawName); j++) {
+				if (rawName[j] == '.') {
+					dotIndex = j;
+				}
+			}
+			rawName[dotIndex] = '\0';
+			cout << rawName << endl;
+			strcat(p->rawClassName, rawName);
+			path = new char[255];
+			strcpy(path, "Classes/");
+			strcat(path,nameFiles[i]);
+			f->open(path,ifstream::in);
+			lexer = new yyFlexLexer(f);
+			parser->parse();
+			if(!err->errQ->isEmpty())						   
+				err->printErrQueue();
+				
+			if (!p->errRecovery->errQ->isEmpty())
+				p->errRecovery->printErrQueue();
+
+			f->close();
+			p->rawClassName[0] = '\0';
+			cout << "------------------------------\n";
+		}
+		p->st->checkAtTheEnd(p->st->rootScope, NULL, p->errRecovery);
+		if (!p->errRecovery->errQ->isEmpty())
+				p->errRecovery->printErrQueue();
+		freopen("stFile.txt","w" ,stdout);
+		p->st->print(p->st->rootScope, p->errRecovery);
+		if (!p->errRecovery->errQ->isEmpty())
+				p->errRecovery->printErrQueue();
+	}
+	
 }

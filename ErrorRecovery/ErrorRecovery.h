@@ -70,14 +70,20 @@ class ErrorRecovery
 public:
 	ErrRecQueue * errQ;
 	ErrRecQueue * warnQ;
+	ErrRecQueue * stateQ;
 	ErrorRecovery(void)
 	{
 		this->errQ = new ErrRecQueue();
 		this->warnQ = new ErrRecQueue();
+		this->stateQ = new ErrRecQueue();
 	}
 	~ErrorRecovery(void);
 	void printErrQueue()
 	{
+		while (!stateQ->isEmpty()) {
+			ErrRecItem * s = stateQ->dequeue();
+			cout << "State: [" << s->lineNo << "," << s->colNo << "]   " << s->txt << ",  " << s->var << "\n";
+		}
 		while(!errQ->isEmpty()) {
 			ErrRecItem * e = errQ->dequeue();
 			cout<<"Error: ["<<e->lineNo<<","<<e->colNo<<"]   "<<e->txt<<",  "<<e->var<<"\n";

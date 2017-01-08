@@ -105,6 +105,7 @@ class Type {
 private:
 	char* name;
 	char* parentName;
+	char* fileName;
 	bool isPublic;
 	bool isPrivate;
 	bool isProtected;
@@ -123,6 +124,8 @@ public:
 	char* getName();
 	void setParentName(char* n);
 	char* getParentName();
+	void setFileName(char* n);
+	char* getFileName();
 	void setInheritedType(Type* e);
 	Type* getInheritedType();
 	void setIsFinal(bool isFinal);
@@ -237,6 +240,7 @@ public:
 	Scope * currScope;
 	Scope * rootScope;
 	bool hasMainMethod;
+	void checkFileClassNames(ErrorRecovery* errRecovery);
 	void checkAtTheEnd(Scope* scope, MapElem* elem, ErrorRecovery* errRecovery);
 	Type* getTypeParent(char* name);
 	Type* getTypeParentByScope(Scope* scope, char* name);

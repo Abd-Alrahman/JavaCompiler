@@ -107,8 +107,8 @@
 %nonassoc SEMICOLON
 %nonassoc e12 e13
 %nonassoc OPEN_D
-%nonassoc e14 
 %nonassoc IDENTIFIER OP_DIM
+%nonassoc e14 
 %nonassoc e17
 %nonassoc e18
 %nonassoc e19
@@ -164,13 +164,13 @@ CompilationUnit
 
 ProgramFile
 	: PackageStatement ImportStatements TypeDeclarations { cout << "ProgramFile 1 \n"; }
-	| PackageStatement ImportStatements					 { cout << "ProgramFile 2 \n"; }
+	| PackageStatement ImportStatements			         { cout << "ProgramFile 2 \n"; }
 	| PackageStatement                  TypeDeclarations { cout << "ProgramFile 3 \n"; }
 	|                  ImportStatements TypeDeclarations { cout << "ProgramFile 4 \n"; }
 	| PackageStatement									 { cout << "ProgramFile 5 \n"; }
 	|                  ImportStatements					 { cout << "ProgramFile 6 \n"; }
-	|                                   TypeDeclarations {err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Missing \'Package Statement \'", "" );}
-	|
+	|                                   TypeDeclarations { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Missing \'Package Statement \'", "" );}
+	|													 { err->errQ->enqueue(0, 0, "Error: file is empty!", ""); }
 	;
 
 PackageStatement
@@ -482,8 +482,9 @@ ConstructorDeclaration
 	;
 
 ConstructorDeclarator
-	: IDENTIFIER OPEN_B ParameterList CLOSE_B {
-												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+	: IDENTIFIER OPEN_B						  { m = new Modifier(modifier); modifier->reset(); }
+						ParameterList CLOSE_B {
+												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, m);
 												cout << "ConstructorDeclarator 1\n";
 											  }
 	| IDENTIFIER OPEN_B CLOSE_B				  {

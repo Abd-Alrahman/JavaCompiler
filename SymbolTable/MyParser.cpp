@@ -256,11 +256,11 @@ void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 				m->reset();
 				return;
 			}
-			m->reset();
 			cout << "==============================================\n";
 			if (!d) {
 				cout << "Error[" << lineNo << ", " << colNo << "]:  data member " << this->names[i] << " already defined!";
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", this->names[i]);
+				m->reset();
 				return;
 			}
 
@@ -270,6 +270,7 @@ void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 				cout << "==================================================\n";
 				cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
 				cout << "==================================================\n";
+				m->reset();
 				return;
 			}
 			d->printDetails();

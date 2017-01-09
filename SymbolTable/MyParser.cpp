@@ -227,19 +227,18 @@ Parameter* MyParser::insertParam(char* name, int lineNo, int colNo, Modifier* m)
 	}
 	Parameter * p = st->createParam(name, m);
 	char* paramName = new char[255];
-	strcpy(paramName, p->getName());
-	p = this->pl->add(p);
-	if (!p) {
-		cout << "Error: Parameter is already declared\n";
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Parameter is already declared", paramName);
-	}
-	else {
-		cout << "=====================================================================\n";
-		cout << "Parameter " << p->getName() << " has been inserted in Symbol Table with type " << p->getType();
-		if (p->getIsFinal()) {
-			cout << " and it's final";
+	if (p && p->strc == PARAMETER) {
+		strcpy(paramName, p->getName());
+		p = this->pl->add(p);
+		if (!p) {
+			this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Parameter is already declared", paramName);
+			return NULL;
 		}
-		cout << "\n=====================================================================\n";
+		else {
+			this->errRecovery->stateQ->enqueue(lineNo, colNo, "State: Parameter has been inserted in Symbol Table ", p->getName());
+			return p;
+		}
+
 	}
 	return p;
 }

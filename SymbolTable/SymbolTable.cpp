@@ -216,6 +216,8 @@ Variable::Variable() {
 	this->type[0] = '\0';
 	this->isFinal = false;
 	this->strc = LOCALVARIABLE;
+	this->colNo = 0;
+	this->rowNo = 0;
 }
 
 Variable::~Variable() {}
@@ -328,6 +330,8 @@ DataMember::DataMember() {
 	this->type = new char[255];
 	this->type[0] = '\0';
 	this->strc = DATAMEMBER;
+	this->colNo = 0;
+	this->rowNo = 0;
 	this->initModifiers();
 }
 
@@ -431,6 +435,8 @@ Type::Type() {
 	this->scope = new Scope();
 	this->inheritedType = NULL;
 	this->strc = TYPE;
+	this->colNo = 0;
+	this->rowNo = 0;
 	this->isPublic = false;
 	this->isPrivate = false;
 	this->isProtected = false;
@@ -440,7 +446,7 @@ Type::Type() {
 
 Type::~Type() {}
 
-void Type::checkForAbstraction() {
+void Type::checkForAbstraction(ErrorRecovery* errRecovery) {
 	// There is parent class
 	if (!this->inheritedType) {
 		return;
@@ -460,7 +466,7 @@ void Type::checkForAbstraction() {
 					Function* thisFunc = (Function*)this->getScope()->m->get(parentFunc->getName());
 					// This class doesn't override parent class functions! (Abstract class overriden state)
 					if (!thisFunc) {
-						cout << "Error: " << this->name << " doesn't override abstract method " << parentFunc->getName() << endl;
+						errRecovery->errQ->enqueue(this->rowNo, this->colNo, "Error: Class doesn't override abstract method", parentFunc->getName());
 					}
 				}
 			}
@@ -478,14 +484,13 @@ bool Type::equals(Type* type) {
 	return false;
 }
 
-bool Type::isCyclicInheritance() {
+bool Type::isCyclicInheritance(ErrorRecovery* errRecovery) {
 	TypeList* typeList = new TypeList();
 	Type* temp = this;
 	while (temp->inheritedType) {
 		if (typeList->add(temp)) {
 			if (typeList->find(temp->inheritedType->name)) {
-				cout << "Error: Cyclic inheritance in class, " << temp->inheritedType->name << endl;
-				//errRecovery->errQ->enqueue(0, 0, "Error: Cyclic inheritance in class", temp->inheritedType->name);
+				errRecovery->errQ->enqueue(temp->rowNo, temp->colNo, "Error: Cyclic inheritance in class", temp->name);
 				return true;
 			}
 			temp = temp->inheritedType;
@@ -605,6 +610,8 @@ Function::Function() {
 	this->scope = new Scope();
 	this->pl = new ParamList();
 	this->strc = FUNCTION;
+	this->colNo = 0;
+	this->rowNo = 0;
 	this->initModifiers();
 }
 
@@ -652,14 +659,14 @@ bool Function::illegalCombinationOfModifiers() {
 	return false;
 }
 
-int Function::checkMethodBody(bool methodBody) {
+int Function::checkMethodBody(bool methodBody, ErrorRecovery* errRecovery) {
 	if (!this->isConstructor) {
 		if ((this->isAbstract || this->isNative) && methodBody) {
-			cout << "Error: " << this->name << " Abstracts & native methods can not have a body\n";
+			errRecovery->errQ->enqueue(this->rowNo, this->colNo, "Error: Abstracts & native methods can not have a body", this->name);
 			return 0;
 		}
 		else if (!this->isAbstract && !this->isNative && !methodBody) {
-			cout << "Error: " << this->name << " Missing method body\n";
+			errRecovery->errQ->enqueue(this->rowNo, this->colNo, "Error: Missing method body", this->name);
 			return 1;
 		}
 	}
@@ -855,7 +862,7 @@ Type * SymbolTable::getTypeParentByScope(Scope* scope, char* name) {
 	}
 }
 
-Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
+Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m, int lineNo, int colNo, ErrorRecovery* errRecovery) {
 	Variable * v = this->getVariableFromCurrentScope(name);
 	if (v) {
 		return 0;//item is exist previously
@@ -863,15 +870,14 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m) {
 	else {
 		if (m->getIsAbstract() || m->getIsNative() || m->getIsPrivate() || m->getIsProtected() || m->getIsPublic() ||
 			m->getIsStatic() || m->getIsSynchronized() || m->getIsTransient() || m->getIsVolatile()) {
-			cout << "===========================================================\n";
-			cout << "Local variable can't has access modifier other than final.\n";
-			cout << "===========================================================\n";
+			errRecovery->errQ->enqueue(v->rowNo, v->colNo, "Error: Local variable can't has access modifier other than final.", v->getName());
 		}
 		v = new Variable();
 		v->setName(name);
+		v->colNo = colNo; v->rowNo = lineNo;
 		if (v->isPrimitiveType(m->getReturnType())) {
 			v->setType(m->getReturnType());
-			cout << "Variable type is primitive" << endl;
+			errRecovery->stateQ->enqueue(v->rowNo, v->colNo, "State: Variable type is primitive type.", v->getName());
 		}
 		else {
 			Type* t = this->getTypeParent(m->getReturnType());
@@ -966,7 +972,7 @@ Parameter * SymbolTable::getParameterFromCurrentFunction(char* name){
 	}
 }
 //================= Data Member ====================
-DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m) {
+DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m, int lineNo, int colNo) {
 	DataMember * d = (DataMember*)this->getDataMemberFromCurrentScope(name);
 	if (d && d->strc == DATAMEMBER) {
 		return 0;//item is exist previously
@@ -978,6 +984,7 @@ DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m
 		d->setIsStatic(m->getIsStatic());
 		d->setIsFinal(m->getIsFinal());
 		d->setIsPublic(m->getIsPublic()); d->setIsPrivate(m->getIsPrivate()); d->setIsProtected(m->getIsProtected());
+		d->colNo = colNo; d->rowNo = lineNo;
 		if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
 			d->setIsPublic(true);
 		}
@@ -1005,13 +1012,12 @@ void SymbolTable::checkAbstractMethod(Scope* scope, int i, MapElem* elem, ErrorR
 		Function* f = (Function*)scope->m->getElemFromArr(i);
 		Type* type = (Type*)elem->getElem();
 		if (f->getIsAbstract() && type && !type->getIsAbstract()) {
-			errRecovery->errQ->enqueue(0, 0, "Class is not abstract ", type->getName());
-			cout << "Error[" << 0 << ", " << 0 << "]: Class " << type->getName() << " is not abstract\n";
+			errRecovery->errQ->enqueue(f->rowNo, f->colNo, "Error: Class is not abstract ", type->getName());
 		}
 	}
 }
 
-void SymbolTable::checkMainMethod(Scope* scope, int i, MapElem* elem) {
+void SymbolTable::checkMainMethod(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery) {
 	if (scope) {
 		Function* function = NULL;
 		if (scope->m->arr[i]) {
@@ -1024,11 +1030,11 @@ void SymbolTable::checkMainMethod(Scope* scope, int i, MapElem* elem) {
 					Type* type = (Type*)elem->getElem();
 					if (type && type->strc == TYPE && type->getIsPublic()) {
 						if (this->hasMainMethod) {
-							cout << "Error: main method already defined!\n";
+							errRecovery->errQ->enqueue(function->rowNo, function->colNo, "Error: main method already defined", function->getName());
 						}
 						else {
 							this->hasMainMethod = true;
-							cout << "Main method has been created\n";
+							errRecovery->stateQ->enqueue(function->rowNo, function->colNo, "State: Main method has been created", function->getName());
 						}
 						return;
 					}
@@ -1106,25 +1112,23 @@ void SymbolTable::checkInnerInheritance(Scope* scope, Type* type, ErrorRecovery*
 									   if (inner1) {
 										   // Error: it's Final!
 										   if (inner1->getIsFinal()) {
-											   errRecovery->errQ->enqueue(0, 0, "Final class can't be inherited from", inner1->getName());
+											   errRecovery->errQ->enqueue(inner1->rowNo, inner1->colNo, "Error: Final class can't be inherited from", inner1->getName());
 										   }
 										   // Inner inheritance state!
 										   else {
-											   cout << type->getName() << " extended successfully from " << inner1->getName() << endl;
+											   errRecovery->stateQ->enqueue(type->rowNo, type->colNo, "State: Inner inheritance state done successfully", inner1->getName());
 											   type->setInheritedType(inner1);
-											   type->checkForAbstraction();
-											   type->isCyclicInheritance();
+											   type->checkForAbstraction(errRecovery);
+											   type->isCyclicInheritance(errRecovery);
 										   }
 									   }
 									   else {
-										   errRecovery->errQ->enqueue(0, 0, "class does not exist", type->getParentName());
-										   cout << "Class " << type->getParentName() << " does not exist.\n";
+										   errRecovery->errQ->enqueue(type->rowNo, type->colNo, "Error: Class does not exist, or there is no inner inheritance", type->getParentName());
 									   }
 								   }
 							   }
 							   else {
-								   cout << "Class " << type->getParentName() << " does not exist or can't be inherited From\n";
-								   errRecovery->errQ->enqueue(0, 0, "Class does not exist or can't be inherited", type->getParentName());
+								   errRecovery->errQ->enqueue(outer2->rowNo, outer2->colNo, "Error: Class does not exist or can't be inherited, or there is no inner inheritance", type->getParentName());
 								   continue;
 							   }
 				}
@@ -1142,17 +1146,26 @@ void SymbolTable::checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRec
 		Type* inheritedType = (Type*)this->getTypeParentByScope(scope, type->getParentName());
 		if (inheritedType && inheritedType->strc == TYPE) {
 			if (inheritedType->getIsFinal()) {
-				errRecovery->errQ->enqueue(0, 0, "Final class can't be inherited from", inheritedType->getName());
+				errRecovery->errQ->enqueue(type->rowNo, type->colNo, "Error: Final class can't be inherited from", inheritedType->getName());
 			}
 			else {
+				char* chr = new char[255]; chr[0] = '\0';
+				strcpy(chr, "State: Outer inheritance ");
+				strcat(chr, type->getName());
+				strcat(chr, " extends ");
+;				errRecovery->stateQ->enqueue(type->rowNo, type->colNo, chr, inheritedType->getName());
 				type->setInheritedType(inheritedType);
-				type->checkForAbstraction();
-				type->isCyclicInheritance();
+				type->checkForAbstraction(errRecovery);
+				type->isCyclicInheritance(errRecovery);
 			}
 			
 		}
 		else {
-			cout << "Class doesn't exist.\n";
+			char* chr = new char[255]; chr[0] = '\0';
+			strcpy(chr, "Error: Outer inheritance ");
+			strcat(chr, type->getName());
+			strcat(chr, ", class doesn't exist");
+			errRecovery->errQ->enqueue(type->rowNo, type->colNo, chr, type->getParentName());
 		}
 		this->checkInnerInheritance(scope, type, errRecovery);
 	}
@@ -1208,7 +1221,7 @@ void SymbolTable::checkFileClassNames(ErrorRecovery* errRecovery) {
 						if (elem1->getStrc() == TYPE) {
 							Type* type1 = (Type*)elem1->getElem();
 							if (strcmp(type->getFileName(), type1->getFileName()) == 0) {
-								cout << "Error: file " << type->getFileName() << " can't has more than one class\n";
+								errRecovery->errQ->enqueue(type1->rowNo, type1->rowNo, "Error: file can't has more than one class", type->getFileName());
 							}
 						}
 					}
@@ -1233,7 +1246,7 @@ void SymbolTable::checkAtTheEnd(Scope* scope, MapElem* elem, ErrorRecovery* errR
 								   break;
 					}
 					case FUNCTION: {
-									   this->checkMainMethod(scope, i, elem);
+									   this->checkMainMethod(scope, i, elem, errRecovery);
 									   this->checkAbstractMethod(scope, i, elem, errRecovery);
 									   this->checkMethodOverriding(scope, i, elem, errRecovery);
 									   this->checkNexts(scope, i, errRecovery);

@@ -3,26 +3,13 @@
 	- Determining if variable is abstract or not.
 	- Illegal Combination of modifiers (public private - abstract final)
 	- Extending more than one class
-	- Creating default constructor for class.
-	- Final class can't be inherited from.
 	- Inheriting from abstract class then all abstract methods must be implemented.
-	- Cyclic inheritanc
-		eg1: a extends a
-		eg2: a extends b
-			 b extends a
-		eg3: a extends b
-			 b extends c
-			 c extends a
-	- Inner inheritance.
-	- Extending from outer class.
-	- DM & Constructor & Class same names.
 ------------------------------------------------------
 1- Variable
 	- Modifiers with variables error other than final.
 	- Defining multiple variables for one type (int x, y, z).
 	- Error Repeated variable name.
 	- Determining if variable is final or not.
-	- Trying defining object from a class. ??
 --------------
 2- Data Member
 	- Default Public Modifier.
@@ -37,22 +24,18 @@
 	- Determining if method is a constructor.
 	- Repeated method name.
 	- Defining Different Modifiers.
-	- Creating default constructor if it doesn't exist.
 	- Same name of constructor with return type.
 	- Constructor can't be abstract or final.
-	- Overriding problems.
 	- Overloading problems.
 	- Abstract methods must be declared in abstract class.
 	- Native & abstract methods can't have body.
 	- Missing method body.
-	- Missing main method.
 ----------------------------------------------------------
 4- Parametrs
 	- Simple parameter.
 	- Final Parameter.
 	- Public parameter, or repeated modifier.
 	- Assigning parameter to function.
-	- Default argument state with ordering.
 ----------------------------------------------------------
 Overriding	-> Same parameters - different names - General state.
 			-> Error final overriding.

@@ -59,6 +59,8 @@ private:
 	char* type;
 	bool isFinal;
 public:
+	int colNo;
+	int rowNo;
 	enum structure strc;
 	Variable();
 	~Variable();
@@ -81,6 +83,8 @@ private:
 	bool isProtected;
 	void initModifiers();
 public:
+	int colNo;
+	int rowNo;
 	enum structure strc;
 	DataMember();
 	~DataMember();
@@ -101,6 +105,7 @@ public:
 	bool illegalCombinationOfModifiers();
 	void printDetails();
 };
+class ErrorRecovery;
 class Type {
 private:
 	char* name;
@@ -115,11 +120,13 @@ private:
 	Scope * scope;
 public:
 	Type* next;
+	int colNo;
+	int rowNo;
 	enum structure strc;
 	Type();
 	~Type();
-	void checkForAbstraction();
-	bool isCyclicInheritance();
+	void checkForAbstraction(ErrorRecovery* errRecovery);
+	bool isCyclicInheritance(ErrorRecovery* errRecovery);
 	void setName(char* n);
 	char* getName();
 	void setParentName(char* n);
@@ -160,6 +167,7 @@ public:
 	bool isEmpty();
 	void print();
 };
+class ErrorRecovery;
 class Function {
 private:
 	char* name;
@@ -178,6 +186,8 @@ private:
 	char* returnType;
 	void initModifiers();
 public:
+	int colNo;
+	int rowNo;
 	enum structure strc;
 	ParamList* pl;
 	Parameter** parameters;
@@ -185,7 +195,7 @@ public:
 	~Function();
 	bool equals(Function* f);
 	void printDetails();
-	int checkMethodBody(bool methodBody);
+	int checkMethodBody(bool methodBody, ErrorRecovery* errRecovery);
 	bool isOverloadingState(Function* f);
 	bool constructorModifiersError();
 	bool illegalCombinationOfModifiers();
@@ -228,7 +238,7 @@ private:
 	void checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRecovery* errRecovery);
 	void checkInnerInheritance(Scope* scope, Type* type, ErrorRecovery* errRecovery);
 	void checkAbstractMethod(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery);
-	void checkMainMethod(Scope* scope, int i, MapElem* elem);
+	void checkMainMethod(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery);
 	void checkNexts(Scope* scope, int i, ErrorRecovery* errRecovery);
 
 	void printNexts(Scope* scope, int index, ErrorRecovery* errRecovery);
@@ -244,11 +254,11 @@ public:
 	void checkAtTheEnd(Scope* scope, MapElem* elem, ErrorRecovery* errRecovery);
 	Type* getTypeParent(char* name);
 	Type* getTypeParentByScope(Scope* scope, char* name);
-	Variable * insertVariableInCurrentScope(char* name, Modifier* m);
+	Variable * insertVariableInCurrentScope(char* name, Modifier* m, int lineNo, int colNo, ErrorRecovery* errRecovery);
 	Variable * getVariableFromCurrentScope(char* name);
 	Parameter * createParam(char* name, Modifier* m);
 	Parameter * getParameterFromCurrentFunction(char* name);
-	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m);
+	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m, int lineNo, int colNo);
 	DataMember * getDataMemberFromCurrentScope(char* name);
 	void print(Scope* scope, ErrorRecovery* errRecovery);
 	SymbolTable(void);

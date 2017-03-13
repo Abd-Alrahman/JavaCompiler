@@ -171,6 +171,8 @@ ProgramFile
 	|                  ImportStatements					 { cout << "ProgramFile 6 \n"; }
 	|                                   TypeDeclarations { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Missing \'Package Statement \'", "" );}
 	|													 { err->errQ->enqueue(0, 0, "Error: file is empty!", ""); }
+	| PackageStatement ImportStatements	FieldVariableDeclaration { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error : illegalVariableDeclaration  \'", "" ); }
+	| FieldVariableDeclaration { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error : illegalVariableDeclaration  \'", "" ); }
 	;
 
 PackageStatement
@@ -384,7 +386,7 @@ MethodDeclaration
 																 }
 	| Modifiers TypeSpecifier Modifiers MethodDeclarator Throws MethodBody { 
 																			 $<function>$ = p->finishFunctionDeclaration($<function>4, p->methodBody);
-																			 err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error modifier return type", $<r.str>1);
+																			 err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error: Modifier orders return type", $<r.str>1);
 																		   }
 	| Modifiers TypeSpecifier MethodDeclarator        MethodBody {
 																	$<function>$ = p->finishFunctionDeclaration($<function>3, p->methodBody);
@@ -392,7 +394,7 @@ MethodDeclaration
 																 }
 	| Modifiers TypeSpecifier Modifiers  MethodDeclarator    MethodBody {
 																		   $<function>$ = p->finishFunctionDeclaration($<function>4, p->methodBody);
-																		   err->errQ->enqueue($<r.myLineNo>5,$<r.myColNo>5,"Error modifier return type", $<r.str>1);
+																		   err->errQ->enqueue($<r.myLineNo>5,$<r.myColNo>5,"Error: Modifier orders return type", $<r.str>1);
 																		}
 	|           TypeSpecifier MethodDeclarator Throws MethodBody {
 																	$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
@@ -945,6 +947,7 @@ void main(void)
 			f->open(path,ifstream::in);
 			lexer = new yyFlexLexer(f);
 			parser->parse();
+			p->st->checkFileClassNames(p->errRecovery);
 			if(!err->errQ->isEmpty())						   
 				err->printErrQueue();
 				
@@ -956,6 +959,7 @@ void main(void)
 			cout << "------------------------------\n";
 		}
 		p->st->checkAtTheEnd(p->st->rootScope, NULL, p->errRecovery);
+		
 		if (!p->errRecovery->errQ->isEmpty())
 				p->errRecovery->printErrQueue();
 		freopen("stFile.txt","w" ,stdout);

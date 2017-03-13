@@ -185,15 +185,13 @@ void MyParser::insertVar(int lineNo, int colNo, Modifier* m) {
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
 	{
 		if (this->names[i] && this->names[i][0]) {
-			Variable * v = st->insertVariableInCurrentScope(this->names[i], m);
+			Variable * v = st->insertVariableInCurrentScope(this->names[i], m, lineNo, colNo, this->errRecovery);
 			cout << "=================================================\n";
 			if (!v) {
-				cout << "Error variable " << v->getName() << " already defined!";
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", v->getName());
 				return;
 			}
 			if (m->getReturnType() && !m->getReturnType()[0]) {
-				cout << "Error: missing return type for variable\n";
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: missing return type for variable", v->getName());
 			}
 			cout << "Variable " << v->getName() << " has been created\n";
@@ -249,16 +247,14 @@ void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 	{
 		if (this->names[i] && this->names[i][0]) {
 			// Check for native, abstract and synchronized.
-			DataMember * d = st->insertDataMemberInCurrentScope(this->names[i], m);
+			DataMember * d = st->insertDataMemberInCurrentScope(this->names[i], m, lineNo, colNo);
 			if (m->getIsAbstract() || m->getIsNative() || m->getIsSynchronized()) {
-				cout << "Error[" << lineNo << ", " << colNo << "]: " << this->names[i] << " Modifier native, abstract & synchronized are not allowed here\n";
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Modifier native, abstract & synchronized are not allowed here", "");
 				m->reset();
 				return;
 			}
 			cout << "==============================================\n";
 			if (!d) {
-				cout << "Error[" << lineNo << ", " << colNo << "]:  data member " << this->names[i] << " already defined!";
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", this->names[i]);
 				m->reset();
 				return;
@@ -288,18 +284,18 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 	return d;
 }
 //========= Types =================
-Type * MyParser::createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName) {
+Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char* inheritedTypeName) {
 	Type* t = (Type*)this->st->getTypeParent(name);
 
 	if(t && t->strc == TYPE) {
-		this->errRecovery->errQ->enqueue(lineno, colno, "Class already exists", name);
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Class already exists", name);
 		return 0;
 	}
 
 	t = new Type();
 
 	// Set class data
-	if (!this->setTypeData(t, name, m, lineno, colno, inheritedTypeName)) {
+	if (!this->setTypeData(t, name, m, lineNo, colNo, inheritedTypeName)) {
 		m->reset();
 		return 0;
 	}
@@ -335,9 +331,8 @@ Type * MyParser::finishTypeDeclaration(Type* t) {
 			cout << "Default constructor has been created with name: " << f->getName() << endl;
 			cout << "==========================================================\n";
 		}
-	}
-	if (this->st->currScope && this->st->currScope->parent)
 		this->st->currScope = this->st->currScope->parent;
+	}
 	if (t)
 		cout << "=============== Class " << t->getName() << " closed ================" << endl;
 	return t;
@@ -350,6 +345,7 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 	t->setIsPublic(m->getIsPublic()); t->setIsPrivate(m->getIsPrivate()); t->setIsProtected(m->getIsProtected());
 	t->setIsFinal(m->getIsFinal());
 	t->setIsAbstract(m->getIsAbstract());
+	t->colNo = colNo; t->rowNo = lineNo;
 
 	// Modifiers are not explicitly written
 	if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
@@ -427,14 +423,12 @@ Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier*
 Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
 	if (f) {
 		cout << "=============== Function " << f->getName() << " closed ================" << endl;
-		int methodBodyState = f->checkMethodBody(methodBody);
+		int methodBodyState = f->checkMethodBody(methodBody, this->errRecovery);
 		if (methodBodyState == 0) {
-			cout << "Error: Abstracts & native methods can not have a body" << endl;
-			this->errRecovery->errQ->enqueue(0, 0, "Error: Abstracts & native methods can not have a body", f->getName());
+			this->errRecovery->errQ->enqueue(f->rowNo, f->colNo, "Error: Abstracts & native methods can not have a body", f->getName());
 		}
 		else if (methodBodyState == 1) {
-			cout << "Error: Missing method body" << endl;
-			this->errRecovery->errQ->enqueue(0, 0, "Error: Missing method body", f->getName());
+			this->errRecovery->errQ->enqueue(f->rowNo, f->colNo, "Error: Missing method body", f->getName());
 		}
 		this->st->currScope = this->st->currScope->parent;
 	}
@@ -445,6 +439,8 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	// Setting function modifiers
 	f->setName(name);
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
+	
+	f->colNo = colNo; f->rowNo = lineNo;
 
 	// Modifiers are not explicitly written
 	if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
@@ -457,10 +453,7 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 
 	// Checking if function has different modifiers
 	if (f->illegalCombinationOfModifiers()) {
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
-		cout << "==================================================\n";
-		cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
-		cout << "==================================================\n";
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Illegal combination of modifiers", f->getName());
 		return false;
 	}
 
@@ -479,10 +472,7 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 		if (t && t->strc == TYPE) {
 			 if(strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
 				if (f->constructorModifiersError()) {
-					cout << "==============================\n";
-					cout << "Error in Constructor Modifiers\n";
-					cout << "==============================\n";
-					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error in Constructor Modifiers", "");
+					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Illegal combination of Constructor Modifiers", f->getName());
 					return false;
 				}
 				else {
@@ -500,8 +490,7 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 
 	// Missing Return Type
 	if (!f->getIsConstructor() && f->getReturnType() && !f->getReturnType()[0]) {
-		this->errRecovery->errQ->enqueue(lineNo, colNo, "Missing return type", "");
-		cout << "Missing return type" << endl;
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Missing return type", f->getName());
 	}
 
 	return true;

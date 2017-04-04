@@ -256,7 +256,7 @@ public:
 	Type* getTypeParentByScope(Scope* scope, char* name);
 	Variable * insertVariableInCurrentScope(char* name, Modifier* m, int lineNo, int colNo, ErrorRecovery* errRecovery);
 	Variable * getVariableFromCurrentScope(char* name);
-	Parameter * createParam(char* name, Modifier* m);
+	Parameter * createParam(char* name, Modifier* m, ErrorRecovery* errRecovery);
 	Parameter * getParameterFromCurrentFunction(char* name);
 	DataMember * insertDataMemberInCurrentScope(char* name, Modifier* m, int lineNo, int colNo);
 	DataMember * getDataMemberFromCurrentScope(char* name);

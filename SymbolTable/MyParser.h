@@ -46,18 +46,6 @@ public:
 	char* getReturnType();
 	void reset();
 };
-
-class Helper {
-private:
-	int bracketsCount;
-public:
-	Helper();
-	~Helper();
-	void setBracketsCount(int brktsCount);
-	int getBracketsCount();
-	void brcktsCountInc();
-	void brcktsCountDec();
-};
 //======================================================================
 class MyParser
 {
@@ -70,7 +58,6 @@ public:
 	char* rawClassName;
 	SymbolTable * st;
 	ErrorRecovery * errRecovery;
-	Helper * helper;
 	char** names;
 	ParamList* pl;
 	bool methodBody;
@@ -78,9 +65,9 @@ public:
 	bool defaultParamState;
 	MyParser(void);
 	~MyParser(void);
-	void insertVar(int lineNo, int colNo, Modifier* m);
+	Variable** insertVar(int lineNo, int colNo, Modifier* m);
 	Variable* addVariableToCurrentScope(Variable* v);
-	void insertMem(int lineNo, int colNo, Modifier* m);
+	DataMember** insertMem(int lineNo, int colNo, Modifier* m);
 	DataMember* addDataMemberToCurrentScope(DataMember* d);
 	Parameter* insertParam(char* name, int lineNo, int colNo, Modifier* m);
 	Type * createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName);

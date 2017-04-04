@@ -18,7 +18,7 @@ void* MapElem::getElem() {
 	return this->elem;
 }
 
-MapElem* MapElem::getNext(){
+MapElem* MapElem::getNext() {
 	return this->next;
 }
 
@@ -35,18 +35,16 @@ structure MapElem::getStrc() {
 }
 
 //-------------------------//
-MyMap::MyMap(void)
-{
+MyMap::MyMap(void) {
 	for(int i=0; i<this->mapLength; i++) {
 		this->arr[i] = 0;
 	}
 }
 
-MyMap::~MyMap(void)
-{
+MyMap::~MyMap(void) {
 }
 
-int MyMap::hash(char* name){
+int MyMap::hash(char* name) {
 	unsigned int i;
 	int retVal = 0;
 	for(i = 0 ; i < strlen(name); i++)
@@ -84,7 +82,7 @@ void* MyMap::getElemFromArr(int index) {
 void* MyMap::get(char* name) {
 	int index = this->hash(name);
 	MapElem * temp = this->arr[index];
-	while((temp != 0) && (strcmp(temp->getName(), name) != 0)){
+	while((temp != 0) && (strcmp(temp->getName(), name) != 0)) {
 		temp = temp->getNext();
 	}
 	if(temp == 0)

@@ -3,11 +3,16 @@
 	#include <iostream>
 	using namespace std;
 	#include <FlexLexer.h>
+	#include "JavaCompiler\AST.h"
 	#include "SymbolTable/MyParser.h"
 	#include<io.h>
 	#include<vector>
 	#include<string>
 	#include <fstream>
+
+
+
+
 
 	int yylex(void);
 	int yyparse();
@@ -15,6 +20,9 @@
 	
 	FlexLexer* lexer = new yyFlexLexer();
 	ErrorRecovery* err = new ErrorRecovery();
+	DataMember **datamember = new DataMember*[20];
+	Variable** vars = new Variable*[20];
+	Parameter* parameter = new Parameter();
 
 	class Parser
 	{
@@ -24,22 +32,22 @@
 			return yyparse();
 		}
 	};
-
+	
+	AST * ast = new AST();
 	MyParser * p = new MyParser();
 	Modifier * modifier = new Modifier();
 	Modifier * m;
-	Type * type;
-
+	Type * type = new Type();
+	Function * function = new Function();
 
 	int numo = 0;
 	int numc = 0;
-
 %}
 
 
 
 %union{
-	struct R {
+	struct R{
 		int i;
 		float f;
 		char c;
@@ -49,14 +57,13 @@
 		int mynumopen;
 		int mynumclose;
 		}r;
+		class TreeNode * tn;
 		class YaccSimpleType * yaccSimpleType;
 		class Variable * variable;
 		class DataMember * dm;
 		class Function * function;
 		class Type * type;
 		class Parameter * param;
-
-
 	}
 
 %token ABSTRACT ASSERT
@@ -100,19 +107,20 @@
 %nonassoc e8
 %nonassoc e9
 %nonassoc e10
-%nonassoc BOOLEAN NEW JNULL SUPER THIS VOID OPEN_B EXC_MARK DURA INT STRING SHORT LONG FLOAT DOUBLE CHAR BYTE 
+%nonassoc BOOLEAN NEW JNULL SUPER THIS VOID OPEN_B EXC_MARK DURA STRING INT SHORT LONG FLOAT DOUBLE CHAR BYTE 
 %nonassoc INTEGER_VALUE LONG_VALUE FLOAT_VALUE CHAR_VALUE STRING_VALUE BOOLLIT LITERAL
 %nonassoc e11
 %nonassoc e16 e21
 %nonassoc SEMICOLON
 %nonassoc e12 e13
-%nonassoc OPEN_D
+%nonassoc OPEN_D 
 %nonassoc IDENTIFIER OP_DIM
-%nonassoc e14 
+%nonassoc e14
 %nonassoc e17
 %nonassoc e18
 %nonassoc e19
 %nonassoc FINALLY CATCH 
+
 
 %start CompilationUnit
 
@@ -120,12 +128,17 @@
 
 TypeSpecifier
 	: TypeName %prec e14  	{ cout << "TypeSpecifier 1\n"; }
-	| TypeName Dims { cout << "TypeSpecifier 2\n"; }
+	| TypeName Dims			{ cout << "TypeSpecifier 2\n"; }
 	;
 
 TypeName
 	: PrimitiveType { cout << "TypeName 1\n"; }
-	| QualifiedName %prec e5 { cout << "TypeName 2\n"; if (modifier->getReturnType() && !modifier->getReturnType()[0]) modifier->setReturnType($<r.str>1); }
+	| QualifiedName %prec e5 {  cout << "TypeName 2\n";
+								char* name = $<r.str>1;
+								if (modifier->getReturnType() && !modifier->getReturnType()[0]) {
+									modifier->setReturnType(name);
+								}
+							}
 	;
 
 ClassNameList
@@ -159,17 +172,21 @@ CompilationUnit
 						cout << "brackets amazing" << endl;
 					}
 					cout <<"-----------\nTHE END !\n";
+					ast->print($<tn>1,0);
+					cout <<"------------------------------------------------- \n";
+					ast->check($<tn>1,0,p);
 					YYABORT;
 				  }
 
+
 ProgramFile
-	: PackageStatement ImportStatements TypeDeclarations { cout << "ProgramFile 1 \n"; }
+	: PackageStatement ImportStatements TypeDeclarations { $<tn>$=$<tn>3;cout << "ProgramFile 1 \n"; }
 	| PackageStatement ImportStatements			         { cout << "ProgramFile 2 \n"; }
-	| PackageStatement                  TypeDeclarations { cout << "ProgramFile 3 \n"; }
-	|                  ImportStatements TypeDeclarations { cout << "ProgramFile 4 \n"; }
+	| PackageStatement                  TypeDeclarations { $<tn>$=$<tn>2;cout << "ProgramFile 3 \n"; }
+	|                  ImportStatements TypeDeclarations { $<tn>$=$<tn>2; cout << "ProgramFile 4 \n"; }
 	| PackageStatement									 { cout << "ProgramFile 5 \n"; }
 	|                  ImportStatements					 { cout << "ProgramFile 6 \n"; }
-	|                                   TypeDeclarations { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Missing \'Package Statement \'", "" );}
+	|                                   TypeDeclarations { $<tn>$=$<tn>1; err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Missing \'Package Statement \'", "" );}
 	|													 { err->errQ->enqueue(0, 0, "Error: file is empty!", ""); }
 	| PackageStatement ImportStatements	FieldVariableDeclaration { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error : illegalVariableDeclaration  \'", "" ); }
 	| FieldVariableDeclaration { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error : illegalVariableDeclaration  \'", "" ); }
@@ -187,13 +204,13 @@ PackageStatement
 
 
 TypeDeclarations
-	: TypeDeclarationOptSemi { cout << "TypeDeclarations\n"; }
-	| TypeDeclarations TypeDeclarationOptSemi
+	: TypeDeclarationOptSemi { cout << "TypeDeclarations\n"; $<tn>$=ast->createNode($<tn>1, 0, classListNode); }
+	| TypeDeclarations TypeDeclarationOptSemi {$<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>2, 0, classListNode));}
 	;
 
 TypeDeclarationOptSemi
-    : TypeDeclaration { cout << "TypeDeclarationOptSemi\n"; }
-    | TypeDeclaration SemiColons
+    : TypeDeclaration  { cout << "TypeDeclarationOptSemi\n"; $<tn>$=$<tn>1; }
+    | TypeDeclaration SemiColons  { cout << "TypeDeclarationOptSemi2 \n"; $<tn>$=$<tn>1; }
     ;
 
 ImportStatements
@@ -208,78 +225,82 @@ ImportStatement
 
 
 QualifiedName
-	: IDENTIFIER { cout << "QualifiedName\n"; }
-	| QualifiedName POINT IDENTIFIER
+	: IDENTIFIER { cout << "QualifiedName 1\n"; 
+				   char * name = $<r.str>1;
+				   $<tn>$=ast->createNode(0, 0, QualifiedName ,name); 
+				 }
+	| QualifiedName POINT IDENTIFIER {  cout << "QualifiedName 2 \n";
+										char * name = $<r.str>3;
+										$<tn>$=ast->createNode($<tn>1, 0, QualifiedNamePIdentifier ,name); 
+									 }
 	;
 
 TypeDeclaration
-	: ClassHeader OPEN_D FieldDeclarations CLOSE_D { cout << "TypeDeclaration 1\n"; 
-													 numo += $<r.mynumopen>4;
-													 numc += $<r.mynumclose>4;														
-													 type = $<type>1 = p->finishTypeDeclaration($<type>1); 
-													 
-												   }
-	| ClassHeader OPEN_D CLOSE_D				   { cout << "TypeDeclaration 2\n";
-														numo += $<r.mynumopen>3 ;
-														numc += $<r.mynumclose>3;
-													 type = $<type>1 = p->finishTypeDeclaration($<type>1); 
-												   }
-
-	| ClassHeader CLOSE_D						   { 
-														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" );
-													}
-	| ClassHeader OPEN_D  %prec e2					{ 
-														err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'}\'", "" );
-													}
-	| ClassHeader %prec e4							{ 
-														err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'{}\'", "" );
-													}
+	: ClassHeader ClassBody  { cout << "TypeDeclaration 1\n"; 
+							   
+							   numo += $<r.mynumopen>2;
+							   numc += $<r.mynumclose>2;														
+							   type = p->finishTypeDeclaration(type); 
+							   $<tn>$=ast->createNode($<tn>1,$<tn>2, classNode,type);   
+							 }
+	| ClassHeader CLOSE_D                { err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" ); $<tn>$=ast->createNode($<tn>1,0 , classNode);}
+	| ClassHeader OPEN_D  %prec e2		           { err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'}\'", "" ); $<tn>$=ast->createNode($<tn>1,0 , classNode);}
+	| ClassHeader %prec e4	                       { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'{}\'", "" ); $<tn>$=ast->createNode($<tn>1,0 , classNode);}
 	;
 
+ClassBody
+	: OPEN_D FieldDeclarations CLOSE_D {cout<<"ClassBody 1 \n"; $<tn>$=ast->createNode($<tn>2,0 , ClassBody);}
+	| OPEN_D CLOSE_D				   {cout<<"ClassBody 2 \n"; $<tn>$=ast->createNode(0,0 , ClassBody);}
+	;
+
+
+
 ClassHeader
-	: Modifiers ClassWord IDENTIFIER Extends Interfaces { 
-															type = $<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
-															cout << "ClassHeader 1\n"; 
+	: Modifiers ClassWord IDENTIFIER Extends Interfaces {   cout << "ClassHeader 1\n";
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
+															$<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	| Modifiers ClassWord IDENTIFIER Extends			{
-															type = $<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
-															cout << "ClassHeader 2\n"; 
+	| Modifiers ClassWord IDENTIFIER Extends			{   cout << "ClassHeader 2\n"; 
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>4);
+														    $<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	| Modifiers ClassWord IDENTIFIER       Interfaces	{ 
-															type = $<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
-															cout << "ClassHeader 3\n"; 
+
+	| Modifiers ClassWord IDENTIFIER       Interfaces	{	cout << "ClassHeader 3\n"; 
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
+ 														    $<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	|           ClassWord IDENTIFIER Extends Interfaces { 
-															type = $<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
-															cout << "ClassHeader 4\n"; 
+	|           ClassWord IDENTIFIER Extends Interfaces { cout << "ClassHeader 4\n"; 
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
+														    $<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	| Modifiers ClassWord IDENTIFIER					{ 
-															type = $<type>$ = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
-															cout << "ClassHeader 5\n"; 
+	| Modifiers ClassWord IDENTIFIER					{ cout << "ClassHeader 5\n"; 
+															type = p->createType($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
+														    $<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	| QualifiedName ClassWord IDENTIFIER				{ 
-															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'Modifier\' but given ",$<r.str>1);
+	| QualifiedName ClassWord IDENTIFIER				{ err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected \'Modifier\' put givin ",$<r.str>1);
+	                                                      $<tn>$=ast->createNode(0,0 , classHeader); 
 														}
-	|           ClassWord IDENTIFIER Extends			{ 
-															type = $<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
-															cout << "ClassHeader 6\n"; 
+	|           ClassWord IDENTIFIER Extends			{ cout << "ClassHeader 6\n"; 
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, $<r.str>3);
+														    $<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	|           ClassWord IDENTIFIER       Interfaces	{ 
-															type = $<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
-															cout << "ClassHeader 7\n"; 
+	|           ClassWord IDENTIFIER       Interfaces	{ 	cout << "ClassHeader 7\n"; 
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");	
+															$<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	|           ClassWord IDENTIFIER					{ 
-															type = $<type>$ = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
+	|           ClassWord IDENTIFIER					{ 	
+															type = p->createType($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier, "");
 															cout << "ClassHeader 8\n"; 
+															$<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	| Modifiers ClassWord %prec e7			            { 
-															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 1","" );
+	| Modifiers ClassWord %prec e7			            { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 1","" );
+														  $<tn>$=ast->createNode(0,0 , classHeader);
+	                                                    }
+	|		    ClassWord %prec e7			            { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 3","" );
+	                                                      $<tn>$=ast->createNode(0,0 , classHeader);
 														}
-	|		    ClassWord %prec e7			            { 
-															err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected <identifier> 2","" );
-														}
-	|           ClassWord Extends						{ 
-															err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"illegal start class","" );
+	|           ClassWord Extends						{ err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"illegal start class","" );
+	                                                      $<tn>$=ast->createNode(0,0 , classHeader);
 														}
 	;
 
@@ -323,127 +344,131 @@ Interfaces
 	;
 
 FieldDeclarations
-	: FieldDeclarationOptSemi { cout << "FieldDeclarations\n"; }
-    | FieldDeclarations FieldDeclarationOptSemi
+	: FieldDeclarationOptSemi { cout << "FieldDeclarations\n"; $<tn>$=ast->createNode($<tn>1,0 , FildDeclarationList);}
+    | FieldDeclarations FieldDeclarationOptSemi {$<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>2, 0, FildDeclarationList));}
 	;
 
 FieldDeclarationOptSemi
-    : FieldDeclaration { cout << "FieldDeclarationOptSemi\n"; }
-    | FieldDeclaration SemiColons
+    : FieldDeclaration { cout << "FieldDeclarationOptSemi 1\n"; $<tn>$=ast->createNode($<tn>1,0 , FildDeclarationNode);}
+    | FieldDeclaration SemiColons { cout << "FieldDeclarationOptSemi 2\n"; $<tn>$=ast->createNode($<tn>1,0 , FildDeclarationNode);}
     ;
 
 FieldDeclaration
-	: FieldVariableDeclaration SEMICOLON { cout << "FieldDeclaration 1\n"; }
-	| FieldVariableDeclaration %prec e11 { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected semicolon","");}
-	| MethodDeclaration					 { bool methodBody = false; 
-										   cout << "FieldDeclaration 2\n"; 
+	: FieldVariableDeclaration SEMICOLON { cout << "FieldDeclaration 1\n"; $<tn>$ = $<tn>1; }
+	| FieldVariableDeclaration %prec e11 { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :expected semicolon",""); $<tn>$ = $<tn>1;}
+	| MethodDeclaration					 { cout << "FieldDeclaration 2\n";
+										   $<tn>$ = $<tn>1;
+										   bool methodBody = false;   
 										 }
-	| ConstructorDeclaration			 { cout << "FieldDeclaration 3\n"; }
-	| StaticInitializer					 { cout << "FieldDeclaration 4\n"; }
-    | NonStaticInitializer				 { cout << "FieldDeclaration 5\n"; }
-    | TypeDeclaration					 { cout << "FieldDeclaration 6\n"; }
+	| ConstructorDeclaration			 { cout << "FieldDeclaration 3\n";$<tn>$ = $<tn>1; }
+	| StaticInitializer					 { cout << "FieldDeclaration 4\n"; $<tn>$ = $<tn>1;}
+    | NonStaticInitializer				 { cout << "FieldDeclaration 5\n"; $<tn>$ = $<tn>1;}
+    | TypeDeclaration					 { cout << "FieldDeclaration 6\n"; $<tn>$ = $<tn>1;}
 	;
 
 FieldVariableDeclaration
-	: Modifiers TypeSpecifier VariableDeclarators	{ 
-														p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
-														cout << "FieldVariableDeclaration 1\n";
-														p->resetNames();
-													}
-	|           TypeSpecifier VariableDeclarators	{ 
-														p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
-														cout << "FieldVariableDeclaration 2\n";
-														p->resetNames();
-													}
+	: Modifiers TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 1\n";
+												    datamember = p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
+													p->resetNames(); 
+													$<tn>$=ast->createNodeData(datamember);	
+												  }
+	|           TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 2\n";
+													p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
+													p->resetNames(); 
+													$<tn>$=ast->createNode($<tn>2,0,DataMemberNode);		
+												  }
 	;
 
 VariableDeclarators
-	: VariableDeclarator { cout << "VariableDeclarators\n"; }
-	| VariableDeclarators COMMA VariableDeclarator
+	: VariableDeclarator { cout << "VariableDeclarators\n"; $<tn>$=ast->createNode($<tn>1, 0, VariableDeclaratorListNode);}
+	| VariableDeclarators COMMA VariableDeclarator {$<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, VariableDeclaratorListNode));}
 	;
 
 VariableDeclarator
-	: DeclaratorName							{ p->addToNames($<r.str>1); cout << "VariableDeclarator 1\n"; }
-	| DeclaratorName ASSIGN VariableInitializer { p-> addToNames($<r.str>1); cout << "VariableDeclarator 2\n"; }
+	: DeclaratorName							{ p->addToNames($<r.str>1); cout << "VariableDeclarator 1\n"; $<tn>$=ast->createNode(0, 0, VariableDeclaratorNode);}
+	| DeclaratorName ASSIGN VariableInitializer { p->addToNames($<r.str>1); cout << "VariableDeclarator 2\n"; $<tn>$=ast->createNode($<tn>3, 0, VariableDeclaratorNode);}
 	;
 
 VariableInitializer
-	: Expression					   { cout << "VariableInitializer 1\n"; }
-	| OPEN_D CLOSE_D				   { cout << "VariableInitializer 2\n"; }
-    | OPEN_D ArrayInitializers CLOSE_D { cout << "VariableInitializer 3\n"; }
+	: Expression					   { cout << "VariableInitializer 1\n"; $<tn>$=ast->createNode($<tn>1, 0, VariableInitializer);}
+	| OPEN_D CLOSE_D				   { cout << "VariableInitializer 2\n"; $<tn>$=ast->createNode(0, 0, VariableInitializer);}
+    | OPEN_D ArrayInitializers CLOSE_D { cout << "VariableInitializer 3\n";  $<tn>$=ast->createNode($<tn>2, 0, VariableInitializer);}
     ;
 
 ArrayInitializers
-	: VariableInitializer						  { cout << "ArrayInitializers 1\n"; }
-	| ArrayInitializers COMMA VariableInitializer { cout << "ArrayInitializers 2\n"; }
-	| ArrayInitializers COMMA					  { cout << "ArrayInitializers 3\n"; }
+	: VariableInitializer						  { cout << "ArrayInitializers 1\n"; $<tn>$=ast->createNode($<tn>1, 0, ArrayInitializerListNode);}
+	| ArrayInitializers COMMA VariableInitializer { cout << "ArrayInitializers 2\n"; $<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, ArrayInitializerListNode));}
+	| ArrayInitializers COMMA					  { cout << "ArrayInitializers 3\n"; $<tn>$ = ast->addToLastRight($<tn>1, ast->createNode(0, 0, ArrayInitializerListNode));}
 	;
 
 MethodDeclaration
-	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3, p->methodBody);
-																	cout << "MethodDeclaration 1\n";
+	: Modifiers TypeSpecifier MethodDeclarator Throws MethodBody {  cout << "MethodDeclaration 1\n";
+																	function = p->finishFunctionDeclaration(function, p->methodBody);
+																	$<tn>$=ast->createNode($<tn>3,$<tn>5 , functionNode,function);
 																 }
-	| Modifiers TypeSpecifier Modifiers MethodDeclarator Throws MethodBody { 
-																			 $<function>$ = p->finishFunctionDeclaration($<function>4, p->methodBody);
-																			 err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error: Modifier orders return type", $<r.str>1);
+	| Modifiers TypeSpecifier Modifiers MethodDeclarator Throws MethodBody { err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error modifier return type", $<r.str>1);
+	  																		 function = p->finishFunctionDeclaration(function, p->methodBody);	
+																			 $<tn>$=ast->createNode($<tn>4,$<tn>6 , functionNode,function);	
 																		   }
-	| Modifiers TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>3, p->methodBody);
-																	cout << "MethodDeclaration 2\n";
+	| Modifiers TypeSpecifier MethodDeclarator        MethodBody { cout << "MethodDeclaration 2\n"; 
+	                                                               
+																   function = p->finishFunctionDeclaration(function, p->methodBody);
+																   $<tn>$=ast->createNode($<tn>3,$<tn>4 , functionNode,function);
+																   
 																 }
-	| Modifiers TypeSpecifier Modifiers  MethodDeclarator    MethodBody {
-																		   $<function>$ = p->finishFunctionDeclaration($<function>4, p->methodBody);
-																		   err->errQ->enqueue($<r.myLineNo>5,$<r.myColNo>5,"Error: Modifier orders return type", $<r.str>1);
+	| Modifiers TypeSpecifier Modifiers  MethodDeclarator    MethodBody { err->errQ->enqueue($<r.myLineNo>5,$<r.myColNo>5,"Error modifier return type", $<r.str>1);
+																		  function = p->finishFunctionDeclaration(function, p->methodBody);
+																		  $<tn>$=ast->createNode($<tn>4,$<tn>5 , functionNode,function);
 																		}
-	|           TypeSpecifier MethodDeclarator Throws MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
-																	cout << "MethodDeclaration 3\n";
-																 }
-	|           TypeSpecifier MethodDeclarator        MethodBody {
-																	$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
-																	modifier->reset();
-																	cout << "MethodDeclaration 4\n";
+	|           TypeSpecifier MethodDeclarator Throws MethodBody { cout << "MethodDeclaration 3\n"; 
+	 															   function = p->finishFunctionDeclaration(function, p->methodBody);
+																   $<tn>$=ast->createNode($<tn>2,$<tn>4 , functionNode,function);
+	 															 }
+	|           TypeSpecifier MethodDeclarator        MethodBody { cout << "MethodDeclaration 4\n";
+																   function = p->finishFunctionDeclaration(function, p->methodBody);
+																   modifier->reset();
+																   $<tn>$=ast->createNode($<tn>2,$<tn>3 , functionNode,function);
 																 }
 	;
 
 MethodDeclarator
-	: DeclaratorName OPEN_B						  { m = new Modifier(modifier); modifier->reset(); } 
-	  ParameterList CLOSE_B						  {
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, m);
-													cout << "MethodDeclarator 1\n";
+	: DeclaratorName OPEN_B { m = new Modifier(modifier); modifier->reset(); }  
+	  ParameterList CLOSE_B { cout << "MethodDeclarator 1\n"; 
+								function = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, m);
+	  						  $<tn>$=ast->createNode($<tn>4,0 , functionHeaderNode);
+							}
+	| DeclaratorName OPEN_B CLOSE_B				  { cout << "MethodDeclarator 2\n"; 
+													
+													function = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier); 
+													$<tn>$=ast->createNode(0,0 , functionHeaderNode);
 												  }
-	| DeclaratorName OPEN_B CLOSE_B				  {
-													cout << "MethodDeclarator 2\n";
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												  }
-	| MethodDeclarator OP_DIM					  {
-													$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-													cout << "MethodDeclarator 3\n";
+	| MethodDeclarator OP_DIM					  { cout << "MethodDeclarator 3\n";
+												    function = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+												    $<tn>$=ast->createNode(0,0 , functionHeaderNode);
 												  }
 	;
 
 ParameterList
-	: Parameter { cout << "ParameterList\n"; }
-	| ParameterList COMMA Parameter
+	: Parameter { cout << "ParameterList\n"; $<tn>$=ast->createNode($<tn>1, 0, parameterNodeList);}
+	| ParameterList COMMA Parameter {$<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, parameterNodeList));}
 	;
 
 Parameter
-	: TypeSpecifier DeclaratorName			 {
-												p->defaultParam = false;
-												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												cout << "Parameter 1\n";
+	: TypeSpecifier DeclaratorName		 { cout << "Parameter 1\n"; 
+										   p->defaultParam = false;
+										   parameter = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+										   $<tn>$=ast->createNode(0, 0, parameterNode,parameter);
+										 }
+	| TypeSpecifier DeclaratorName	ASSIGN	 { cout << "Parameter default \n"; 
+											   p->defaultParam = true;
+											   parameter = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+												$<tn>$=ast->createNode(0, 0, parameterNode,parameter); 
 											 }
-	| TypeSpecifier DeclaratorName	ASSIGN	ComplexPrimaryNoParenthesis {
-												p->defaultParam = true;
-												$<param>$ = p->insertParam($<r.str>2, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												cout << "Parameter 2\n";
-											 }
-    | Modifiers TypeSpecifier DeclaratorName {
-												p->defaultParam = false;
-												$<param>$ = p->insertParam($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												cout << "Parameter 3\n";
-											 }
+    | FINAL TypeSpecifier DeclaratorName { cout << "Parameter 2\n"; 
+	                                       p->defaultParam = false;
+										   parameter = p->insertParam($<r.str>3, yylval.r.myLineNo, yylval.r.myColNo, modifier);
+										   $<tn>$=ast->createNode(0, 0, parameterNode,parameter);
+										 } 
 	;
 
 DeclaratorName
@@ -456,44 +481,46 @@ Throws
 	;
 
 MethodBody
-	: Block		{ cout << "MethodBody 1\n"; }
+	: Block		{ cout << "MethodBody 1\n"; $<tn>$=ast->createNode($<tn>1,0 , functionBodyNode);}
 	| SEMICOLON { p->methodBody = false; cout << "MethodBody 2\n"; }
 	;
 
 ConstructorDeclaration
-	: Modifiers ConstructorDeclarator Throws Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
-														cout << "ConstructorDeclaration 1\n";
+	: Modifiers ConstructorDeclarator Throws Block { cout << "ConstructorDeclaration 1\n"; 
+													 
+													 function = p->finishFunctionDeclaration(function, p->methodBody);
+													 $<tn>$=ast->createNode($<tn>2,0, ConstructorNode,function);
 												   }
-	| Modifiers ConstructorDeclarator Block		   {
-														$<function>$ = p->finishFunctionDeclaration($<function>2, p->methodBody);
-														cout << "ConstructorDeclaration 2\n";
+	| Modifiers ConstructorDeclarator        Block { cout << "ConstructorDeclaration 2\n";                                   
+													 function = p->finishFunctionDeclaration(function, p->methodBody);
+													 $<tn>$=ast->createNode($<tn>2,0, ConstructorNode,function);
 												   }
-	|           ConstructorDeclarator Throws Block {
-														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
-														cout << "ConstructorDeclaration 3\n";
+	|           ConstructorDeclarator Throws Block { cout << "ConstructorDeclaration 3\n"; 
+												     function = p->finishFunctionDeclaration(function, p->methodBody);
+													 $<tn>$=ast->createNode($<tn>1,0, ConstructorNode,function);
 												   }
-	|           ConstructorDeclarator Block		   {
-														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
-														cout << "ConstructorDeclaration 4\n";
+	|           ConstructorDeclarator        Block { cout << "ConstructorDeclaration 4\n"; 
+													 function = p->finishFunctionDeclaration(function, p->methodBody);
+	                                                 $<tn>$=ast->createNode($<tn>1,0, ConstructorNode,function);
 												   }
 	|           ConstructorDeclarator { p->methodBody = false; } SEMICOLON	   {
-														$<function>$ = p->finishFunctionDeclaration($<function>1, p->methodBody);
+														function = p->finishFunctionDeclaration(function, p->methodBody);
 														cout << "ConstructorDeclaration 5\n";
 												   }
 	;
 
 ConstructorDeclarator
-	: IDENTIFIER OPEN_B						  { m = new Modifier(modifier); modifier->reset(); }
-						ParameterList CLOSE_B {
-												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, m);
-												cout << "ConstructorDeclarator 1\n";
+	: IDENTIFIER OPEN_B                       { m = new Modifier(modifier); modifier->reset(); }
+	  ParameterList CLOSE_B                   { cout << "ConstructorDeclarator 1\n";
+												function = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, m); 
+	                                            $<tn>$=ast->createNode(0, 0, ConstructorHeaderNode);
 											  }
-	| IDENTIFIER OPEN_B CLOSE_B				  {
-												$<function>$ = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier);
-												cout << "ConstructorDeclarator 2\n";
+	| IDENTIFIER OPEN_B CLOSE_B				  { cout << "ConstructorDeclarator 2\n";
+												function = p->createFunction($<r.str>1, yylval.r.myLineNo, yylval.r.myColNo, modifier); 
+											    $<tn>$=ast->createNode(0, 0, ConstructorHeaderNode);
 											  }
 	;
+
 
 StaticInitializer
 	: STATIC Block { cout << "StaticInitializer\n"; }
@@ -505,90 +532,116 @@ NonStaticInitializer
 
 Extends
 	: EXTENDS TypeName		 { cout << "Extends 1\n"; }
-	| Extends COMMA TypeName {
-								cout << "Extends 2\n";
-								err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2, "Class can't extends more than one", "");
-							 }
-	| EXTENDS %prec e8       { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :illegal start of type ", ""); }
+	| Extends COMMA TypeName { cout << "Extends 2\n"; }
+	| EXTENDS %prec e8       { err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :illegal start of type ", "");}
 	;
 
 Block
-	: OPEN_D LocalVariableDeclarationsAndStatements CLOSE_D { p->methodBody = true; cout << "Block 1\n"; }
-	| OPEN_D CLOSE_D										{ p->methodBody = true; cout << "Block 2\n"; }
+	: OPEN_D LocalVariableDeclarationsAndStatements CLOSE_D { cout << "Block 1\n"; 
+															  $<tn>$ = $<tn>2;
+															  p->methodBody = true;
+															}
+	| OPEN_D CLOSE_D										{ cout << "Block 2\n"; 
+	                                                          p->methodBody = true;
+															  $<tn>$=ast->createNode(0, 0, EmptyBlock);
+															}
     ;
-	
+
 LocalVariableDeclarationsAndStatements
-	: LocalVariableDeclarationOrStatement { cout << "LocalVariableDeclarationsAndStatements\n"; }
-	| LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
+	: LocalVariableDeclarationOrStatement { cout << "LocalVariableDeclarationsAndStatements\n"; 
+											$<tn>$=ast->createNode($<tn>1, 0, LocalVarOrStmtListNode); 
+										  }
+	| LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement {
+	                                        $<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>2, 0, LocalVarOrStmtListNode));
+											}
 	;
 
 LocalVariableDeclarationOrStatement
-	: LocalVariableDeclarationStatement { cout << "LocalVariableDeclarationOrStatement 1\n"; }
-	| Statement							{ cout << "LocalVariableDeclarationOrStatement 2\n"; }
+	: LocalVariableDeclarationStatement { cout << "LocalVariableDeclarationOrStatement 1\n"; 
+	                                      $<tn>$=ast->createNode($<tn>1, 0, LocalVarOrStmtNode); 
+										}
+	| Statement							{ cout << "LocalVariableDeclarationOrStatement 2\n"; 
+                                          $<tn>$=ast->createNode($<tn>1, 0, LocalVarOrStmtNode); 
+										}
 	;
 
 LocalVariableDeclarationStatement
-	:			TypeSpecifier VariableDeclarators SEMICOLON		{
-																	p->insertVar(yylval.r.myLineNo, yylval.r.myColNo, modifier);
-																	cout << "LocalVariableDeclarationStatement 1\n"; 
-																	p->resetNames();
-																}
-    | Modifiers TypeSpecifier VariableDeclarators SEMICOLON		{
-																	p->insertVar(yylval.r.myLineNo, yylval.r.myColNo, modifier);
-																	cout << "LocalVariableDeclarationStatement 2\n";
-																	p->resetNames();
-																}
+	: TypeSpecifier VariableDeclarators SEMICOLON		{ cout << "LocalVariableDeclarationStatement 1\n"; 
+														  
+														  vars = p->insertVar(yylval.r.myLineNo, yylval.r.myColNo, modifier);
+														  $<tn>$=ast->createNodeVar(vars,$<tn>2);
+														  p->resetNames(); 
+														}
+    | FINAL TypeSpecifier VariableDeclarators SEMICOLON { cout << "LocalVariableDeclarationStatement 2\n"; 
+														  vars = p->insertVar(yylval.r.myLineNo, yylval.r.myColNo, modifier);
+														  $<tn>$=ast->createNodeVar(vars,$<tn>3);
+
+														  p->resetNames(); 
+														}
 	;
-	
+
 Statement
-	: EmptyStatement				{ cout << "Statement 1\n"; }
-	| LabelStatement				{ cout << "Statement 2\n"; }
-	| ExpressionStatement SEMICOLON { cout << "Statement 3\n"; }
-    | SelectionStatement			{ cout << "Statement 4\n"; }
-    | IterationStatement			{ cout << "Statement 5\n"; }
-	| JumpStatement					{ cout << "Statement 6\n"; }
-	| GuardingStatement				{ cout << "Statement 7\n"; }
-	| Block							{ cout << "Statement 8\n"; }
+	: EmptyStatement				{ cout << "Statement 1\n"; $<tn>$ = $<tn>1; }
+	| LabelStatement				{ cout << "Statement 2\n"; $<tn>$ = $<tn>1; }
+	| ExpressionStatement SEMICOLON { cout << "Statement 3\n"; $<tn>$ = $<tn>1; }
+    | IfElseStatment					{ cout << "Statement 4\n"; $<tn>$ = $<tn>1; }
+	| SwitchStatement				{ cout << "Statement 9\n"; $<tn>$ = $<tn>1; }
+    | IterationStatement			{ cout << "Statement 5\n"; $<tn>$ = $<tn>1; }
+	| JumpStatement					{ cout << "Statement 6\n"; $<tn>$ = $<tn>1; }
+	| GuardingStatement				{ cout << "Statement 7\n"; $<tn>$ = $<tn>1; }
+	| Block							{ cout << "Statement 8\n"; $<tn>$ = $<tn>1; }
 	;
 
 EmptyStatement
-	: SEMICOLON { cout << "EmptyStatement 8\n"; }
+	: SEMICOLON { cout << "EmptyStatement 8\n"; $<tn>$=ast->createNode(0, 0, EmptyStatementNode); }
     ;
 
 LabelStatement
-	: IDENTIFIER COLON				{ cout << "LabelStatement 1\n"; }
-    | CASE ConstantExpression COLON { cout << "LabelStatement 2\n"; }
-	| DEFAULT COLON					{ cout << "LabelStatement 3\n"; }
+	: IDENTIFIER COLON				{ cout << "LabelStatement 1\n"; $<tn>$=ast->createNode(0, 0, LabelStatementNode);}
+    | CASE ConstantExpression COLON { cout << "LabelStatement 2\n"; $<tn>$=ast->createNode(0, 0, LabelStatementNode);}
+	| DEFAULT COLON					{ cout << "LabelStatement 3\n"; $<tn>$=ast->createNode(0, 0, LabelStatementNode);}
     ;
 
 ExpressionStatement
-	: Expression { cout << "ExpressionStatement\n"; }
+	: Expression { cout << "ExpressionStatement\n"; $<tn>$=$<tn>1; }
 	;
 
-SelectionStatement
-	: IF OPEN_B Expression CLOSE_B Statement %prec e1		{ cout << "SelectionStatement 1\n"; }
-	| IF OPEN_B CLOSE_B Statement %prec e15                    { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : if without expression ","");}
-    | IF OPEN_B Expression CLOSE_B Statement ELSE Statement { cout << "SelectionStatement 2\n"; }
-	| IF OPEN_B CLOSE_B Statement ELSE Statement     { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : ifelse without expression ","");}
-    | SWITCH OPEN_B Expression CLOSE_B Block				{ cout << "SelectionStatement 3\n"; }
-	| SWITCH OPEN_B CLOSE_B Block				{ err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error :illegal switch ", "");}
+
+IfElseStatment
+	: IfStatement %prec e1      {$<tn>$=ast->createNode($<tn>1, 0, IfElseStatment);}
+	| IfStatement ElseStatement {$<tn>$=ast->createNode($<tn>1, $<tn>2, IfElseStatment);}
+	;
+
+
+IfStatement
+	: IF OPEN_B Expression CLOSE_B Statement		      	   { cout << "SelectionStatement 1\n"; $<tn>$=ast->createNode($<tn>3, $<tn>5, IfStatmentNode);}
+	| IF OPEN_B CLOSE_B Statement                              { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : if without expression ","");}
     ;
 
+ElseStatement
+	:ELSE Statement {cout << "ElseStatement \n"; $<tn>$=ast->createNode($<tn>2, 0, ElseStatementNode); }
+	;
+
+SwitchStatement
+	: SWITCH OPEN_B Expression CLOSE_B Block	{ cout << "SelectionStatement 3\n"; $<tn>$=ast->createNode($<tn>3, $<tn>5, SwitchStatmentNode); }
+	| SWITCH OPEN_B CLOSE_B Block				{ err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error :illegal switch ", "");}
+	;
+
 IterationStatement
-	: WHILE OPEN_B Expression CLOSE_B Statement				 { cout << "IterationStatement 1\n"; }
+	: WHILE OPEN_B Expression CLOSE_B Statement				 { cout << "IterationStatement 1\n"; $<tn>$=ast->createNode($<tn>3, $<tn>5, WhileNode); }
 	| WHILE OPEN_B CLOSE_B Statement				         { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : WHILE without expression ","");}
-	| DO Statement WHILE OPEN_B Expression CLOSE_B SEMICOLON { cout << "IterationStatement 2\n"; }
+	| DO Statement WHILE OPEN_B Expression CLOSE_B SEMICOLON { cout << "IterationStatement 2\n"; $<tn>$=ast->createNode($<tn>5, $<tn>2, DoWhileNode);}
 	| DO Statement WHILE OPEN_B CLOSE_B SEMICOLON			 { err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error : dowhile without expression ","");}
 	| DO Statement WHILE OPEN_B CLOSE_B %prec e16            { err->errQ->enqueue($<r.myLineNo>4,$<r.myColNo>4,"Error : dowhile without expression and missing semicolon ","");}
-	| FOR OPEN_B ForInit ForExpr ForIncr CLOSE_B Statement	 { cout << "IterationStatement 3\n"; }
-	| FOR OPEN_B ForInit ForExpr         CLOSE_B Statement	 { cout << "IterationStatement 4\n"; }
-	| FOR OPEN_B TypeName IDENTIFIER COLON IDENTIFIER CLOSE_B Statement	 { cout << "IterationStatement 5\n"; }
+	| FOR OPEN_B ForInit ForExpr ForIncr CLOSE_B Statement	 { cout << "IterationStatement 3\n"; $<tn>$=ast->createNode(0, 0, ForNode); }
+	| FOR OPEN_B ForInit ForExpr         CLOSE_B Statement	 { cout << "IterationStatement 4\n"; $<tn>$=ast->createNode(0, 0, ForNode); }
+	| FOR OPEN_B TypeName IDENTIFIER COLON IDENTIFIER CLOSE_B Statement	 { cout << "IterationStatement 5\n"; $<tn>$=ast->createNode(0, 0, ForNode); }
 	| DO Statement WHILE OPEN_B Expression CLOSE_B	%prec e21		 { err->errQ->enqueue($<r.myLineNo>6,$<r.myColNo>6,"Error : dowhile missing semicolon ","");}
 	;
 
 ForInit
 	: ExpressionStatements SEMICOLON	{ cout << "ForInit 1\n"; }
-	| LocalVariableDeclarationStatement { cout << "ForInit 2\n"; }
+	| LocalVariableDeclarationStatement { cout << "ForInit 2\n";}
 	| SEMICOLON							{ cout << "ForInit 3\n"; }
 	;
 
@@ -598,31 +651,31 @@ ForExpr
 	;
 
 ForIncr
-	: ExpressionStatements { cout << "ForIncr\n"; }
+	: ExpressionStatements { cout << "ForIncr\n";}
 	;
 
 ExpressionStatements
 	: ExpressionStatement { cout << "ExpressionStatements\n"; }
-	| ExpressionStatements COMMA ExpressionStatement
+	| ExpressionStatements COMMA ExpressionStatement 	{  cout << "ExpressionStatements 2\n";  }
 	;
 
 JumpStatement
-	: BREAK IDENTIFIER SEMICOLON	{ cout << "JumpStatement 1\n"; }
-	| BREAK            SEMICOLON	{ cout << "JumpStatement 2\n"; }
-    | CONTINUE IDENTIFIER SEMICOLON { cout << "JumpStatement 3\n"; }
-	| CONTINUE            SEMICOLON { cout << "JumpStatement 4\n"; }
-	| RETURN Expression SEMICOLON	{ cout << "JumpStatement 5\n"; }
-	| RETURN            SEMICOLON	{ cout << "JumpStatement 6\n"; }
-	| THROW Expression SEMICOLON	{ cout << "JumpStatement 7\n"; }
+	: BREAK IDENTIFIER SEMICOLON	{ cout << "JumpStatement 1\n"; $<tn>$=ast->createNode(0, 0, JumpStatementNode);}
+	| BREAK            SEMICOLON	{ cout << "JumpStatement 2\n"; $<tn>$=ast->createNode(0, 0, JumpStatementNode);}
+    | CONTINUE IDENTIFIER SEMICOLON { cout << "JumpStatement 3\n"; $<tn>$=ast->createNode(0, 0, JumpStatementNode);}
+	| CONTINUE            SEMICOLON { cout << "JumpStatement 4\n"; $<tn>$=ast->createNode(0, 0, JumpStatementNode);}
+	| RETURN Expression SEMICOLON	{ cout << "JumpStatement 5\n"; $<tn>$=ast->createNode(0, 0, JumpStatementNode);}
+	| RETURN            SEMICOLON	{ cout << "JumpStatement 6\n"; $<tn>$=ast->createNode(0, 0, JumpStatementNode);}
+	| THROW Expression SEMICOLON	{ cout << "JumpStatement 7\n"; $<tn>$=ast->createNode(0, 0, JumpStatementNode);}
 	;
 
 GuardingStatement
 	: SYNCHRONIZED OPEN_B Expression CLOSE_B Statement { cout << "GuardingStatement 1\n"; }
-	| TRY Block Finally	%prec e18					   { cout << "GuardingStatement 2\n"; }
+	| TRY Block Finally	%prec e18					   { cout << "GuardingStatement 2\n"; $<tn>$=ast->createNode(0, 0, TryNode); }
 	| TRY Block %prec e17                              {err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :Expected try catch or try finally", "" );}
-	| TRY Block Catches	%prec e19					   { cout << "GuardingStatement 3\n"; }
+	| TRY Block Catches	%prec e19					   { cout << "GuardingStatement 3\n"; $<tn>$=ast->createNode(0, 0, TryNode); }
 	| CatchHeader								       {err->errQ->enqueue($<r.myLineNo>1,$<r.myColNo>1,"Error :Expected try catch or try catch finally", "" );}
-	| TRY Block Catches Finally						   { cout << "GuardingStatement 4\n"; }
+	| TRY Block Catches Finally						   { cout << "GuardingStatement 4\n"; $<tn>$=ast->createNode(0, 0, TryNode); }
 	;
 
 Catches
@@ -631,45 +684,63 @@ Catches
 	;
 
 Catch
-	: CatchHeader Block { cout << "Catch\n"; }
+	: CatchHeader Block { cout << "Catch\n"; $<tn>$=ast->createNode($<tn>1, $<tn>2, catchNode);}
 	;
 
 CatchHeader
-	: CATCH OPEN_B TypeSpecifier IDENTIFIER CLOSE_B { cout << "CatchHeader 1\n"; }
-	| CATCH OPEN_B TypeSpecifier CLOSE_B			{ cout << "CatchHeader 2\n"; }
+	: CATCH OPEN_B TypeSpecifier IDENTIFIER CLOSE_B { cout << "CatchHeader 1\n";$<tn>$=ast->createNode($<tn>1, $<tn>2, catchHeaderNode); }
+	| CATCH OPEN_B TypeSpecifier CLOSE_B			{ cout << "CatchHeader 2\n";$<tn>$=ast->createNode($<tn>1, $<tn>2,  catchHeaderNode); }
+	| CATCH OPEN_B CLOSE_B							{err->errQ->enqueue($<r.myLineNo>3,$<r.myColNo>3,"Error :illegal catch", "" );}
 	;
 
 Finally
-	: FINALLY Block { cout << "Finally\n"; }
+	: FINALLY Block { cout << "Finally\n";$<tn>$=ast->createNode(0, $<tn>2, finallyNode); }
 	;
 
 PrimaryExpression
-	: QualifiedName { cout << "PrimaryExpression 1\n"; }
-	| NotJustName	{ cout << "PrimaryExpression 2\n"; }
+	: QualifiedName { cout << "PrimaryExpression 1\n"; $<tn>$=ast->createNode($<tn>1, 0, PrimaryExpressionNode);}
+	| NotJustName	{ cout << "PrimaryExpression 2\n"; $<tn>$=ast->createNode($<tn>1, 0, PrimaryExpressionNode);}
 	;
 
 NotJustName
 	: SpecialName			  { cout << "NotJustName 1\n"; }
-	| NewAllocationExpression { cout << "NotJustName 2\n"; }
-	| ComplexPrimary		  { cout << "NotJustName 3\n"; }
+	| NewAllocationExpression { cout << "NotJustName 2\n"; $<tn>$=ast->createNode($<tn>1, 0, NotJustName); }
+	| ComplexPrimary		  { cout << "NotJustName 3\n"; $<tn>$=ast->createNode($<tn>1, 0, NotJustName); }
 	;
 
 ComplexPrimary
 	: OPEN_B Expression CLOSE_B	%prec e10  { cout << "ComplexPrimary 1\n"; }
-	| ComplexPrimaryNoParenthesis { cout << "ComplexPrimary 2\n"; }
+	| ComplexPrimaryNoParenthesis { cout << "ComplexPrimary 2\n"; $<tn>$=ast->createNode($<tn>1, 0, ComplexPrimary); }
 	;
 
 ComplexPrimaryNoParenthesis
 	: LITERAL	  { cout << "ComplexPrimaryNoParenthesis 1\n"; }
-	| INTEGER_VALUE  { cout << "ComplexPrimaryNoParenthesis INTEGER_VALUE\n"; }
-	| FLOAT_VALUE  { cout << "ComplexPrimaryNoParenthesis FLOAT_VALUE\n"; }
-	| CHAR_VALUE  { cout << "ComplexPrimaryNoParenthesis CAHR_VALUE\n"; }
-	| LONG_VALUE  { cout << "ComplexPrimaryNoParenthesis LONG_VALUE\n"; }
-	| STRING_VALUE  { cout << "ComplexPrimaryNoParenthesis STRING_VALUE\n"; }
+	| INTEGER_VALUE  { cout << "ComplexPrimaryNoParenthesis INTEGER_VALUE\n";
+					   int * val = &$<r.i>1;
+					   $<tn>$=ast->createNode(0, 0, Integer_Value,val); 
+					 }
+	| FLOAT_VALUE  { cout << "ComplexPrimaryNoParenthesis FLOAT_VALUE\n";
+					 float * val = &$<r.f>1;
+					 $<tn>$=ast->createNode(0, 0, Float_Value,val);
+				   }
+	| CHAR_VALUE  { cout << "ComplexPrimaryNoParenthesis CAHR_VALUE\n";
+					 char * val = &$<r.c>1;
+					 $<tn>$=ast->createNode(0, 0, Char_Value,val); 
+				  }
+	| LONG_VALUE  { cout << "ComplexPrimaryNoParenthesis LONG_VALUE\n";
+					 int * val = &$<r.i>1;
+					 $<tn>$=ast->createNode(0, 0, Long_Value,val); 
+				  }
+	| STRING_VALUE  { cout << "ComplexPrimaryNoParenthesis STRING_VALUE\n";
+					 char * val = $<r.str>1;
+					 $<tn>$=ast->createNode(0, 0, String_Value,val); 
+					}
 	| BOOLLIT	  { cout << "ComplexPrimaryNoParenthesis 2\n"; }
 	| ArrayAccess { cout << "ComplexPrimaryNoParenthesis 3\n"; }
 	| FieldAccess { cout << "ComplexPrimaryNoParenthesis 4\n"; }
-	| MethodCall  { cout << "ComplexPrimaryNoParenthesis 5\n"; }
+	| MethodCall  { cout << "ComplexPrimaryNoParenthesis 5\n"; 
+					$<tn>$=ast->createNode($<tn>1, 0, MethodCall);			
+				  }
 	;
 
 ArrayAccess
@@ -686,14 +757,14 @@ FieldAccess
 	;
 
 MethodCall
-	: MethodAccess OPEN_B ArgumentList CLOSE_B { cout << "MethodCall 1\n"; }
-	| MethodAccess OPEN_B CLOSE_B			   { cout << "MethodCall 2\n"; }
+	: MethodAccess OPEN_B ArgumentList CLOSE_B { cout << "MethodCall 1\n"; $<tn>$=ast->createNode($<tn>1, 0, MethodAccess); }
+	| MethodAccess OPEN_B CLOSE_B			   { cout << "MethodCall 2\n"; $<tn>$=ast->createNode($<tn>1, 0, MethodAccess);}
 	;
 
 MethodAccess
 	: ComplexPrimaryNoParenthesis { cout << "MethodAccess 1\n"; }
 	| SpecialName				  { cout << "MethodAccess 2\n"; }
-	| QualifiedName				  { cout << "MethodAccess 3\n"; }
+	| QualifiedName				  { cout << "MethodAccess 3\n"; $<tn>$=$<tn>1; }
 	;
 
 SpecialName
@@ -708,13 +779,13 @@ ArgumentList
 	;
 
 NewAllocationExpression
-    : PlainNewAllocationExpression					   { cout << "NewAllocationExpression 1\n"; }
+    : PlainNewAllocationExpression					   { cout << "NewAllocationExpression 1\n"; $<tn>$ = $<tn>1; }
     | QualifiedName POINT PlainNewAllocationExpression { cout << "NewAllocationExpression 2\n"; }
     ;
-	
+
 PlainNewAllocationExpression
-    : ArrayAllocationExpression	%prec e13					     { cout << "PlainNewAllocationExpression 1\n"; }
-    | ClassAllocationExpression	%prec e12						 { cout << "PlainNewAllocationExpression 2\n"; }
+    : ArrayAllocationExpression	%prec e13						 { cout << "PlainNewAllocationExpression 1\n"; $<tn>$=ast->createNode($<tn>1, 0, PlainNewAllocationExpression);}
+    | ClassAllocationExpression	%prec e12 						 { cout << "PlainNewAllocationExpression 2\n"; $<tn>$=ast->createNode($<tn>1, 0, PlainNewAllocationExpression);}
     | ArrayAllocationExpression OPEN_D CLOSE_D					 { cout << "PlainNewAllocationExpression 3\n"; }
     | ClassAllocationExpression OPEN_D CLOSE_D					 { cout << "PlainNewAllocationExpression 4\n"; }
     | ArrayAllocationExpression OPEN_D ArrayInitializers CLOSE_D { cout << "PlainNewAllocationExpression 5\n"; }
@@ -722,23 +793,23 @@ PlainNewAllocationExpression
     ;
 
 ClassAllocationExpression
-	: NEW TypeName OPEN_B ArgumentList CLOSE_B { cout << "ClassAllocationExpression 1\n"; }
-	| NEW TypeName OPEN_B              CLOSE_B { cout << "ClassAllocationExpression 2\n"; }
+	: NEW TypeName OPEN_B ArgumentList CLOSE_B { cout << "ClassAllocationExpression 1\n"; $<tn>$=ast->createNode(0, 0, ClassAllocationExpression);}
+	| NEW TypeName OPEN_B              CLOSE_B { cout << "ClassAllocationExpression 2\n"; $<tn>$=ast->createNode(0, 0, ClassAllocationExpression);}
     ;
 
 ArrayAllocationExpression
 	: NEW TypeName DimExprs Dims { cout << "ArrayAllocationExpression 1\n"; }
-	| NEW TypeName DimExprs		 { cout << "ArrayAllocationExpression 2\n"; }
+	| NEW TypeName DimExprs		 { cout << "ArrayAllocationExpression 2\n"; $<tn>$=ast->createNode($<tn>3, 0, ArrayAllocationExpression);}
     | NEW TypeName Dims			 { cout << "ArrayAllocationExpression 3\n"; }
 	;
 
 DimExprs
-	: DimExpr		   { cout << "DimExprs 1\n"; }
-	| DimExprs DimExpr { cout << "DimExprs 2\n"; }
+	: DimExpr		   { cout << "DimExprs 1\n"; $<tn>$=ast->createNode($<tn>1, 0,DimExprListNode); }
+	| DimExprs DimExpr { cout << "DimExprs 2\n"; $<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>2, 0, DimExprListNode)); }
 	;
 
 DimExpr
-	: OPEN Expression CLOSE { cout << "DimExpr\n"; }
+	: OPEN Expression CLOSE { cout << "DimExpr\n"; $<tn>$=ast->createNode($<tn>2, 0,DimExpr); }
 	;
 
 Dims
@@ -747,42 +818,42 @@ Dims
 	;
 
 PostfixExpression
-	: PrimaryExpression		{ cout << "PostfixExpression 1\n"; }
-	| RealPostfixExpression { cout << "PostfixExpression 2\n"; }
+	: PrimaryExpression		{ cout << "PostfixExpression 1\n"; $<tn>$=ast->createNode($<tn>1, 0, PostfixExpressionNode);}
+	| RealPostfixExpression { cout << "PostfixExpression 2\n"; $<tn>$=ast->createNode($<tn>1, 0, PostfixExpressionNode);}
 	;
 
 RealPostfixExpression
-	: PostfixExpression OP_INC { cout << "RealPostfixExpression 1\n"; }
-	| PostfixExpression OP_DEC { cout << "RealPostfixExpression 2\n"; }
+	: PostfixExpression OP_INC { cout << "RealPostfixExpression 1\n"; $<tn>$=ast->createNode(0, 0, RealPostfixExpressionNode); }
+	| PostfixExpression OP_DEC { cout << "RealPostfixExpression 2\n"; $<tn>$=ast->createNode(0, 0, RealPostfixExpressionNode);}
 	;
 
 UnaryExpression
-	: OP_INC UnaryExpression				 { cout << "UnaryExpression 1\n"; }
-	| OP_DEC UnaryExpression				 { cout << "UnaryExpression 2\n"; }
-	| ArithmeticUnaryOperator CastExpression { cout << "UnaryExpression 3\n"; }
-	| LogicalUnaryExpression				 { cout << "UnaryExpression 4\n"; }
+	: OP_INC UnaryExpression				 { cout << "UnaryExpression 1\n"; $<tn>$ = ast->addToLastRight($<tn>2, ast->createNode(0, 0, UnaryExpressionListNode)); }
+	| OP_DEC UnaryExpression				 { cout << "UnaryExpression 2\n"; $<tn>$ = ast->addToLastRight($<tn>2, ast->createNode(0, 0, UnaryExpressionListNode)); }
+	| ArithmeticUnaryOperator CastExpression { cout << "UnaryExpression 3\n"; $<tn>$=ast->createNode($<tn>1, 0, UnaryExpressionListNode);}
+	| LogicalUnaryExpression				 { cout << "UnaryExpression 4\n"; $<tn>$=ast->createNode($<tn>1, 0, UnaryExpressionListNode);}
 	;
 
 LogicalUnaryExpression
-	: PostfixExpression					   { cout << "LogicalUnaryExpression 1\n"; }
-	| LogicalUnaryOperator UnaryExpression { cout << "LogicalUnaryExpression 2\n"; }
+	: PostfixExpression					   { cout << "LogicalUnaryExpression 1\n"; $<tn>$=ast->createNode($<tn>1, 0, LogicalUnaryExpressionNode); }
+	| LogicalUnaryOperator UnaryExpression { cout << "LogicalUnaryExpression 2\n"; $<tn>$=ast->createNode($<tn>1, 0, LogicalUnaryExpressionNode); }
 	;
 
 LogicalUnaryOperator
-	: DURA	   { cout << "LogicalUnaryOperator DURA\n"; }
-	| EXC_MARK { cout << "LogicalUnaryOperator EXC_MARK\n"; }
+	: DURA	   { cout << "LogicalUnaryOperator DURA\n"; $<tn>$=ast->createNode(0, 0, LogicalUnaryOperatorNode); }
+	| EXC_MARK { cout << "LogicalUnaryOperator EXC_MARK\n"; $<tn>$=ast->createNode(0, 0, LogicalUnaryOperatorNode); }
 	;
 
 ArithmeticUnaryOperator
-	: PLUS	{ cout << "ArithmeticUnaryOperator PLUS\n"; }
-	| MINUS { cout << "ArithmeticUnaryOperator MINUS\n"; }
+	: PLUS	{ cout << "ArithmeticUnaryOperator PLUS\n"; $<tn>$=ast->createNode(0, 0, ArithmeticUnaryOperatorNode);}
+	| MINUS { cout << "ArithmeticUnaryOperator MINUS\n"; $<tn>$=ast->createNode(0, 0, ArithmeticUnaryOperatorNode); }
 	;
-	
+
 CastExpression
-	: UnaryExpression										{ cout << "CastExpression 1\n"; }
-	| OPEN_B PrimitiveTypeExpression CLOSE_B CastExpression { cout << "CastExpression 2\n"; }
-	| OPEN_B ClassTypeExpression CLOSE_B CastExpression		{ cout << "CastExpression 3\n"; }
-	| OPEN_B Expression CLOSE_B LogicalUnaryExpression		{ cout << "CastExpression 4\n"; }
+	: UnaryExpression										{ cout << "CastExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, CastExpressionListNode); }
+	| OPEN_B PrimitiveTypeExpression CLOSE_B CastExpression { cout << "CastExpression 2\n"; $<tn>$ = ast->addToLastRight($<tn>4, ast->createNode(0, 0, CastExpressionListNode));}
+	| OPEN_B ClassTypeExpression CLOSE_B CastExpression		{ cout << "CastExpression 3\n"; $<tn>$ = ast->addToLastRight($<tn>4, ast->createNode(0, 0, CastExpressionListNode));}
+	| OPEN_B Expression CLOSE_B LogicalUnaryExpression		{ cout << "CastExpression 4\n"; $<tn>$ =ast->createNode(0, 0, CastExpressionListNode);}
 	;
 
 PrimitiveTypeExpression
@@ -795,77 +866,77 @@ ClassTypeExpression
     ;
 
 MultiplicativeExpression
-	: CastExpression								 { cout << "MultiplicativeExpression 1\n"; }
-	| MultiplicativeExpression MULT CastExpression	 { cout << "MultiplicativeExpression 2\n"; }
-	| MultiplicativeExpression DIV CastExpression	 { cout << "MultiplicativeExpression 3\n"; }
-	| MultiplicativeExpression MODULE CastExpression { cout << "MultiplicativeExpression 4\n"; }
+	: CastExpression								 { cout << "MultiplicativeExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, MultiplicativeExpressionListNode);}
+	| MultiplicativeExpression MULT CastExpression	 { cout << "MultiplicativeExpression 2\n";$<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, MultiplicativeExpressionListNode)); }
+	| MultiplicativeExpression DIV CastExpression	 { cout << "MultiplicativeExpression 3\n";$<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, MultiplicativeExpressionListNode)); }
+	| MultiplicativeExpression MODULE CastExpression { cout << "MultiplicativeExpression 4\n";$<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, MultiplicativeExpressionListNode)); }
 	;
 
 AdditiveExpression
-	: MultiplicativeExpression							{ cout << "AdditiveExpression 1\n"; }
-    | AdditiveExpression PLUS MultiplicativeExpression	{ cout << "AdditiveExpression 2\n"; }
-	| AdditiveExpression MINUS MultiplicativeExpression { cout << "AdditiveExpression 3\n"; }
+	: MultiplicativeExpression							{ cout << "AdditiveExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, AdditiveExpressionListNode);}
+    | AdditiveExpression PLUS MultiplicativeExpression	{ cout << "AdditiveExpression 2\n";  $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, AdditiveExpressionListNode));}
+	| AdditiveExpression MINUS MultiplicativeExpression { cout << "AdditiveExpression 3\n";  $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, AdditiveExpressionListNode));}
     ;
 
 ShiftExpression
-	: AdditiveExpression						 { cout << "ShiftExpression 1\n"; }
-    | ShiftExpression OP_SHL AdditiveExpression	 { cout << "ShiftExpression 2\n"; }
-    | ShiftExpression OP_SHR AdditiveExpression	 { cout << "ShiftExpression 3\n"; }
-    | ShiftExpression OP_SHRR AdditiveExpression { cout << "ShiftExpression 4\n"; }
+	: AdditiveExpression						 { cout << "ShiftExpression 1\n";$<tn>$ =ast->createNode($<tn>1, 0, ShiftExpressionListNode); }
+    | ShiftExpression OP_SHL AdditiveExpression	 { cout << "ShiftExpression 2\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, ShiftExpressionListNode)); }
+    | ShiftExpression OP_SHR AdditiveExpression	 { cout << "ShiftExpression 3\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, ShiftExpressionListNode)); }
+    | ShiftExpression OP_SHRR AdditiveExpression { cout << "ShiftExpression 4\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, ShiftExpressionListNode)); }
 	;
 
 RelationalExpression
-	: ShiftExpression								{ cout << "RelationalExpression 1\n"; }
-    | RelationalExpression LESS ShiftExpression		{ cout << "RelationalExpression 2\n"; }
-	| RelationalExpression GREATER ShiftExpression	{ cout << "RelationalExpression 3\n"; }
-	| RelationalExpression OP_LE ShiftExpression	{ cout << "RelationalExpression 4\n"; }
-	| RelationalExpression OP_GE ShiftExpression	{ cout << "RelationalExpression 5\n"; }
-	| RelationalExpression INSTANCEOF TypeSpecifier { cout << "RelationalExpression 6\n"; }
+	: ShiftExpression								{ cout << "RelationalExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, RelationalExpressionListNode); }
+    | RelationalExpression LESS ShiftExpression		{ cout << "RelationalExpression 2\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, RelationalExpressionListNode)); }
+	| RelationalExpression GREATER ShiftExpression	{ cout << "RelationalExpression 3\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, RelationalExpressionListNode)); }
+	| RelationalExpression OP_LE ShiftExpression	{ cout << "RelationalExpression 4\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, RelationalExpressionListNode)); }
+	| RelationalExpression OP_GE ShiftExpression	{ cout << "RelationalExpression 5\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, RelationalExpressionListNode)); }
+	| RelationalExpression INSTANCEOF TypeSpecifier { cout << "RelationalExpression 6\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode(0, 0, RelationalExpressionListNode)); }
 	;
 
 EqualityExpression
-	: RelationalExpression							{ cout << "EqualityExpression 1\n"; }
-    | EqualityExpression OP_EQ RelationalExpression { cout << "EqualityExpression 2\n"; }
-    | EqualityExpression OP_NE RelationalExpression { cout << "EqualityExpression 3\n"; }
+	: RelationalExpression							{ cout << "EqualityExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, EqualityExpressionListNode);}
+    | EqualityExpression OP_EQ RelationalExpression { cout << "EqualityExpression 2\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, EqualityExpressionListNode));}
+    | EqualityExpression OP_NE RelationalExpression { cout << "EqualityExpression 3\n"; $<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, EqualityExpressionListNode));}
     ;
 
 AndExpression
-	: EqualityExpression				   { cout << "AndExpression 1\n"; }
-    | AndExpression AND EqualityExpression { cout << "AndExpression 2\n"; }
+	: EqualityExpression				   { cout << "AndExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, AndExpressionListNode);}
+    | AndExpression AND EqualityExpression { cout << "AndExpression 2\n";$<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, AndExpressionListNode)); }
     ;
 
 ExclusiveOrExpression
-	: AndExpression							  { cout << "ExclusiveOrExpression 1\n"; }
-	| ExclusiveOrExpression XOR AndExpression { cout << "ExclusiveOrExpression 2\n"; }
+	: AndExpression							  { cout << "ExclusiveOrExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, ExclusiveOrExpressionListNode);}
+	| ExclusiveOrExpression XOR AndExpression { cout << "ExclusiveOrExpression 2\n";$<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0,ExclusiveOrExpressionListNode)); }
 	;
 
 InclusiveOrExpression
-	: ExclusiveOrExpression							 { cout << "InclusiveOrExpression 1\n"; }
-	| InclusiveOrExpression OR ExclusiveOrExpression { cout << "InclusiveOrExpression 2\n"; }
+	: ExclusiveOrExpression							 { cout << "InclusiveOrExpression 1\n";$<tn>$ =ast->createNode($<tn>1, 0, InclusiveOrExpressionListNode); }
+	| InclusiveOrExpression OR ExclusiveOrExpression { cout << "InclusiveOrExpression 2\n";$<tn>$=ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0,InclusiveOrExpressionListNode)); }
 	;
-
+	
 ConditionalAndExpression
-	: InclusiveOrExpression									 { cout << "ConditionalAndExpression 1\n"; }
-	| ConditionalAndExpression OP_LAND InclusiveOrExpression { cout << "ConditionalAndExpression 2\n"; }
+	: InclusiveOrExpression									 { cout << "ConditionalAndExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, ConditionalAndExpressionListNode); }
+	| ConditionalAndExpression OP_LAND InclusiveOrExpression { cout << "ConditionalAndExpression 2\n"; $<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, ConditionalAndExpressionListNode)); }
 	;
 
 ConditionalOrExpression
-	: ConditionalAndExpression								  { cout << "ConditionalOrExpression 1\n"; }
-	| ConditionalOrExpression OP_LOR ConditionalAndExpression { cout << "ConditionalOrExpression 2\n"; }
+	: ConditionalAndExpression								  { cout << "ConditionalOrExpression 1\n"; $<tn>$ =ast->createNode($<tn>1, 0, ConditionalOrExpressionListNode);}
+	| ConditionalOrExpression OP_LOR ConditionalAndExpression { cout << "ConditionalOrExpression 2\n"; $<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>3, 0, ConditionalOrExpressionListNode)); }
 	;
 
 ConditionalExpression
-	: ConditionalOrExpression												   { cout << "ConditionalExpression 1\n"; }
-	| ConditionalOrExpression QUES_MARK Expression COLON ConditionalExpression { cout << "ConditionalExpression 2\n"; }
+	: ConditionalOrExpression												   { cout << "ConditionalExpression 1\n"; $<tn>$=ast->createNode($<tn>1,0,ConditionalExpressionListNode);}
+	| ConditionalOrExpression QUES_MARK Expression COLON ConditionalExpression { cout << "ConditionalExpression 2\n"; $<tn>$ = ast->addToLastRight($<tn>5, ast->createNode($<tn>1, 0, ConditionalExpressionListNode));}
 	;
 
 AssignmentExpression
-	: ConditionalExpression									  { cout << "AssignmentExpression 1\n"; }
-	| UnaryExpression AssignmentOperator AssignmentExpression { cout << "AssignmentExpression 2\n"; }
+	: ConditionalExpression									  { cout << "AssignmentExpression 1\n"; $<tn>$=ast->createNode($<tn>1, 0, AssignExpressionListNode);}
+	| UnaryExpression AssignmentOperator AssignmentExpression { cout << "AssignmentExpression 2\n"; $<tn>$ = ast->addToLastRight($<tn>1, ast->createNode($<tn>3, $<tn>2, AssignExpressionListNode));} 
 	;
 
 AssignmentOperator
-	: ASSIGN   { cout << "AssignmentOperator ASSIGN\n"; }
+	: ASSIGN   { cout << "AssignmentOperator ASSIGN\n"; $<tn>$=ast->createNode(0, 0, Assign); }
 	| ASS_MUL  { cout << "AssignmentOperator ASS_MUL\n"; }
 	| ASS_DIV  { cout << "AssignmentOperator ASS_DIV\n"; }
 	| ASS_MOD  { cout << "AssignmentOperator ASS_MOD\n"; }
@@ -880,7 +951,7 @@ AssignmentOperator
 	;
 
 Expression
-	: AssignmentExpression { cout << "Expression\n"; }
+	: AssignmentExpression { cout << "Expression\n";$<tn>$=ast->createNode($<tn>1, 0,ExpressionNode ); }
     ;
 
 ConstantExpression
@@ -947,7 +1018,6 @@ void main(void)
 			f->open(path,ifstream::in);
 			lexer = new yyFlexLexer(f);
 			parser->parse();
-			p->st->checkFileClassNames(p->errRecovery);
 			if(!err->errQ->isEmpty())						   
 				err->printErrQueue();
 				
@@ -959,7 +1029,6 @@ void main(void)
 			cout << "------------------------------\n";
 		}
 		p->st->checkAtTheEnd(p->st->rootScope, NULL, p->errRecovery);
-		
 		if (!p->errRecovery->errQ->isEmpty())
 				p->errRecovery->printErrQueue();
 		freopen("stFile.txt","w" ,stdout);
@@ -967,5 +1036,4 @@ void main(void)
 		if (!p->errRecovery->errQ->isEmpty())
 				p->errRecovery->printErrQueue();
 	}
-	
 }

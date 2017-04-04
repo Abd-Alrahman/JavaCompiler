@@ -888,11 +888,13 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m, in
 					cout << "object has been created\n";
 				}
 				else {
-					cout << "Class doesn't exist\n";
+					v->setType(m->getReturnType());
+					errRecovery->errQ->enqueue(0, 0, "Class doesn't exist", m->getReturnType());
 				}
 			}
 			else {
-				cout << "Class doesn't exist\n";
+				v->setType(m->getReturnType());
+				errRecovery->errQ->enqueue(0, 0, "Class doesn't exist", m->getReturnType());
 			}
 		}
 
@@ -927,7 +929,7 @@ return v;
 }*/
 
 //================= Parameter ====================
-Parameter * SymbolTable::createParam(char* name, Modifier* m) {
+Parameter * SymbolTable::createParam(char* name, Modifier* m, ErrorRecovery* errRecovery) {
 	if (m->getIsAbstract() || m->getIsNative() || m->getIsPrivate() || m->getIsProtected() || m->getIsPublic() ||
 		m->getIsStatic() || m->getIsSynchronized() || m->getIsTransient() || m->getIsVolatile()) {
 		cout << "=====================================================\n";
@@ -949,11 +951,13 @@ Parameter * SymbolTable::createParam(char* name, Modifier* m) {
 				cout << "object has been created\n";
 			}
 			else {
-				cout << "Class doesn't exist\n";
+				p->setType(m->getReturnType());
+				errRecovery->errQ->enqueue(0, 0, "Class doesn't exist", m->getReturnType());
 			}
 		}
 		else {
-			cout << "Class doesn't exist\n";
+			p->setType(m->getReturnType());
+			errRecovery->errQ->enqueue(0, 0, "Class doesn't exist", m->getReturnType());
 		}
 	}
 
@@ -1010,9 +1014,11 @@ DataMember * SymbolTable::getDataMemberFromCurrentScope(char* name) {
 void SymbolTable::checkAbstractMethod(Scope* scope, int i, MapElem* elem, ErrorRecovery* errRecovery) {
 	if (scope) {
 		Function* f = (Function*)scope->m->getElemFromArr(i);
-		Type* type = (Type*)elem->getElem();
-		if (f->getIsAbstract() && type && !type->getIsAbstract()) {
-			errRecovery->errQ->enqueue(f->rowNo, f->colNo, "Error: Class is not abstract ", type->getName());
+		if (elem) {
+			Type* type = (Type*)elem->getElem();
+			if (f->getIsAbstract() && type && !type->getIsAbstract()) {
+				errRecovery->errQ->enqueue(f->rowNo, f->colNo, "Error: Class is not abstract ", type->getName());
+			}
 		}
 	}
 }
@@ -1049,10 +1055,10 @@ void SymbolTable::checkMethodOverriding(Scope* scope, int i, MapElem* elem, Erro
 		Type* type = NULL;
 		Function* currFunc = (Function*)scope->m->getElemFromArr(i);
 
-		if (elem->getElem())
+		if (elem && elem->getElem())
 			type = (Type*)elem->getElem();
 
-		if (!type->getInheritedType()) {
+		if (type && !type->getInheritedType()) {
 			this->checkAtTheEnd(currFunc->getScope(), scope->m->getFromArr(i), errRecovery);
 			return;
 		}
@@ -1063,13 +1069,13 @@ void SymbolTable::checkMethodOverriding(Scope* scope, int i, MapElem* elem, Erro
 			if (parentFunc && parentFunc->strc == FUNCTION) {
 				if (parentFunc->pl->size == currFunc->pl->size && currFunc->pl->equals(parentFunc->pl)) {
 					if (parentFunc->getIsFinal()) {
-						errRecovery->errQ->enqueue(0, 0, "Error: Overriden method is final", parentFunc->getName());
+						errRecovery->errQ->enqueue(currFunc->rowNo, currFunc->colNo, "Error: Overriden method is final", parentFunc->getName());
 					}
 					if (currFunc->equals(parentFunc)) {
-						errRecovery->stateQ->enqueue(0, 0, "State: Overriding state", currFunc->getName());
+						errRecovery->stateQ->enqueue(currFunc->rowNo, currFunc->colNo, "State: Overriding state", currFunc->getName());
 					}
 					else {
-						errRecovery->stateQ->enqueue(0, 0, "State: No Overriding state", currFunc->getName());
+						errRecovery->stateQ->enqueue(currFunc->rowNo, currFunc->colNo, "State: No Overriding state", currFunc->getName());
 					}
 				}
 			}

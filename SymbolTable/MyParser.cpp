@@ -60,19 +60,19 @@ void Modifier::setIsProtected(bool isProtected) {
 	this->isProtected = isProtected;
 }
 
-void Modifier::setIsStatic(bool isStatic){
+void Modifier::setIsStatic(bool isStatic) {
 	this->isStatic = isStatic;
 }
 
-void Modifier::setIsFinal(bool isFinal){
+void Modifier::setIsFinal(bool isFinal) {
 	this->isFinal = isFinal;
 }
 
-void Modifier::setIsAbstract(bool isAbstract){
+void Modifier::setIsAbstract(bool isAbstract) {
 	this->isAbstract = isAbstract;
 }
 
-void Modifier::setIsNative(bool isNative){
+void Modifier::setIsNative(bool isNative) {
 	this->isNative = isNative;
 }
 
@@ -80,7 +80,7 @@ void Modifier::setIsSynchronized(bool isSynchronized) {
 	this->isSynchronized = isSynchronized;
 }
 
-void Modifier::setIsTransient(bool isTransient){
+void Modifier::setIsTransient(bool isTransient) {
 	this->isTransient = isTransient;
 }
 
@@ -108,15 +108,15 @@ bool Modifier::getIsStatic() {
 	return this->isStatic;
 }
 
-bool Modifier::getIsFinal(){
+bool Modifier::getIsFinal() {
 	return this->isFinal;
 }
 
-bool Modifier::getIsAbstract(){
+bool Modifier::getIsAbstract() {
 	return this->isAbstract;
 }
 
-bool Modifier::getIsNative(){
+bool Modifier::getIsNative() {
 	return this->isNative;
 }
 
@@ -135,39 +135,19 @@ bool Modifier::getIsVolatile() {
 char* Modifier::getReturnType() {
 	return this->returnType;
 }
-//================Helper====================
-Helper::Helper() {}
-Helper::~Helper() {}
-
-void Helper::brcktsCountInc() {
-	this->bracketsCount++;
-}
-
-void Helper::brcktsCountDec() {
-	this->bracketsCount--;
-}
-
-void Helper::setBracketsCount(int brcktsCount) {
-	this->bracketsCount = brcktsCount;
-}
-
-int Helper::getBracketsCount() {
-	return this->bracketsCount;
-}
 
 
 MyParser::MyParser(void)
 {
-	this->st				= new SymbolTable();
-	this->errRecovery		= new ErrorRecovery();
-	this->helper			= new Helper();
-	this->names				= new char*[20];
-	this->pl				= new ParamList();
-	this->methodBody		= false;
-	this->defaultParam		= false;
+	this->st = new SymbolTable();
+	this->errRecovery = new ErrorRecovery();
+	this->names = new char*[20];
+	this->pl = new ParamList();
+	this->methodBody = false;
+	this->defaultParam = false;
 	this->defaultParamState = false;
-	this->rawClassName		= new char[255];
-	this->rawClassName[0]	= '\0';
+	this->rawClassName = new char[255];
+	this->rawClassName[0] = '\0';
 	this->initNames();
 }
 
@@ -176,20 +156,26 @@ MyParser::~MyParser(void) {}
 void MyParser::initNames() {
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
 	{
-		this->names[i]	  = new char[255];
+		this->names[i] = new char[255];
 		this->names[i][0] = '\0';
 	}
 }
 //========= Variable =================
-void MyParser::insertVar(int lineNo, int colNo, Modifier* m) {
+Variable** MyParser::insertVar(int lineNo, int colNo, Modifier* m) {
+	Variable** vars = new Variable*[20];
+	for (int j = 0; j < 20; j++)
+	{
+		vars[j] = NULL;
+	}
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
 	{
 		if (this->names[i] && this->names[i][0]) {
 			Variable * v = st->insertVariableInCurrentScope(this->names[i], m, lineNo, colNo, this->errRecovery);
+			vars[i] = v;
 			cout << "=================================================\n";
 			if (!v) {
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Variable is already declared", v->getName());
-				return;
+				return NULL;
 			}
 			if (m->getReturnType() && !m->getReturnType()[0]) {
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: missing return type for variable", v->getName());
@@ -202,12 +188,12 @@ void MyParser::insertVar(int lineNo, int colNo, Modifier* m) {
 		}
 		else {
 			m->reset();
-			return;
+			return vars;
 		}
 	}
 }
 Variable* MyParser::addVariableToCurrentScope(Variable* v) {
-	if(v) {
+	if (v) {
 		this->st->currScope->m->put(v->getName(), v, LOCALVARIABLE);
 	}
 	return v;
@@ -223,7 +209,7 @@ Parameter* MyParser::insertParam(char* name, int lineNo, int colNo, Modifier* m)
 		this->errRecovery->stateQ->enqueue(lineNo, colNo, "State: Default parameter state", name);
 		this->defaultParamState = true;
 	}
-	Parameter * p = st->createParam(name, m);
+	Parameter * p = st->createParam(name, m, errRecovery);
 	char* paramName = new char[255];
 	if (p && p->strc == PARAMETER) {
 		strcpy(paramName, p->getName());
@@ -242,22 +228,29 @@ Parameter* MyParser::insertParam(char* name, int lineNo, int colNo, Modifier* m)
 }
 
 //========= Data Member =================
-void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
+DataMember** MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
+	DataMember** members = new DataMember*[20];
+	for (int j = 0; j < 20; j++){
+		members[j] = NULL;
+	}
+
 	for (int i = 0; i < (sizeof(this->names) / sizeof(**this->names)); i++)
 	{
 		if (this->names[i] && this->names[i][0]) {
 			// Check for native, abstract and synchronized.
 			DataMember * d = st->insertDataMemberInCurrentScope(this->names[i], m, lineNo, colNo);
+			members[i] = d;
+			cout << members[i]->getName();
 			if (m->getIsAbstract() || m->getIsNative() || m->getIsSynchronized()) {
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Modifier native, abstract & synchronized are not allowed here", "");
 				m->reset();
-				return;
+				return NULL;
 			}
 			cout << "==============================================\n";
 			if (!d) {
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Data member is already declared", this->names[i]);
 				m->reset();
-				return;
+				return NULL;
 			}
 
 			// Checking if function has different modifiers
@@ -267,13 +260,13 @@ void MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 				cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
 				cout << "==================================================\n";
 				m->reset();
-				return;
+				return NULL;
 			}
 			d->printDetails();
 		}
 		else {
 			m->reset();
-			return;
+			return members;
 		}
 	}
 }
@@ -287,7 +280,7 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char* inheritedTypeName) {
 	Type* t = (Type*)this->st->getTypeParent(name);
 
-	if(t && t->strc == TYPE) {
+	if (t && t->strc == TYPE) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Class already exists", name);
 		return 0;
 	}
@@ -321,7 +314,7 @@ Type * MyParser::finishTypeDeclaration(Type* t) {
 			goto constructor;
 		}
 		if (!f) {
-			constructor:Function* f = new Function();
+		constructor:Function* f = new Function();
 			f->setIsPublic(true);
 			f->setIsConstructor(true);
 			f->setName(t->getName());
@@ -331,7 +324,8 @@ Type * MyParser::finishTypeDeclaration(Type* t) {
 			cout << "Default constructor has been created with name: " << f->getName() << endl;
 			cout << "==========================================================\n";
 		}
-		this->st->currScope = this->st->currScope->parent;
+		if (this->st->currScope && this->st->currScope->parent)
+			this->st->currScope = this->st->currScope->parent;
 	}
 	if (t)
 		cout << "=============== Class " << t->getName() << " closed ================" << endl;
@@ -439,7 +433,7 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	// Setting function modifiers
 	f->setName(name);
 	f->setIsPublic(m->getIsPublic()); f->setIsPrivate(m->getIsPrivate()); f->setIsProtected(m->getIsProtected());
-	
+
 	f->colNo = colNo; f->rowNo = lineNo;
 
 	// Modifiers are not explicitly written
@@ -470,7 +464,7 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	if (this->st->currScope && this->st->currScope->parent) {
 		Type* t = (Type*)this->st->currScope->parent->m->get(name);
 		if (t && t->strc == TYPE) {
-			 if(strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
+			if (strcmp(t->getName(), name) == 0 && (m->getReturnType() && !m->getReturnType()[0])) {
 				if (f->constructorModifiersError()) {
 					this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Illegal combination of Constructor Modifiers", f->getName());
 					return false;

@@ -10,10 +10,6 @@
 	#include<string>
 	#include <fstream>
 
-
-
-
-
 	int yylex(void);
 	int yyparse();
 	void yyerror(char *);

@@ -208,19 +208,33 @@ bool TypeList::isEmpty() {
 	return (this->root == NULL);
 }
 
-//============ Variable ================
+//============ Variable ===============
+int Variable::lastId = 0;
+
 Variable::Variable() {
-	this->name = new char[255];
-	this->name[0] = '\0';
-	this->type = new char[255];
-	this->type[0] = '\0';
-	this->isFinal = false;
-	this->strc = LOCALVARIABLE;
+	this->id = 0;
 	this->colNo = 0;
 	this->rowNo = 0;
+	this->name = new char[255];
+	this->type = new char[255];
+	this->alternativeType = new char[255];
+	this->name[0] = '\0';
+	this->type[0] = '\0';
+	this->alternativeType[0] = '\0';
+	this->isFinal = false;
+	this->strc = LOCALVARIABLE;
+	Variable::lastIdInc();
 }
 
 Variable::~Variable() {}
+
+void Variable::setId(int id) {
+	this->id = id;
+}
+
+int Variable::getId() {
+	return this->id;
+}
 
 void Variable::setName(char* n) {
 	strcat(this->name, n);
@@ -230,12 +244,32 @@ char* Variable::getName() {
 	return this->name;
 }
 
+int Variable::lastIdInc() {
+	return ++Variable::lastId;
+}
+
+void Variable::setLastId(int lastId) {
+	Variable::lastId = lastId;
+}
+
+int Variable::getLastId() {
+	return Variable::lastId;
+}
+
 void Variable::setType(char* type) {
 	strcat(this->type, type);
 }
 
 char* Variable::getType() {
 	return this->type;
+}
+
+void Variable::setAlternativeType(char* alternativeType) {
+	strcat(this->alternativeType, alternativeType);
+}
+
+char* Variable::getAlternativeType() {
+	return this->alternativeType;
 }
 
 void Variable::setIsFinal(bool isFinal) {
@@ -425,23 +459,25 @@ void DataMember::printDetails() {
 //=======================================
 //============== Type ===================
 Type::Type() {
-	this->name = new char[255];
-	this->name[0] = '\0';
-	this->parentName = new char[255];
-	this->parentName[0] = '\0';
-	this->fileName = new char[255];
-	this->fileName[0] = '\0';
-	this->next = NULL;
-	this->scope = new Scope();
-	this->inheritedType = NULL;
-	this->strc = TYPE;
 	this->colNo = 0;
 	this->rowNo = 0;
+	this->strc = TYPE;
+	this->next = NULL;
+	this->inheritedType = NULL;
+	this->name = new char[255];
+	this->fileName = new char[255];
+	this->parentName = new char[255];
+	this->name[0] = '\0';
+	this->fileName[0] = '\0';
+	this->parentName[0] = '\0';
+	this->scope = new Scope();
+	this->scope->scopeOwner = (Type*) this;
 	this->isPublic = false;
 	this->isPrivate = false;
 	this->isProtected = false;
 	this->isFinal = false;
 	this->isAbstract = false;
+	this->isStatic = false;
 }
 
 Type::~Type() {}
@@ -561,6 +597,10 @@ bool Type::getIsFinal() {
 	return this->isFinal;
 }
 
+void Type::setIsStatic(bool isStatic) {
+	this->isStatic = isStatic;
+}
+
 void Type::setIsAbstract(bool isAbstract) {
 	this->isAbstract = isAbstract;
 }
@@ -575,6 +615,10 @@ bool Type::getIsPublic() {
 
 bool Type::getIsPrivate() {
 	return this->isPrivate;
+}
+
+bool Type::getIsStatic() {
+	return this->isStatic;
 }
 
 bool Type::getIsProtected() {
@@ -602,20 +646,46 @@ void Type::printDetails() {
 }
 //=======================================
 //=================Function==============
+int Function::lastId = 0;
+
 Function::Function() {
-	this->name = new char[255];
-	this->name[0] = '\0';
-	this->returnType = new char[255];
-	this->returnType[0] = '\0';
-	this->scope = new Scope();
-	this->pl = new ParamList();
-	this->strc = FUNCTION;
+	this->id = 0;
 	this->colNo = 0;
 	this->rowNo = 0;
+	this->strc = FUNCTION;
+	this->name = new char[255];
+	this->returnType = new char[255];
+	this->name[0] = '\0';
+	this->returnType[0] = '\0';
+	this->scope = new Scope();
+	this->scope->scopeOwner = (Function*) this;
+	this->pl = new ParamList();
+	this->varCount = 0;
 	this->initModifiers();
+	Function::lastIdInc();
 }
 
 Function::~Function() {}
+
+void Function::setId(int id) {
+	this->id = id;
+}
+
+int Function::getId() {
+	return this->id;
+}
+
+void Function::setLastId(int lastId) {
+	Function::lastId = lastId;
+}
+
+int Function::getLastId() {
+	return lastId;
+}
+
+void Function::lastIdInc() {
+	lastId++;
+}
 
 bool Function::equals(Function* f) {
 	if ((strcmp(this->name, f->name) == 0) && (strcmp(this->returnType, f->returnType) == 0) &&
@@ -718,6 +788,10 @@ void Function::setReturnType(char* returnType) {
 	strcat(this->returnType, returnType);
 }
 
+void Function::setVarCount(int varCount) {
+	this->varCount = varCount;
+}
+
 void Function::setIsPublic(bool isPublic) {
 	this->isPublic = isPublic;
 }
@@ -772,6 +846,14 @@ bool Function::getIsPrivate() {
 
 bool Function::getIsProtected() {
 	return this->isProtected;
+}
+
+int Function::getVarCount() {
+	return this->varCount;
+}
+
+void Function::varCountInc() {
+	++this->varCount;
 }
 
 bool Function::getIsStatic() {
@@ -875,6 +957,7 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m, in
 		v = new Variable();
 		v->setName(name);
 		v->colNo = colNo; v->rowNo = lineNo;
+		v->setId(Variable::getLastId());
 		if (v->isPrimitiveType(m->getReturnType())) {
 			v->setType(m->getReturnType());
 			errRecovery->stateQ->enqueue(v->rowNo, v->colNo, "State: Variable type is primitive type.", v->getName());
@@ -885,15 +968,18 @@ Variable * SymbolTable::insertVariableInCurrentScope(char* name, Modifier* m, in
 				// TODO: abstract class can't be instantiated.
 				if (strcmp(t->getName(), m->getReturnType()) == 0) {
 					v->setType(m->getReturnType());
+					v->setAlternativeType(m->getAlternativeReturnType());
 					cout << "object has been created\n";
 				}
 				else {
 					v->setType(m->getReturnType());
+					v->setAlternativeType(m->getAlternativeReturnType());
 					errRecovery->errQ->enqueue(0, 0, "Class doesn't exist", m->getReturnType());
 				}
 			}
 			else {
 				v->setType(m->getReturnType());
+				v->setAlternativeType(m->getAlternativeReturnType());
 				errRecovery->errQ->enqueue(0, 0, "Class doesn't exist", m->getReturnType());
 			}
 		}
@@ -1410,6 +1496,8 @@ Function* SymbolTable::printMethodHeader(Scope* scope, int index, ErrorRecovery*
 		else
 			cout << "Constructor: ";
 		cout << scope->m->getFromArr(index)->getName();
+		Function* function = (Function*)scope->m->getElemFromArr(index);
+		cout << "[" << function->getId() << "]";
 		if (!function->pl->isEmpty()) {
 			cout << " with parameters: (";
 			function->pl->print();
@@ -1439,7 +1527,7 @@ DataMember* SymbolTable::printDmHeader(Scope* scope, int index) {
 Variable* SymbolTable::printVarHeader(Scope* scope, int index) {
 	Variable* var = (Variable*)scope->m->getElemFromArr(index);
 	if (var && var->strc == LOCALVARIABLE) {
-		cout << "\t\tLocal Variable: " << var->getName() << " with type " << var->getType() << endl;
+		cout << "\t\tLocal Variable" << "[" << var->getId() << "]: " << var->getName() << " with type " << var->getType() << endl;
 	}
 	return var;
 }

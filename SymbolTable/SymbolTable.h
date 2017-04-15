@@ -16,6 +16,7 @@ public:
 	Scope();
 	Scope * parent;
 	MyMap * m;
+	void* scopeOwner;
 };
 class Parameter {
 private:
@@ -54,24 +55,35 @@ public:
 	void print();
 };
 class Variable {
-private: 
+private:
+	int id;
 	char* name;
 	char* type;
+	char* alternativeType;
 	bool isFinal;
+	static int lastId;
 public:
 	int colNo;
 	int rowNo;
 	enum structure strc;
 	Variable();
 	~Variable();
+	void setId(int id);
+	int getId();
 	void setName(char* n);
 	char* getName();
 	void setType(char* type);
 	char* getType();
+	void setAlternativeType(char* type);
+	char* getAlternativeType();
 	void setIsFinal(bool isFinal);
 	bool getIsFinal();
+	static void setLastId(int lastId);
+	static int getLastId();
+	static int lastIdInc();
 	bool isPrimitiveType(char* type);
 };
+
 class DataMember {
 private:
 	char* name;
@@ -116,6 +128,7 @@ private:
 	bool isProtected;
 	bool isFinal;
 	bool isAbstract;
+	bool isStatic;
 	Type* inheritedType;
 	Scope * scope;
 public:
@@ -137,6 +150,8 @@ public:
 	Type* getInheritedType();
 	void setIsFinal(bool isFinal);
 	bool getIsFinal();
+	void setIsStatic(bool isStatic);
+	bool getIsStatic();
 	void setIsPublic(bool isPublic);
 	bool getIsPublic();
 	void setIsPrivate(bool isPrivate);
@@ -170,7 +185,10 @@ public:
 class ErrorRecovery;
 class Function {
 private:
+	int id;
+	static int lastId;
 	char* name;
+	int varCount;
 	bool isPublic;
 	bool isPrivate;
 	bool isProtected;
@@ -201,8 +219,16 @@ public:
 	bool illegalCombinationOfModifiers();
 	void setName(char* name);
 	char* getName();
+	void setId(int id);
+	int getId();
+	static void setLastId(int lastId);
+	static int getLastId();
+	static void lastIdInc();
 	void setIsPublic(bool isPublic);
 	bool getIsPublic();
+	void setVarCount(int varCount);
+	int getVarCount();
+	void varCountInc();
 	void setIsPrivate(bool isPrivate);
 	bool getIsPrivate();
 	void setIsProtected(bool isProtected);

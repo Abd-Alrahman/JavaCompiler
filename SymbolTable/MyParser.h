@@ -18,6 +18,7 @@ private:
 	bool isTransient;
 	bool isVolatile;
 	char* returnType;
+	char* alternativeReturnType;
 public:
 	Modifier();
 	Modifier(Modifier* m);
@@ -44,6 +45,8 @@ public:
 	bool getIsVolatile();
 	void setReturnType(char* returnType);
 	char* getReturnType();
+	void setReturnAlternativeType(char* alternativeReturnType);
+	char* getAlternativeReturnType();
 	void reset();
 };
 //======================================================================
@@ -51,7 +54,7 @@ class MyParser
 {
 private:
 	bool setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo);
-	bool setTypeData(Type* f, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName);
+	bool setTypeData(Type* f, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName, bool isInner);
 	void MyParser::initNames();
 	void MyParser::initParameters();
 public:
@@ -70,8 +73,8 @@ public:
 	DataMember** insertMem(int lineNo, int colNo, Modifier* m);
 	DataMember* addDataMemberToCurrentScope(DataMember* d);
 	Parameter* insertParam(char* name, int lineNo, int colNo, Modifier* m);
-	Type * createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName);
-	Type * finishTypeDeclaration(Type* t);
+	Type * createType(char* name, int lineno, int colno, Modifier* m, char* inheritedTypeName, bool isInner = false);
+	Type * finishTypeDeclaration(Type* t, bool isInner = false);
 	Function * createFunction(char* name, int lineno, int colno, Modifier* m);
 	Function * finishFunctionDeclaration(Function* f, bool methodBody);
 	Parameter** getParameters();

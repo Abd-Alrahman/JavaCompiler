@@ -2,6 +2,10 @@
 #include <iostream>
 //============ Modifier =================
 Modifier::Modifier() {
+	this->returnType = new char[255];
+	this->alternativeReturnType = new char[255];
+	this->returnType[0] = '\0';
+	this->alternativeReturnType[0] = '\0';
 	this->isPublic = false;
 	this->isPrivate = false;
 	this->isProtected = false;
@@ -12,8 +16,6 @@ Modifier::Modifier() {
 	this->isVolatile = false;
 	this->isTransient = false;
 	this->isNative = false;
-	this->returnType = new char[255];
-	this->returnType[0] = '\0';
 }
 
 Modifier::Modifier(Modifier* m) {
@@ -29,11 +31,17 @@ Modifier::Modifier(Modifier* m) {
 	this->isNative = m->isNative;
 	this->returnType = new char[255];
 	strcpy(this->returnType, m->returnType);
+	this->alternativeReturnType = new char[255];
+	strcpy(this->alternativeReturnType, m->alternativeReturnType);
 }
 
 Modifier::~Modifier() {}
 
 void Modifier::reset() {
+	this->returnType = new char[255];
+	this->alternativeReturnType = new char[255];
+	this->returnType[0] = '\0';
+	this->alternativeReturnType[0] = '\0';
 	this->isPublic = false;
 	this->isPrivate = false;
 	this->isProtected = false;
@@ -44,8 +52,6 @@ void Modifier::reset() {
 	this->isVolatile = false;
 	this->isTransient = false;
 	this->isNative = false;
-	this->returnType = new char[255];
-	this->returnType[0] = '\0';
 }
 
 void Modifier::setIsPublic(bool isPublic) {
@@ -89,7 +95,13 @@ void Modifier::setIsVolatile(bool isVolatile) {
 }
 
 void Modifier::setReturnType(char* returnType) {
+	this->returnType[0] = '\0';
 	strcat(this->returnType, returnType);
+}
+
+void Modifier::setReturnAlternativeType(char* alternativeReturnType) {
+	this->alternativeReturnType[0] = '\0';
+	strcat(this->alternativeReturnType, alternativeReturnType);
 }
 
 bool Modifier::getIsPublic() {
@@ -134,6 +146,10 @@ bool Modifier::getIsVolatile() {
 
 char* Modifier::getReturnType() {
 	return this->returnType;
+}
+
+char* Modifier::getAlternativeReturnType() {
+	return this->alternativeReturnType;
 }
 
 
@@ -256,9 +272,6 @@ DataMember** MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 			// Checking if function has different modifiers
 			if (d->illegalCombinationOfModifiers()) {
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
-				cout << "==================================================\n";
-				cout << "Error[" << lineNo << ", " << colNo << "]: Illegal combination of modifiers\n";
-				cout << "==================================================\n";
 				m->reset();
 				return NULL;
 			}
@@ -277,9 +290,10 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 	return d;
 }
 //========= Types =================
-Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char* inheritedTypeName) {
+Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char* inheritedTypeName, bool isInner) {
 	Type* t = (Type*)this->st->getTypeParent(name);
-
+	// Resetting count id
+	Function::setLastId(0);
 	if (t && t->strc == TYPE) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Class already exists", name);
 		return 0;
@@ -288,7 +302,7 @@ Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char
 	t = new Type();
 
 	// Set class data
-	if (!this->setTypeData(t, name, m, lineNo, colNo, inheritedTypeName)) {
+	if (!this->setTypeData(t, name, m, lineNo, colNo, inheritedTypeName, isInner)) {
 		m->reset();
 		return 0;
 	}
@@ -306,23 +320,26 @@ Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char
 	return t;
 }
 
-Type * MyParser::finishTypeDeclaration(Type* t) {
+Type * MyParser::finishTypeDeclaration(Type* t, bool isInner) {
 	if (t && t->strc == TYPE) {
-		// Creating default constructor for class if doesn't exist.
-		Function* f = (Function*)this->st->currScope->m->get(t->getName());
-		if (f && f->strc != FUNCTION) {
-			goto constructor;
-		}
-		if (!f) {
-		constructor:Function* f = new Function();
-			f->setIsPublic(true);
-			f->setIsConstructor(true);
-			f->setName(t->getName());
-			this->st->currScope->m->put(f->getName(), f, FUNCTION);
+		if (!isInner) {
+			// Creating default constructor for class if doesn't exist.
+			Function* f = (Function*)this->st->currScope->m->get(t->getName());
+			if (f && f->strc != FUNCTION) {
+				goto constructor;
+			}
+			if (!f) {
+			constructor:Function* f = new Function();
+				f->setId(Function::getLastId());
+				f->setIsPublic(true);
+				f->setIsConstructor(true);
+				f->setName(t->getName());
+				this->st->currScope->m->put(f->getName(), f, FUNCTION);
 
-			cout << "==========================================================\n";
-			cout << "Default constructor has been created with name: " << f->getName() << endl;
-			cout << "==========================================================\n";
+				cout << "==========================================================\n";
+				cout << "Default constructor has been created with name: " << f->getName() << endl;
+				cout << "==========================================================\n";
+			}
 		}
 		if (this->st->currScope && this->st->currScope->parent)
 			this->st->currScope = this->st->currScope->parent;
@@ -332,14 +349,18 @@ Type * MyParser::finishTypeDeclaration(Type* t) {
 	return t;
 }
 
-bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName) {
+bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName, bool isInner) {
 	// Setting class modifiers
 	t->setName(name); t->setParentName(m->getReturnType());
 	t->setFileName(this->rawClassName);
 	t->setIsPublic(m->getIsPublic()); t->setIsPrivate(m->getIsPrivate()); t->setIsProtected(m->getIsProtected());
-	t->setIsFinal(m->getIsFinal());
+	t->setIsFinal(m->getIsFinal()); t->setIsStatic(m->getIsStatic());
 	t->setIsAbstract(m->getIsAbstract());
 	t->colNo = colNo; t->rowNo = lineNo;
+
+	if (isInner && (m->getIsPublic() || m->getIsPrivate() || m->getIsProtected())) {
+		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Class can't has access modifiers!", t->getName());
+	}
 
 	// Modifiers are not explicitly written
 	if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
@@ -377,6 +398,9 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 //========= Functions ===========
 Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier* m) {
 	Function* f = new Function();
+
+	// Resetting id counting
+	Variable::setLastId(0);
 
 	if (!this->setMethodData(f, name, m, lineNo, colNo)) {
 		// Resetting the modifier
@@ -444,6 +468,11 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	f->setIsTransient(m->getIsTransient()); f->setIsSynchronized(m->getIsSynchronized()); f->setIsVolatile(m->getIsVolatile());
 	f->setIsNative(m->getIsNative());
 	f->setReturnType(m->getReturnType());
+
+	// Set Object Method ID
+	if (!f->getIsStatic()) {
+		f->setId(Function::getLastId());
+	}
 
 	// Checking if function has different modifiers
 	if (f->illegalCombinationOfModifiers()) {

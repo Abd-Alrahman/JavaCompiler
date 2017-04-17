@@ -9,7 +9,9 @@
 using namespace::std;
 enum NodeType {
 	//statements
-	IfStatmentNode, WhileNode, DoWhileNode, ForNode, expressionNode, SwitchStatmentNode,
+	IfStatmentNode, WhileNode, DoWhileNode, ForeachHeaderNode, ForNode, ForHeaderNode, ForInit, ForExpr,
+	
+	expressionNode, SwitchStatmentNode,
 
 
 
@@ -23,7 +25,7 @@ enum NodeType {
 	ConstructorHeaderNode, ConstructorBodyNode, TryNode, catchNode, catchHeaderNode, finallyNode, NotJustName, ComplexPrimary,
 
 	//values
-	Integer_Value, QualifiedName, Assign, Float_Value, Char_Value, Long_Value, String_Value,
+	Integer_Value, QualifiedName, Assign, Float_Value, Char_Value, Long_Value, String_Value, Boolean_Value,
 	booleanType, charType, byteType, shortType, intType, longType, floatType, doubleType, voidType, StringType,
 
 	ElseStatementNode, IfElseStatment,
@@ -81,6 +83,9 @@ public:
 
 class AST
 {
+private:
+	void checkUpperCasting(TreeNode* expressionLeftNode, TreeNode* castNode, TreeNode* function);
+	void checkDownCasting(TreeNode* expressionLeftNode, TreeNode* castNode, TreeNode* function);
 public:
 	queue<TreeNode*>q;
 	nodeList * list = new nodeList();
@@ -94,6 +99,7 @@ public:
 	TreeNode * addToLastRight(TreeNode * basic, TreeNode* newItem);
 	Type * checkMapForType(MyMap * m);
 	TreeNode ** getNodes(TreeNode * tn, string s);
+	TreeNode ** getParamNodes(TreeNode * tn, char * functionName);
 	void makeVisitedZero(TreeNode * tn);
 	TreeNode * checkall(TreeNode * tn, string s);
 	TreeNode * checkLeft(TreeNode * tn, string s);
@@ -115,6 +121,11 @@ public:
 	void checkInnerClass(TreeNode * tn);
 	void checkLocalInnerClass(TreeNode* tn);
 	void checKReturnFunction(TreeNode * tn);
+	void checkAssignType(TreeNode * tn);
+	void checkParameterFunNumber(TreeNode * tn);
+	void checkClasses(TreeNode * tn);
+	void checkCastingState(TreeNode * tn);
+	Type * getType(char * className);
 	void check(MyParser * p);
 	void addTree(TreeNode * tn);
 	void print(TreeNode * tn, int lvl);

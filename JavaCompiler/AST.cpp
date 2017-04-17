@@ -59,8 +59,9 @@ void nodeList::print() {
 char* arr[] =
 {
 	"IfStatmentNode", "WhileNode",
-	"DoWhileNode",
-	"ForNode",
+	"DoWhileNode", "ForeachHeaderNode",
+	"ForNode", "ForHeaderNode",
+	"ForInit", "ForExpr",
 	"expressionNode", "SwitchStatmentNode",
 
 	"functionListNode", "functionNode",
@@ -81,6 +82,7 @@ char* arr[] =
 	"QualifiedName", "Assign",
 	"Float_Value", "Char_Value",
 	"Long_Value", "String_Value",
+	"Boolean_Value",
 	"booleanType", "charType",
 	"byteType", "shortType",
 	"intType", "longType",
@@ -210,7 +212,8 @@ TreeNode * AST::checkLeft(TreeNode * tn, string s) {
 		TreeNode * temp = this->q.front();
 		this->q.pop();
 		if (arr[temp->nodeType] == s) {
-			res = temp;
+			this->makeVisitedZero(tn);
+			return temp;
 		}
 		if (temp->left && temp->visited != 1) {
 			this->q.push(temp->left);
@@ -218,7 +221,7 @@ TreeNode * AST::checkLeft(TreeNode * tn, string s) {
 		temp->visited = 1;
 	}
 	this->makeVisitedZero(tn);
-	return res;
+	return NULL;
 }
 
 TreeNode * AST::checkall(TreeNode * tn, string s){
@@ -369,6 +372,7 @@ void AST::checkFunctionStmtOrVar(TreeNode * tn, TreeNode * funcNode, TreeNode * 
 	Function * fun = (Function *)funcNode->elem;
 	if (tn != NULL){
 		TreeNode * variableExp = checkLeft(tn, "UnaryExpressionListNode");
+		TreeNode * forNode = checkLeft(tn, "ForNode");
 		TreeNode * whileNode = checkLeft(tn, "WhileNode");
 		TreeNode * ifStmtNode = checkLeft(tn, "IfStatmentNode");
 		if (ifStmtNode){
@@ -398,6 +402,7 @@ void AST::checkFunctionStmtOrVar(TreeNode * tn, TreeNode * funcNode, TreeNode * 
 		else if (variableExp){
 			bool checkifVar = false;
 			bool checkWhileVar = false;
+			bool checkForVar = false;
 			char * name = NULL;
 
 			if (Exp){
@@ -409,7 +414,7 @@ void AST::checkFunctionStmtOrVar(TreeNode * tn, TreeNode * funcNode, TreeNode * 
 					if (varList){
 						while (varList[j] != NULL){
 							Variable * var = (Variable *)varList[j]->elem;
-							if (name == var->getName()){
+							if (strcmp(name, var->getName()) == 0){
 								checkifVar = true;
 								break;
 							}
@@ -430,12 +435,31 @@ void AST::checkFunctionStmtOrVar(TreeNode * tn, TreeNode * funcNode, TreeNode * 
 							while (varList[j] != NULL){
 								
 								Variable * var = (Variable *)varList[j]->elem;
-								if (name == var->getName()){
+								if (strcmp(name, var->getName()) == 0){
 									checkWhileVar = true;
 									break;
 								}
 								j++;
 							}
+						}
+					}
+				}
+				else if (Exp->nodeType == ForNode) {
+					TreeNode * forStmt = Exp;
+					TreeNode ** varList = this->getNodes(forStmt, "LocalVariableNode");
+
+					TreeNode * forRight = checkRight(forStmt, "LocalVarOrStmtListNode");
+					TreeNode * forVar = checkLeft(forRight, "QualifiedName");
+					if (forVar) {
+						name = (char *)forVar->elem;
+						int j = 0;
+						while (varList[j]){
+							Variable * var = (Variable *)varList[j]->elem;
+							if (strcmp(name,var->getName()) == 0){
+								checkForVar = true;
+								break;
+							}
+							j++;
 						}
 					}
 				}
@@ -456,7 +480,7 @@ void AST::checkFunctionStmtOrVar(TreeNode * tn, TreeNode * funcNode, TreeNode * 
 					}
 				}
 			}
-			if (!checkifVar && !checkWhileVar && !thisBeforVar && v && !methodCall) {
+			if (!checkifVar && !checkWhileVar && !thisBeforVar && !checkForVar && v && !methodCall) {
 				varcheck = this->checkVariable(v->elem, funcNode);
 				bool inheritanceParent = false;
 				if (!fun->getIsStatic()) {
@@ -477,12 +501,16 @@ void AST::checkFunctionStmtOrVar(TreeNode * tn, TreeNode * funcNode, TreeNode * 
 		if (tn->right != NULL){
 			TreeNode * variableExp = NULL;
 			TreeNode * whileNode = checkLeft(tn->right, "WhileNode");
+			TreeNode * forNode = checkLeft(tn, "ForNode");
 			TreeNode * ifStmtNode = checkLeft(tn->right, "IfStatmentNode");
 			if (!whileNode && !ifStmtNode){
 				variableExp = checkLeft(tn->right, "UnaryExpressionListNode");;
 			}
 			if (whileNode){
 				this->checkFunctionStmtOrVar(tn->right, funcNode, whileNode);
+			}
+			if (forNode){
+				this->checkFunctionStmtOrVar(tn->right, funcNode, forNode);
 			}
 			if (ifStmtNode){
 				this->checkFunctionStmtOrVar(tn->right, funcNode, ifStmtNode);
@@ -496,6 +524,9 @@ void AST::checkFunctionStmtOrVar(TreeNode * tn, TreeNode * funcNode, TreeNode * 
 		}
 		if (ifStmtNode && ifStmtNode->right){
 			this->checkFunctionStmtOrVar(ifStmtNode->right, funcNode, ifStmtNode);
+		}
+		if (forNode && forNode->right){
+			this->checkFunctionStmtOrVar(forNode->right, funcNode, forNode);
 		}
 		
 	}
@@ -860,7 +891,7 @@ bool AST::varIsPrivate(TreeNode * reqClass, char * datamemberName){
 		int i = 0;
 		while (dataList[i] != NULL) {
 			datamember =(DataMember*) dataList[i]->elem;
-			if (strcmp(datamember->getName(), datamemberName) == 0) {
+			if (strcmp(datamember->getName(), datamemberName) == 0){
 				if (datamember->getIsPrivate()){
 					res = true;
 				}
@@ -868,7 +899,7 @@ bool AST::varIsPrivate(TreeNode * reqClass, char * datamemberName){
 			}
 			i++;
 		}
-		if (!checkDatamember && !checkDataMemberParent) {
+		if (!checkDatamember && !checkDataMemberParent){
 			Type * t = (Type*)reqClass->elem;
 			cout << "Error : Datamember " << datamemberName << " in Class " << t->getName() << " is not defined " << endl;
 		}
@@ -1136,13 +1167,16 @@ void AST::checKReturnFunction(TreeNode * tn) {
 		TreeNode* functionBody = this->checkRight(functions[i], "functionBodyNode");
 		Function* function = (Function*)functions[i]->elem;
 
-		if (functionBody && !(function->getReturnType() == "void")) {
+		char * name = "void";
+
+		if (functionBody && strcmp(function->getReturnType(),name) != 0) {
 			TreeNode** functionStmts = this->getNodes(functionBody, "LocalVarOrStmtNode");
 			int count = 0;
 			while (functionStmts[count]) {
 				TreeNode * returnNode = this->checkLeft(functionStmts[count], "JumpStatementNode");
 				if (returnNode) {
 					TreeNode * returnVarNameNode = this->checkLeft(returnNode, "QualifiedName");
+					TreeNode * returnComplexPrimaryNode = this->checkLeft(returnNode, "ComplexPrimary");
 					if (returnVarNameNode) {
 						char * returnVarName = (char*)returnVarNameNode->elem;
 						if (returnVarName) {
@@ -1152,6 +1186,38 @@ void AST::checKReturnFunction(TreeNode * tn) {
 							}
 						}
 					}
+					else if (returnComplexPrimaryNode) {
+						TreeNode * valueNode = returnComplexPrimaryNode->left;
+						if (valueNode) {
+							char * value = arr[valueNode->nodeType];
+							if (strcmp(function->getReturnType(), "int") == 0 && strcmp(value, "Integer_Value") != 0) {
+								cout << "Error : incompatible types : " << value << " cannot be converted to " << function->getReturnType() << endl;
+							}
+							else if (strcmp(function->getReturnType(), "float") == 0 && strcmp(value, "Float_Value") != 0) {
+								cout << "Error : incompatible types : " << value << " cannot be converted to " << function->getReturnType() << endl;
+							}
+							else if (strcmp(function->getReturnType(), "char") == 0 && strcmp(value, "CAHR_VALUE") != 0) {
+								cout << "Error : incompatible types : " << value << " cannot be converted to " << function->getReturnType() << endl;
+							}
+							else if (strcmp(function->getReturnType(), "long") == 0 && strcmp(value, "Long_Value") != 0) {
+								cout << "Error : incompatible types : " << value << " cannot be converted to " << function->getReturnType() << endl;
+							}
+							else if (strcmp(function->getReturnType(), "string") == 0 && strcmp(value, "String_Value") != 0) {
+								cout << "Error : incompatible types : " << value << " cannot be converted to " << function->getReturnType() << endl;
+							}
+						}
+					}
+				}
+				count++;
+			}
+		}
+		else if (functionBody && strcmp(function->getReturnType(), name) == 0) {
+			TreeNode** functionStmts = this->getNodes(functionBody, "LocalVarOrStmtNode");
+			int count = 0;
+			while (functionStmts[count]) {
+				TreeNode * returnNode = this->checkLeft(functionStmts[count], "JumpStatementNode");
+				if (returnNode) {
+					cout << "incompatible types: unexpected return value \n";
 				}
 				count++;
 			}
@@ -1161,7 +1227,379 @@ void AST::checKReturnFunction(TreeNode * tn) {
 	
 }
 
-void AST::check(MyParser * p){
+void AST::checkAssignType(TreeNode * tn) {
+	TreeNode * reqClass = this->checkLeft(tn, "classNode");
+	TreeNode ** functions = this->getNodes(reqClass, "functionNode");
+	int i = 0;
+
+	while (functions[i]) {
+		TreeNode* functionBody = this->checkRight(functions[i], "functionBodyNode");
+		Function* function = (Function*)functions[i]->elem;
+		if (functionBody) {
+			TreeNode** functionVars = this->getNodes(functionBody, "LocalVariableNode");
+			int count = 0;
+			while (functionVars[count]) {
+				Variable * reqVar = (Variable *)functionVars[count]->elem;
+				TreeNode * assignNode = this->checkLeft(functionVars[count],"ExpressionNode");
+				if (assignNode) {
+					TreeNode * assignTypeNode = this->checkLeft(assignNode,"ComplexPrimary");
+					TreeNode * assignedObject = this->checkLeft(assignNode, "QualifiedName");
+					if (assignTypeNode) {
+						TreeNode * valueNode = assignTypeNode->left;
+						if (valueNode) {
+							char * value = arr[valueNode->nodeType];
+							if (strcmp(reqVar->getType(), "int") == 0 && strcmp(value, "Integer_Value") != 0) {
+								cout << "Error : incompatible types " << reqVar->getName() << " is " << reqVar->getType() << " in Function " << function->getName() << endl;
+							}
+							else if (strcmp(reqVar->getType(), "float") == 0 && strcmp(value, "Float_Value") != 0) {
+								cout << "Error : incompatible types " << reqVar->getName() << " is " << reqVar->getType() << " in Function " << function->getName() << endl;
+							}
+							else if (strcmp(reqVar->getType(), "char") == 0 && strcmp(value, "CAHR_VALUE") != 0) {
+								cout << "Error : incompatible types " << reqVar->getName() << " is " << reqVar->getType() << " in Function " << function->getName() << endl;
+							}
+							else if (strcmp(reqVar->getType(), "long") == 0 && strcmp(value, "Long_Value") != 0) {
+								cout << "Error : incompatible types " << reqVar->getName() << " is " << reqVar->getType() << " in Function " << function->getName() << endl;
+							}
+							else if (strcmp(reqVar->getType(), "string") == 0 && strcmp(value, "String_Value") != 0) {
+								cout << "Error : incompatible types " << reqVar->getName() << " is " << reqVar->getType() << " in Function " << function->getName() << endl;
+							}
+						}
+					}
+					else if (assignedObject) {
+						char * objectOrVarName = (char *)assignedObject->elem;
+						Variable * objectOrVar = this->getVariable(objectOrVarName, functions[i]);
+						if (objectOrVar && objectOrVar->strc == LOCALVARIABLE) {
+							if (strcmp(reqVar->getType(), objectOrVar->getType()) != 0){
+								cout << "Error : incompatible types : " << objectOrVar->getType() << " cannot be converted to " << reqVar->getType() << endl;
+							}
+						}
+					}
+				}
+				count++;
+			}
+		}
+		i++;
+	}
+}
+
+
+TreeNode ** AST::getParamNodes(TreeNode * tn, char * functionName) {
+	TreeNode ** res = new TreeNode*[20];
+	for (int i = 0; i < 20; i++)
+	{
+		res[i] = NULL;
+	}
+	TreeNode ** functionNode = this->getNodes(tn, "functionNode");
+	int count = 0;
+	while (functionNode[count]) {
+		Function * function = (Function *)functionNode[count]->elem;
+		if (function && function->strc == FUNCTION && strcmp(function->getName(),functionName) == 0) {
+			TreeNode * funHeaderNode = this->checkLeft(functionNode[count], "functionHeaderNode");
+			TreeNode ** funParams = this->getNodes(funHeaderNode, "parameterNode");
+			int j = 0;
+			while (funParams[j]){
+				res[j] = funParams[j];
+				j++;
+			}
+		}
+		count++;
+	}
+
+	return res;
+}
+
+void AST::checkParameterFunNumber(TreeNode * tn) {
+	
+	Node * current = this->list->getRoot();
+	TreeNode ** classNodes = new TreeNode*[20];
+	int count = 0;
+	for (int i = 0; i < 20; i++)
+	{
+		classNodes[i] = NULL;
+	}
+	while (current) {
+		TreeNode * currClass = this->checkLeft(current->tn, "classNode");
+		//Type * t = (Type*)currClass->elem;
+		classNodes[count] = currClass;
+		count++;
+		current = current->next;
+	}
+	
+	
+	TreeNode * reqClass = this->checkLeft(tn, "classNode");
+	TreeNode ** functions = this->getNodes(reqClass, "functionNode");
+	int i = 0;
+
+	while (functions[i]) {
+		TreeNode* functionBody = this->checkRight(functions[i], "functionBodyNode");
+		Function* function = (Function*)functions[i]->elem;
+		if (functionBody) {
+			TreeNode ** functionStmts = this->getNodes(functionBody, "LocalVarOrStmtNode");
+			int count = 0;
+			while (functionStmts[count]) {
+				TreeNode * methodCallNode = this->checkLeft(functionStmts[count], "MethodAccess");
+				if (methodCallNode) {
+					TreeNode * MethodCallNameNode = this->checkLeft(methodCallNode, "QualifiedNamePIdentifier");
+					TreeNode ** argumentListNodes = this->getNodes(methodCallNode, "ArgumentList");
+					char * methoCallName = NULL;
+					char * objectName = NULL;
+					if (MethodCallNameNode) {
+						int functionParamNum = 0;
+						int defaultParamNum = 0;
+						int classNumber = 0;
+						methoCallName = (char *)MethodCallNameNode->elem;
+						TreeNode * objectNameNode = this->checkLeft(MethodCallNameNode, "QualifiedName");
+						if (objectNameNode) {
+							objectName = (char *)objectNameNode->elem;
+							Variable * reqObject = this->getVariable(objectName, functions[i]);
+							if (reqObject) {
+								char * ObjectClassName = reqObject->getType();
+								int j = 0;
+								while (classNodes[j]) {
+									Type * t = (Type*)classNodes[j]->elem;
+									if (strcmp(t->getName(), ObjectClassName) == 0) {
+										Function * fun = (Function *)t->getScope()->m->get(methoCallName);
+										if (fun && fun->strc == FUNCTION) {
+											functionParamNum = fun->pl->size;
+										}
+										classNumber = j;
+									}
+									j++;
+								}
+							}
+						}
+						TreeNode ** paramNodes = this->getParamNodes(classNodes[classNumber], methoCallName);
+						int k = 0;
+						while (paramNodes[k]) {
+							TreeNode * defaultNode = this->checkLeft(paramNodes[k], "ExpressionNode");
+							if (defaultNode) {
+								defaultParamNum++;
+							}
+							k++;
+						}
+						k = 0;
+						int paramNumInMethodCall = 0;
+						while (argumentListNodes[k]) {
+							paramNumInMethodCall++;
+							k++;
+						}
+						Type * t = (Type*)classNodes[classNumber]->elem;
+						if (paramNumInMethodCall > functionParamNum){
+							cout << "Error : check argument number in method " << methoCallName << " in class " << t->getName() << endl;
+						}
+						else{
+							if (defaultParamNum != 0) {
+								bool check = false;
+								for (int i = defaultParamNum; i >= 0; i--)
+								{
+									if (paramNumInMethodCall == (functionParamNum - i)){
+										check = true;
+									}
+								}
+								if (!check) {
+									cout << "Error : check argument number in method " << methoCallName << " in class " << t->getName() << endl;
+								}
+							}
+							if (paramNumInMethodCall != functionParamNum && defaultParamNum == 0) {
+								cout << "Error : check argument number in method " << methoCallName << " in class " << t->getName() << endl;
+							}
+						}
+					}
+				}
+				count++;
+			}
+		}
+		i++;
+	}
+}
+
+void AST::checkClasses(TreeNode * tn){
+	Node * current = this->list->getRoot();
+	Type ** classNodes = new Type*[20];
+	int count = 0;
+	for (int i = 0; i < 20; i++)
+	{
+		classNodes[i] = NULL;
+	}
+	while (current) {
+		TreeNode * currClass = this->checkLeft(current->tn, "classNode");
+		Type * t = (Type*)currClass->elem;
+		classNodes[count] = t;
+		count++;
+		current = current->next;
+	}
+
+
+	TreeNode * reqClass = this->checkLeft(tn, "classNode");
+	TreeNode ** functions = this->getNodes(reqClass, "functionNode");
+	int i = 0;
+
+	while (functions[i]) {
+		TreeNode* functionBody = this->checkRight(functions[i], "functionBodyNode");
+		Function* function = (Function*)functions[i]->elem;
+		if (functionBody) {
+			TreeNode ** functionVars = this->getNodes(functionBody, "LocalVariableNode");
+			int count = 0;
+			while (functionVars[count]) {
+				Variable * var =(Variable *) functionVars[count]->elem;
+				if (var) {
+					char * varType = var->getType();
+					if (strcmp(varType, "int") != 0 &&
+						strcmp(varType, "float") != 0 &&
+						strcmp(varType, "char") != 0 &&
+						strcmp(varType, "long") != 0 &&
+						strcmp(varType, "string") != 0 &&
+						strcmp(varType, "boolean") != 0) {
+					
+						int j = 0;
+						bool check = false;
+						while (classNodes[j]) {
+							if (strcmp(classNodes[j]->getName(), varType) == 0) {
+								check = true;
+								break;
+							}
+							j++;
+						}
+						if (!check) {
+							cout << "Error : class " << varType << " doesn't exist " << endl;
+						}
+					}
+					//question 22
+					TreeNode * newNode = this->checkLeft(functionVars[count], "NewOfObject");
+					if (newNode) {
+						TreeNode * typeNameAfterNewNode = this->checkLeft(newNode, "QualifiedName");
+						if (typeNameAfterNewNode) {
+							char * typeName = (char*)typeNameAfterNewNode->elem;
+							if (strcmp(var->getType(), typeName) != 0) {
+								cout << "Error : illegal new type in variable : " << var->getName() << endl;
+							}
+						}
+					}
+
+				}
+				count++;
+			}
+		}
+		i++;
+	}
+}
+
+
+Type * AST::getType(char * className) {
+	Node * current = this->list->getRoot();
+	Type ** classNodes = new Type*[20];
+	int count = 0;
+	for (int i = 0; i < 20; i++) {
+		classNodes[i] = NULL;
+	}
+
+	while (current) {
+		TreeNode * currClass = this->checkLeft(current->tn, "classNode");
+		Type * t = (Type*)currClass->elem;
+		classNodes[count] = t;
+		count++;
+		current = current->next;
+	}
+
+	int j = 0;
+	while (classNodes[j]) {
+		if (strcmp(classNodes[j]->getName(), className) == 0) {
+			return classNodes[j];
+		}
+		j++;
+	}
+	return NULL;
+}
+
+void AST::checkCastingState(TreeNode * tn) {
+	TreeNode * reqClass = this->checkLeft(tn, "classNode");
+	TreeNode ** functions = this->getNodes(reqClass, "functionNode");
+	int i = 0;
+
+	while (functions[i]) {
+		TreeNode* functionBody = this->checkRight(functions[i], "functionBodyNode");
+		Function* function = (Function*)functions[i]->elem;
+
+		if (functionBody) {
+			TreeNode** stmts = this->getNodes(functionBody, "LocalVarOrStmtNode");
+			int count = 0;
+
+			while (stmts[count]) {
+				TreeNode* expressionNode = this->checkLeft(stmts[count], "UnaryExpressionListNode");
+
+				if (expressionNode) {
+					TreeNode* expressionLeftNode = this->checkLeft(expressionNode, "QualifiedName");
+					TreeNode* assignAndRightNode = this->checkRight(expressionNode, "AssignExpressionListNode");
+
+					if (assignAndRightNode) {
+						TreeNode* castNode = this->checkLeft(assignAndRightNode, "CastExpressionListNode");
+						// For upper casting
+						this->checkUpperCasting(expressionLeftNode, castNode, functions[i]);
+						// For down casting 
+						this->checkDownCasting(expressionLeftNode, castNode, functions[i]);
+					}
+				}
+				count++;
+			}
+		}
+		i++;
+	}
+}
+
+void AST::checkUpperCasting(TreeNode* expressionLeftNode, TreeNode* castNode, TreeNode* function) {
+	if (castNode) {
+		TreeNode* castingNode = this->checkLeft(castNode, "QualifiedName");
+		TreeNode* castNodeRight = this->checkRight(castNode, "LogicalUnaryExpressionNode");
+
+		if (castNodeRight) {
+			TreeNode* castedNode = this->checkLeft(castNodeRight, "QualifiedName");
+			if (castingNode && castedNode) {
+				Variable* leftObject = this->getVariable(expressionLeftNode->elem, function);
+				Variable* rightObject = this->getVariable(castedNode->elem, function);
+				Type* t = this->getType((char*)castingNode->elem);
+
+				if (leftObject && rightObject && leftObject->strc == LOCALVARIABLE && rightObject->strc == LOCALVARIABLE) {
+					if (t && ((strcmp(leftObject->getType(), (char*)castingNode->elem) == 0) ||
+						(t->getInheritedType() && strcmp(t->getInheritedType()->getName(), leftObject->getType())) == 0)) {
+						if ((strcmp(rightObject->getType(), t->getName()) != 0) &&
+							(strcmp(rightObject->getType(), leftObject->getType()) != 0) &&
+							(t->getInheritedType() && strcmp(t->getInheritedType()->getName(), rightObject->getType()) != 0)) {
+							cout << "Incompatible types " << endl;
+						}
+					}
+					else {
+						cout << "Incompatible types " << endl;
+					}
+				}
+			}
+		}
+	}
+}
+
+void AST::checkDownCasting(TreeNode* expressionLeftNode, TreeNode* castNode, TreeNode* function) {
+	if (castNode) {
+		TreeNode* castingNode = this->checkLeft(castNode, "QualifiedName");
+		TreeNode* castNodeRight = this->checkRight(castNode, "LogicalUnaryExpressionNode");
+
+		if (castNodeRight) {
+			TreeNode* castedNode = this->checkLeft(castNodeRight, "QualifiedName");
+			if (castingNode && castedNode) {
+				Variable* leftObject = this->getVariable(expressionLeftNode->elem, function);
+				Variable* rightObject = this->getVariable(castedNode->elem, function);
+				Type* t = this->getType((char*)castingNode->elem);
+
+				if (leftObject && rightObject && leftObject->strc == LOCALVARIABLE && rightObject->strc == LOCALVARIABLE) {
+					if ((t && strcmp(leftObject->getType(), t->getName()) != 0) ||
+						(t && t->getInheritedType() && strcmp(t->getInheritedType()->getName(), rightObject->getType()) != 0)) {
+						cout << "Incompatible types " << endl;
+					}
+				}
+			}
+		}
+	}
+}
+
+void AST::check(MyParser * p ) {
 
 	TreeNode * tn;
 	cout << "\n";
@@ -1184,6 +1622,11 @@ void AST::check(MyParser * p){
 			this->checkInnerClass(tn);
 			this->checkLocalInnerClass(tn);
 			this->checKReturnFunction(tn);
+			this->checkAssignType(tn);
+			this->checkParameterFunNumber(tn);
+			this->checkClasses(tn);
+			this->checkCastingState(tn);
+
 			/*
 			TreeNode * classNode = this->checkLeft(tn, "classNode");
 			TreeNode * classBody = this->checkRight(classNode, "ClassBody");

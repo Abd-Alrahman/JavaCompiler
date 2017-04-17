@@ -94,7 +94,7 @@ public:
 	~AST(void);
 	TreeNode * createNode(TreeNode * left, TreeNode* right, NodeType nt);
 	TreeNode * createNode(TreeNode * left, TreeNode* right, NodeType nt, void * e);
-	TreeNode * createNodeData(DataMember**);
+	TreeNode * createNodeData(DataMember**, TreeNode* t);
 	TreeNode * createNodeVar(Variable** arr , TreeNode * t);
 	TreeNode * addToLastRight(TreeNode * basic, TreeNode* newItem);
 	Type * checkMapForType(MyMap * m);
@@ -122,10 +122,13 @@ public:
 	void checkLocalInnerClass(TreeNode* tn);
 	void checKReturnFunction(TreeNode * tn);
 	void checkAssignType(TreeNode * tn);
+	bool checkFinalDmInit(DataMember* dm, TreeNode* reqClass);
+	bool checkFinalDmInit(TreeNode* valueNode, DataMember* dm);
 	void checkParameterFunNumber(TreeNode * tn);
 	void checkClasses(TreeNode * tn);
 	void checkCastingState(TreeNode * tn);
 	Type * getType(char * className);
+	void checkConstants(TreeNode* t);
 	void check(MyParser * p);
 	void addTree(TreeNode * tn);
 	void print(TreeNode * tn, int lvl);

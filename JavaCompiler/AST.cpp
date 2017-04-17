@@ -147,7 +147,7 @@ TreeNode * AST::createNode(TreeNode * l, TreeNode* r, NodeType nt, void * e){
 	return tn;
 }
 
-TreeNode * AST::createNodeData(DataMember** arr) {
+TreeNode * AST::createNodeData(DataMember** arr, TreeNode* t) {
 	int count = 0;
 	TreeNode * tn = new TreeNode();
 	while (arr[count] != NULL) {
@@ -155,7 +155,7 @@ TreeNode * AST::createNodeData(DataMember** arr) {
 	}
 	tn = this->createNode(0, 0, DataMemberList);
 	for (int j = 0; j < count; j++) {
-		tn = this->addToLastRight(tn, this->createNode(0, 0, DataMemberNode, arr[j]));
+		tn = this->addToLastRight(tn, this->createNode(t, 0, DataMemberNode, arr[j]));
 	}
 	return tn;
 }
@@ -1226,6 +1226,71 @@ void AST::checKReturnFunction(TreeNode * tn) {
 	}
 	
 }
+/**
+* Check if final Data Member is initialized in every constructor.
+*/
+bool AST::checkFinalDmInit(TreeNode* reqClass, DataMember* dm) {
+	TreeNode ** constructorNodes = this->getNodes(reqClass, "ConstructorNode");
+	int count = 0;
+
+	while (constructorNodes[count]) {
+		Function* reqConstructor = (Function*)constructorNodes[count]->elem;
+		if (reqConstructor && reqConstructor->strc == FUNCTION) {
+			TreeNode ** stmtNodes = this->getNodes(constructorNodes[count], "LocalVarOrStmtNode");
+			int i = 0;
+			bool check = false;
+			while (stmtNodes[i]) {
+				TreeNode * unaryExpressionListNode = this->checkLeft(stmtNodes[i], "UnaryExpressionListNode");
+				if (unaryExpressionListNode) {
+					TreeNode* varNameNode = this->checkLeft(unaryExpressionListNode, "QualifiedName");
+					char* name = (char*)varNameNode->elem;
+
+					if (varNameNode && strcmp((char*)varNameNode->elem, dm->getName()) == 0) {
+						check = true;
+						TreeNode* assignNode = this->checkRight(unaryExpressionListNode, "AssignExpressionListNode");
+						if (!assignNode) {
+							return false;
+						}
+					}
+				}
+				i++;
+			}
+			if (!check) {
+				return false;
+			}
+		}
+		count++;
+	}
+	return true;
+}
+
+/**
+* Check if final Data Member is initialized at declaration.
+*/
+bool AST::checkFinalDmInit(DataMember* dm, TreeNode* assignTypeNode) {
+	if (assignTypeNode) {
+		TreeNode * valueNode = assignTypeNode->left;
+		if (valueNode) {
+			char * value = arr[valueNode->nodeType];
+			if (strcmp(dm->getType(), "int") == 0 && strcmp(value, "Integer_Value") != 0) {
+				return false;
+			}
+			else if (strcmp(dm->getType(), "float") == 0 && strcmp(value, "Float_Value") != 0) {
+				return false;
+			}
+			else if (strcmp(dm->getType(), "char") == 0 && strcmp(value, "CAHR_VALUE") != 0) {
+				return false;
+			}
+			else if (strcmp(dm->getType(), "long") == 0 && strcmp(value, "Long_Value") != 0) {
+				return false;
+			}
+			else if (strcmp(dm->getType(), "string") == 0 && strcmp(value, "String_Value") != 0) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
 
 void AST::checkAssignType(TreeNode * tn) {
 	TreeNode * reqClass = this->checkLeft(tn, "classNode");
@@ -1599,6 +1664,34 @@ void AST::checkDownCasting(TreeNode* expressionLeftNode, TreeNode* castNode, Tre
 	}
 }
 
+void AST::checkConstants(TreeNode* tn) {
+	TreeNode * reqClass = this->checkLeft(tn, "classNode");
+	TreeNode ** dmNodeList = this->getNodes(reqClass, "DataMemberNode");
+	int count = 0;
+
+	while (dmNodeList[count]) {
+		DataMember* reqDm = (DataMember*)dmNodeList[count]->elem;
+
+		if (reqDm && reqDm->strc == DATAMEMBER && reqDm->getIsFinal()) {
+			TreeNode * valueNode = this->checkLeft(dmNodeList[count], "ComplexPrimary");
+
+			if (valueNode) {
+				// Check initialization at declaration
+				if (!this->checkFinalDmInit(reqDm, valueNode)) {
+					cout << "Error : incompatible types " << reqDm->getName() << " is " << reqDm->getType() << endl;
+				}
+			}
+			else {
+				// Check initialization in constructor
+				if (!this->checkFinalDmInit(reqClass, reqDm)) {
+					cout << "Variable " << reqDm->getName() << " might not been initialized" << endl;
+				}
+			}
+		}
+		count++;
+	}
+}
+
 void AST::check(MyParser * p ) {
 
 	TreeNode * tn;
@@ -1626,7 +1719,7 @@ void AST::check(MyParser * p ) {
 			this->checkParameterFunNumber(tn);
 			this->checkClasses(tn);
 			this->checkCastingState(tn);
-
+			this->checkConstants(tn);
 			/*
 			TreeNode * classNode = this->checkLeft(tn, "classNode");
 			TreeNode * classBody = this->checkRight(classNode, "ClassBody");

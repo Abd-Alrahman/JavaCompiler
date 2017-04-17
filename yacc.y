@@ -10,10 +10,6 @@
 	#include<string>
 	#include <fstream>
 
-
-
-
-
 	int yylex(void);
 	int yyparse();
 	void yyerror(char *);
@@ -252,6 +248,7 @@ TypeDeclaration
 							   numo += $<r.mynumopen>2;
 							   numc += $<r.mynumclose>2;														
 							   type = p->finishTypeDeclaration((Type*)($<tn>1)->elem); 
+							   modifier->reset();
 							   $<tn>$=ast->createNode($<tn>1,$<tn>2, classNode,type);   
 							 }
 	| ClassHeader CLOSE_D                { err->errQ->enqueue($<r.myLineNo>2,$<r.myColNo>2,"Error :expected \'{\'", "" ); $<tn>$=ast->createNode($<tn>1,0 , classNode);}
@@ -381,12 +378,12 @@ FieldVariableDeclaration
 	: Modifiers TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 1\n";
 												    datamember = p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
 													p->resetNames(); 
-													$<tn>$=ast->createNodeData(datamember);	
+													$<tn>$=ast->createNodeData(datamember, $<tn>3);	
 												  }
 	|           TypeSpecifier VariableDeclarators { cout << "FieldVariableDeclaration 2\n";
 													datamember = p->insertMem(yylval.r.myLineNo, yylval.r.myColNo, modifier);
 													p->resetNames(); 
-													$<tn>$=ast->createNodeData(datamember);		
+													$<tn>$=ast->createNodeData(datamember, $<tn>2);		
 												  }
 	;
 
@@ -493,7 +490,7 @@ Throws
 
 MethodBody
 	: Block		{ cout << "MethodBody 1\n"; $<tn>$=ast->createNode($<tn>1,0 , functionBodyNode);}
-	| SEMICOLON { p->methodBody = false; cout << "MethodBody 2\n"; }
+	| SEMICOLON { p->methodBody = false; cout << "MethodBody 2\n"; $<tn>$=ast->createNode(0,0 , functionBodyNode);}
 	;
 
 ConstructorDeclaration
@@ -603,6 +600,7 @@ Statement
 	| Block							{ cout << "Statement 8\n"; $<tn>$ = $<tn>1; }
 	| InnerClassHeader ClassBody			{
 										type = p->finishTypeDeclaration((Type *)$<tn>1->elem, true);
+										modifier->reset();
 										$<tn>$=ast->createNode($<tn>1,$<tn>2, classInnerNode,type);
 									}	
 	                       
@@ -1001,6 +999,7 @@ int yylex()
 {
 	return lexer->yylex();
 }
+
 void main(void)
 {
 	freopen("out.txt","w" ,stdout);
@@ -1032,7 +1031,7 @@ void main(void)
 		{
 			char* rawName = new char[255];
 			rawName[0] = '\0';
-			int dotIndex;
+			int dotIndex = 0;
 			strcat(rawName, nameFiles[i]);
 			for (int j = 0; j < sizeof(rawName) / sizeof(*rawName); j++) {
 				if (rawName[j] == '.') {
@@ -1044,7 +1043,7 @@ void main(void)
 			strcat(p->rawClassName, rawName);
 			path = new char[255];
 			strcpy(path, "Classes/");
-			strcat(path,nameFiles[i]);
+			strcat(path, nameFiles[i]);
 			f->open(path,ifstream::in);
 			lexer = new yyFlexLexer(f);
 			parser->parse();
@@ -1067,4 +1066,5 @@ void main(void)
 				p->errRecovery->printErrQueue();
 		ast->check(p);
 	}
+	
 }

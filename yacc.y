@@ -5,10 +5,13 @@
 	#include <FlexLexer.h>
 	#include "JavaCompiler\AST.h"
 	#include "SymbolTable/MyParser.h"
-	#include<io.h>
-	#include<vector>
-	#include<string>
+	#include <io.h>
+	#include <vector>
+	#include <string>
 	#include <fstream>
+	#include <string.h>
+	#include <iostream>
+	#include <string>
 
 	int yylex(void);
 	int yyparse();
@@ -1000,10 +1003,12 @@ int yylex()
 	return lexer->yylex();
 }
 
+
 void main(void)
 {
-	freopen("out.txt","w" ,stdout);
+	freopen("out.txt", "w", stdout);
 	Parser* parser = new Parser();
+
 	vector<char*> nameFiles;
 	_finddata_t data;
 	int ff = _findfirst("Classes/*.java", &data);

@@ -358,7 +358,10 @@ bool Parameter::isPrimitiveType(char* type) {
 }
 
 //============ Data Member  ================
+int DataMember::lastId = 0;
+
 DataMember::DataMember() {
+	this->id = 0;
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->type = new char[255];
@@ -367,9 +370,19 @@ DataMember::DataMember() {
 	this->colNo = 0;
 	this->rowNo = 0;
 	this->initModifiers();
+	DataMember::lastIdInc();
+
 }
 
 DataMember::~DataMember() {}
+
+void DataMember::setId(int id) {
+	this->id = id;
+}
+
+int DataMember::getId() {
+	return this->id;
+}
 
 void DataMember::initModifiers() {
 	this->isFinal = false;
@@ -443,6 +456,18 @@ bool DataMember::illegalCombinationOfModifiers() {
 	}
 	return false;
 }
+int DataMember::lastIdInc() {
+	return ++DataMember::lastId;
+}
+
+void DataMember::setLastId(int lastId) {
+	DataMember::lastId = lastId;
+}
+
+int DataMember::getLastId() {
+	return DataMember::lastId;
+}
+
 
 void DataMember::printDetails() {
 	cout << "Data member " << this->name << " has been created\n";
@@ -654,8 +679,10 @@ Function::Function() {
 	this->rowNo = 0;
 	this->strc = FUNCTION;
 	this->name = new char[255];
+	this->label = new char[255];
 	this->returnType = new char[255];
 	this->name[0] = '\0';
+	this->label[0] = '\0';
 	this->returnType[0] = '\0';
 	this->scope = new Scope();
 	this->scope->scopeOwner = (Function*) this;
@@ -666,6 +693,13 @@ Function::Function() {
 }
 
 Function::~Function() {}
+
+void Function::generateLabel(Type* parentType) {
+	char* name = new char[255];
+	name[0] = '\0';
+	strcpy(name, parentType->getName()); strcat(name, "_"); strcat(name, this->name);
+	this->setLabel(name);
+}
 
 void Function::setId(int id) {
 	this->id = id;
@@ -780,6 +814,10 @@ void Function::setName(char* name) {
 	strcat(this->name, name);
 }
 
+void Function::setLabel(char* label) {
+	strcat(this->label, label);
+}
+
 void Function::setScope(Scope* m) {
 	this->scope = m;
 }
@@ -890,6 +928,10 @@ char* Function::getReturnType() {
 
 char* Function::getName() {
 	return this->name;
+}
+
+char* Function::getLabel() {
+	return this->label;
 }
 
 Scope * Function::getScope() {
@@ -1078,9 +1120,19 @@ DataMember * SymbolTable::insertDataMemberInCurrentScope(char* name, Modifier* m
 		if (m->getIsPrivate() == false && m->getIsProtected() == false && m->getIsPublic() == false) {
 			d->setIsPublic(true);
 		}
+		if (!d->getIsStatic()) {
+			d->setId(DataMember::getLastId());
+		}
+		else {
+			DataMember::setLastId(DataMember::getLastId() - 1);
+			d->setId(MyParser::getLastId());
+			MyParser::lastIdInc();
+		}
 		if (this->currScope)
 			this->currScope->m->put(name, d, DATAMEMBER);
 	}
+
+	
 	return d;
 }
 
@@ -1245,7 +1297,7 @@ void SymbolTable::checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRec
 				strcpy(chr, "State: Outer inheritance ");
 				strcat(chr, type->getName());
 				strcat(chr, " extends ");
-;				errRecovery->stateQ->enqueue(type->rowNo, type->colNo, chr, inheritedType->getName());
+				errRecovery->stateQ->enqueue(type->rowNo, type->colNo, chr, inheritedType->getName());
 				type->setInheritedType(inheritedType);
 				type->checkForAbstraction(errRecovery);
 				type->isCyclicInheritance(errRecovery);
@@ -1391,6 +1443,7 @@ void SymbolTable::printNexts(Scope* scope, int index, ErrorRecovery* errRecovery
 								   else
 									   cout << "Constructor: ";
 								   cout << function->getName();
+								   cout << "[" << function->getLabel() << ", " << function->getId() << "]";
 								   if (!function->pl->isEmpty()) {
 									   cout << " with parameters: (";
 									   function->pl->print();
@@ -1412,14 +1465,14 @@ void SymbolTable::printNexts(Scope* scope, int index, ErrorRecovery* errRecovery
 									 if (d->getIsProtected()) cout << "Protected ";
 									 if (d->getIsStatic()) cout << "Static ";
 									 if (d->getIsFinal()) cout << "Final ";
-									 cout << "Data Member: " << d->getName() << " with type " << d->getType() << endl;
+									 cout << "Data Member[" << d->getId() << "]: " << d->getName() << " with type " << d->getType() << endl;
 								 }
 								 break;
 			}
 			case LOCALVARIABLE: {
 									Variable* var = (Variable*)elem->getElem();
 									if (var && var->strc == LOCALVARIABLE) {
-										cout << "\t\tLocal Variable: " << var->getName() << " with type " << var->getType() << endl;
+										cout << "\t\tLocal Variable[" << var->getId() << "]: " << var->getName() << " with type " << var->getType() << endl;
 									}
 									break;
 			}
@@ -1497,7 +1550,7 @@ Function* SymbolTable::printMethodHeader(Scope* scope, int index, ErrorRecovery*
 			cout << "Constructor: ";
 		cout << scope->m->getFromArr(index)->getName();
 		Function* function = (Function*)scope->m->getElemFromArr(index);
-		cout << "[" << function->getId() << "]";
+		cout << "[" << function->getLabel() << ", " << function->getId() << "]";
 		if (!function->pl->isEmpty()) {
 			cout << " with parameters: (";
 			function->pl->print();
@@ -1519,7 +1572,7 @@ DataMember* SymbolTable::printDmHeader(Scope* scope, int index) {
 		if (d->getIsProtected()) cout << "Protected ";
 		if (d->getIsStatic()) cout << "Static ";
 		if (d->getIsFinal()) cout << "Final ";
-		cout << "Data Member: " << d->getName() << " with type " << d->getType() << endl;
+		cout << "Data Member" << "[" << d->getId() << "]: " << d->getName() << " with type " << d->getType() << endl;
 	}
 	return d;
 }

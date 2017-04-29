@@ -152,9 +152,12 @@ char* Modifier::getAlternativeReturnType() {
 	return this->alternativeReturnType;
 }
 
+//============ MyParser =================
+int MyParser::lastId = 0;
 
 MyParser::MyParser(void)
 {
+	this->lastType = NULL;
 	this->st = new SymbolTable();
 	this->errRecovery = new ErrorRecovery();
 	this->names = new char*[20];
@@ -165,6 +168,7 @@ MyParser::MyParser(void)
 	this->rawClassName = new char[255];
 	this->rawClassName[0] = '\0';
 	this->initNames();
+	lastIdInc();
 }
 
 MyParser::~MyParser(void) {}
@@ -176,6 +180,19 @@ void MyParser::initNames() {
 		this->names[i][0] = '\0';
 	}
 }
+
+int MyParser::lastIdInc() {
+	return ++MyParser::lastId;
+}
+
+void MyParser::setLastId(int lastId) {
+	MyParser::lastId = lastId;
+}
+
+int MyParser::getLastId() {
+	return MyParser::lastId;
+}
+
 //========= Variable =================
 Variable** MyParser::insertVar(int lineNo, int colNo, Modifier* m) {
 	Variable** vars = new Variable*[20];
@@ -268,7 +285,7 @@ DataMember** MyParser::insertMem(int lineNo, int colNo, Modifier* m) {
 				m->reset();
 				return NULL;
 			}
-
+			
 			// Checking if function has different modifiers
 			if (d->illegalCombinationOfModifiers()) {
 				this->errRecovery->errQ->enqueue(lineNo, colNo, "Illegal combination of modifiers", "");
@@ -292,14 +309,19 @@ DataMember* MyParser::addDataMemberToCurrentScope(DataMember* d) {
 //========= Types =================
 Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char* inheritedTypeName, bool isInner) {
 	Type* t = (Type*)this->st->getTypeParent(name);
+
 	// Resetting count id
 	Function::setLastId(0);
+
 	if (t && t->strc == TYPE) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Class already exists", name);
 		return 0;
 	}
 
 	t = new Type();
+
+	// Getting last created type
+	this->lastType = t;
 
 	// Set class data
 	if (!this->setTypeData(t, name, m, lineNo, colNo, inheritedTypeName, isInner)) {
@@ -334,6 +356,11 @@ Type * MyParser::finishTypeDeclaration(Type* t, bool isInner) {
 				f->setIsPublic(true);
 				f->setIsConstructor(true);
 				f->setName(t->getName());
+				char* label = new char[255];
+				strcpy(label, t->getName());
+				strcat(label, "_");
+				strcat(label, t->getName());
+				f->setLabel(label);
 				this->st->currScope->m->put(f->getName(), f, FUNCTION);
 
 				cout << "==========================================================\n";
@@ -357,6 +384,11 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 	t->setIsFinal(m->getIsFinal()); t->setIsStatic(m->getIsStatic());
 	t->setIsAbstract(m->getIsAbstract());
 	t->colNo = colNo; t->rowNo = lineNo;
+
+	// Default inheritance from Object class
+	if (t->getParentName() && !t->getParentName()[0] && (strcmp(t->getName(), "Object") != 0)) {
+		t->setParentName("Object");
+	}
 
 	if (isInner && (m->getIsPublic() || m->getIsPrivate() || m->getIsProtected())) {
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Error: Class can't has access modifiers!", t->getName());
@@ -408,11 +440,20 @@ Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier*
 		return 0;
 	}
 
+	f->generateLabel(this->lastType);
 	// Check for overloading state
 	Function* existedFunc = (Function*)this->st->currScope->m->get(name);
 	if (existedFunc && existedFunc->strc == FUNCTION) {
 		if (f->isOverloadingState(existedFunc)) {
-			cout << "Overloading state!\n";
+			// how to cast integer to char*
+			char* underWithSize = new char[3];
+			char* plSize = new char[2];
+			strcpy(underWithSize, "_");
+			itoa(f->pl->size, plSize, 10);
+			strcat(underWithSize, plSize);
+
+			f->setLabel(underWithSize);
+			this->errRecovery->stateQ->enqueue(lineNo, colNo, "State: Overloading state! in method ", name);
 			goto jmpOverReturnLbl;
 		}
 		m->reset();
@@ -472,6 +513,11 @@ bool MyParser::setMethodData(Function* f, char* name, Modifier* m, int lineNo, i
 	// Set Object Method ID
 	if (!f->getIsStatic()) {
 		f->setId(Function::getLastId());
+	}
+	else {
+		Function::setLastId(Function::getLastId() - 1);
+		f->setId(MyParser::getLastId());
+		MyParser::lastIdInc();
 	}
 
 	// Checking if function has different modifiers

@@ -53,10 +53,12 @@ public:
 class MyParser
 {
 private:
+	Type* lastType;
 	bool setMethodData(Function* f, char* name, Modifier* m, int lineNo, int colNo);
 	bool setTypeData(Type* f, char* name, Modifier* m, int lineNo, int colNo, char* inheritedTypeName, bool isInner);
 	void MyParser::initNames();
 	void MyParser::initParameters();
+	static int lastId;
 public:
 	char* rawClassName;
 	SymbolTable * st;
@@ -82,5 +84,8 @@ public:
 	void setNames(char** namesArr);
 	void addToNames(char* name);
 	void resetNames();
+	static void setLastId(int lastId);
+	static int getLastId();
+	static int lastIdInc();
 };
 #endif

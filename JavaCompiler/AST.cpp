@@ -130,7 +130,7 @@ AST::~AST(void)
 {
 }
 
-TreeNode * AST::createNode(TreeNode * l, TreeNode* r, NodeType nt){
+TreeNode * AST::createNode(TreeNode * l, TreeNode* r, NodeType nt) {
 	TreeNode * tn = new TreeNode();
 	tn->nodeType = nt;
 	tn->left = l;
@@ -138,7 +138,7 @@ TreeNode * AST::createNode(TreeNode * l, TreeNode* r, NodeType nt){
 	return tn;
 }
 
-TreeNode * AST::createNode(TreeNode * l, TreeNode* r, NodeType nt, void * e){
+TreeNode * AST::createNode(TreeNode * l, TreeNode* r, NodeType nt, void * e) {
 	TreeNode * tn = new TreeNode();
 	tn->nodeType = nt;
 	tn->left = l;

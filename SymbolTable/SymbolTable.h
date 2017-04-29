@@ -86,6 +86,7 @@ public:
 
 class DataMember {
 private:
+	int id;
 	char* name;
 	char* type;
 	bool isFinal;
@@ -94,12 +95,15 @@ private:
 	bool isPrivate;
 	bool isProtected;
 	void initModifiers();
+	static int lastId;
 public:
 	int colNo;
 	int rowNo;
 	enum structure strc;
 	DataMember();
 	~DataMember();
+	void setId(int id);
+	int getId();
 	void setName(char* n);
 	char* getName();
 	void setType(char* type);
@@ -116,11 +120,15 @@ public:
 	bool getIsStatic();
 	bool illegalCombinationOfModifiers();
 	void printDetails();
+	static void setLastId(int lastId);
+	static int getLastId();
+	static int lastIdInc();
 };
 class ErrorRecovery;
 class Type {
 private:
 	char* name;
+	char* label;
 	char* parentName;
 	char* fileName;
 	bool isPublic;
@@ -140,8 +148,10 @@ public:
 	~Type();
 	void checkForAbstraction(ErrorRecovery* errRecovery);
 	bool isCyclicInheritance(ErrorRecovery* errRecovery);
-	void setName(char* n);
+	void setName(char* name);
 	char* getName();
+	void setLabel(char* label);
+	char* getLabel();
 	void setParentName(char* n);
 	char* getParentName();
 	void setFileName(char* n);
@@ -187,6 +197,7 @@ class Function {
 private:
 	int id;
 	static int lastId;
+	char* label;
 	char* name;
 	int varCount;
 	bool isPublic;
@@ -212,6 +223,7 @@ public:
 	Function();
 	~Function();
 	bool equals(Function* f);
+	void generateLabel(Type* t);
 	void printDetails();
 	int checkMethodBody(bool methodBody, ErrorRecovery* errRecovery);
 	bool isOverloadingState(Function* f);
@@ -219,6 +231,8 @@ public:
 	bool illegalCombinationOfModifiers();
 	void setName(char* name);
 	char* getName();
+	void setLabel(char* label);
+	char* getLabel();
 	void setId(int id);
 	int getId();
 	static void setLastId(int lastId);

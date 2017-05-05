@@ -168,6 +168,7 @@ MyParser::MyParser(void)
 	this->rawClassName = new char[255];
 	this->rawClassName[0] = '\0';
 	this->initNames();
+	Parameter::setLastId(0);
 	lastIdInc();
 }
 
@@ -344,6 +345,8 @@ Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char
 
 Type * MyParser::finishTypeDeclaration(Type* t, bool isInner) {
 	if (t && t->strc == TYPE) {
+		t->setSize(DataMember::getLastId() * 8);
+		DataMember::setLastId(0);
 		if (!isInner) {
 			// Creating default constructor for class if doesn't exist.
 			Function* f = (Function*)this->st->currScope->m->get(t->getName());
@@ -431,8 +434,7 @@ bool MyParser::setTypeData(Type* t, char* name, Modifier* m, int lineNo, int col
 Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier* m) {
 	Function* f = new Function();
 
-	// Resetting id counting
-	Variable::setLastId(0);
+	Parameter::setLastId(0);
 
 	if (!this->setMethodData(f, name, m, lineNo, colNo)) {
 		// Resetting the modifier
@@ -440,12 +442,14 @@ Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier*
 		return 0;
 	}
 
+	// Resetting id counting
+	Variable::setLastId(f->pl->size);
+
 	f->generateLabel(this->lastType);
 	// Check for overloading state
 	Function* existedFunc = (Function*)this->st->currScope->m->get(name);
 	if (existedFunc && existedFunc->strc == FUNCTION) {
 		if (f->isOverloadingState(existedFunc)) {
-			// how to cast integer to char*
 			char* underWithSize = new char[3];
 			char* plSize = new char[2];
 			strcpy(underWithSize, "_");
@@ -457,9 +461,6 @@ Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier*
 			goto jmpOverReturnLbl;
 		}
 		m->reset();
-		cout << "========================================\n";
-		cout << "Error[" << lineNo << ", " << colNo << "]: Function " << name << " already exists\n";
-		cout << "========================================\n";
 		this->errRecovery->errQ->enqueue(lineNo, colNo, "Function already exists ", name);
 		return 0;
 	}
@@ -481,6 +482,7 @@ Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier*
 
 Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
 	if (f) {
+		f->setSize(Variable::getLastId() * 8);
 		cout << "=============== Function " << f->getName() << " closed ================" << endl;
 		int methodBodyState = f->checkMethodBody(methodBody, this->errRecovery);
 		if (methodBodyState == 0) {

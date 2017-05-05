@@ -20,15 +20,22 @@ public:
 };
 class Parameter {
 private:
+	int id;
 	char* name;
 	char* type;
 	bool isFinal;
+	static int lastId;
 public:
 	enum structure strc;
 	Parameter* next;
 	Parameter();
 	Parameter(Parameter* parameter);
 	~Parameter();
+	void setId(int id);
+	int getId();
+	static void setLastId(int lastId);
+	static int getLastId();
+	static int lastIdInc();
 	void setName(char* n);
 	char* getName();
 	void setType(char* type);
@@ -127,6 +134,7 @@ public:
 class ErrorRecovery;
 class Type {
 private:
+	int size;
 	char* name;
 	char* label;
 	char* parentName;
@@ -148,6 +156,8 @@ public:
 	~Type();
 	void checkForAbstraction(ErrorRecovery* errRecovery);
 	bool isCyclicInheritance(ErrorRecovery* errRecovery);
+	void setSize(int size);
+	int getSize();
 	void setName(char* name);
 	char* getName();
 	void setLabel(char* label);
@@ -196,6 +206,7 @@ class ErrorRecovery;
 class Function {
 private:
 	int id;
+	int size;
 	static int lastId;
 	char* label;
 	char* name;
@@ -235,6 +246,8 @@ public:
 	char* getLabel();
 	void setId(int id);
 	int getId();
+	void setSize(int size);
+	int getSize();
 	static void setLastId(int lastId);
 	static int getLastId();
 	static void lastIdInc();

@@ -78,6 +78,7 @@ void ParamList::print() {
 			cout << "final ";
 		}
 		cout << current->getType() << " " << current->getName();
+		cout << "[" << current->getId() << "]";
 		if (current->next) {
 			cout << ", ";
 			current = current->next;
@@ -291,7 +292,10 @@ bool Variable::isPrimitiveType(char* type) {
 }
 
 //============= Parameter =================
+int Parameter::lastId = 0;
+
 Parameter::Parameter() {
+	this->id = 0;
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->type = new char[255];
@@ -299,9 +303,11 @@ Parameter::Parameter() {
 	this->isFinal = false;
 	this->next = NULL;
 	this->strc = PARAMETER;
+	Parameter::lastIdInc();
 }
 
 Parameter::Parameter(Parameter* parameter) {
+	this->id = parameter->id;
 	this->name = new char[255];
 	this->name[0] = '\0';
 	this->type = new char[255];
@@ -321,6 +327,26 @@ bool Parameter::equals(Parameter* p) {
 		return true;
 	}
 	return false;
+}
+
+void Parameter::setId(int id) {
+	this->id = id;
+}
+
+int Parameter::getId() {
+	return this->id;
+}
+
+int Parameter::lastIdInc() {
+	return ++Parameter::lastId;
+}
+
+void Parameter::setLastId(int lastId) {
+	Parameter::lastId = lastId;
+}
+
+int Parameter::getLastId() {
+	return Parameter::lastId;
 }
 
 void Parameter::setName(char* n) {
@@ -371,7 +397,6 @@ DataMember::DataMember() {
 	this->rowNo = 0;
 	this->initModifiers();
 	DataMember::lastIdInc();
-
 }
 
 DataMember::~DataMember() {}
@@ -456,6 +481,7 @@ bool DataMember::illegalCombinationOfModifiers() {
 	}
 	return false;
 }
+
 int DataMember::lastIdInc() {
 	return ++DataMember::lastId;
 }
@@ -467,7 +493,6 @@ void DataMember::setLastId(int lastId) {
 int DataMember::getLastId() {
 	return DataMember::lastId;
 }
-
 
 void DataMember::printDetails() {
 	cout << "Data member " << this->name << " has been created\n";
@@ -484,6 +509,7 @@ void DataMember::printDetails() {
 //=======================================
 //============== Type ===================
 Type::Type() {
+	this->size = 0;
 	this->colNo = 0;
 	this->rowNo = 0;
 	this->strc = TYPE;
@@ -506,6 +532,14 @@ Type::Type() {
 }
 
 Type::~Type() {}
+
+void Type::setSize(int size) {
+	this->size = size;
+}
+
+int Type::getSize() {
+	return this->size;
+}
 
 void Type::checkForAbstraction(ErrorRecovery* errRecovery) {
 	// There is parent class
@@ -674,6 +708,7 @@ void Type::printDetails() {
 int Function::lastId = 0;
 
 Function::Function() {
+	this->size = 0;
 	this->id = 0;
 	this->colNo = 0;
 	this->rowNo = 0;
@@ -699,6 +734,14 @@ void Function::generateLabel(Type* parentType) {
 	name[0] = '\0';
 	strcpy(name, parentType->getName()); strcat(name, "_"); strcat(name, this->name);
 	this->setLabel(name);
+}
+
+void Function::setSize(int size) {
+	this->size = size;
+}
+
+int Function::getSize() {
+	return this->size;
 }
 
 void Function::setId(int id) {
@@ -1060,13 +1103,12 @@ return v;
 Parameter * SymbolTable::createParam(char* name, Modifier* m, ErrorRecovery* errRecovery) {
 	if (m->getIsAbstract() || m->getIsNative() || m->getIsPrivate() || m->getIsProtected() || m->getIsPublic() ||
 		m->getIsStatic() || m->getIsSynchronized() || m->getIsTransient() || m->getIsVolatile()) {
-		cout << "=====================================================\n";
-		cout << "Parameter can't has access modifier other than final.\n";
-		cout << "=====================================================\n";
+		errRecovery->errQ->enqueue(0, 0, "Parameter can't has access modifier other than final.", name);
 		return NULL;
 	}
 	Parameter* p = new Parameter();
 	p->setName(name);
+	p->setId(Parameter::getLastId());
 	if (p->isPrimitiveType(m->getReturnType())) {
 		p->setType(m->getReturnType());
 		cout << "Parameter type is primitive" << endl;
@@ -1284,11 +1326,12 @@ void SymbolTable::checkInnerInheritance(Scope* scope, Type* type, ErrorRecovery*
 }
 
 void SymbolTable::checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRecovery* errRecovery) {
-	Type* type = (Type*)currElem->getElem();
+	Type* type = (Type*) currElem->getElem();
 	if (type->getParentName() && type->getParentName()[0]) {
 		// Outer extends Outer
-		Type* inheritedType = (Type*)this->getTypeParentByScope(scope, type->getParentName());
+		Type* inheritedType = (Type*) this->getTypeParentByScope(scope, type->getParentName());
 		if (inheritedType && inheritedType->strc == TYPE) {
+			type->setSize(type->getSize() + inheritedType->getSize());
 			if (inheritedType->getIsFinal()) {
 				errRecovery->errQ->enqueue(type->rowNo, type->colNo, "Error: Final class can't be inherited from", inheritedType->getName());
 			}
@@ -1448,8 +1491,8 @@ void SymbolTable::printNexts(Scope* scope, int index, ErrorRecovery* errRecovery
 									   cout << " with parameters: (";
 									   function->pl->print();
 									   cout << ")";
-
 								   }
+								   cout << " and size = " << function->getSize();
 								   cout << " { \n";
 								   this->print(function->getScope(), errRecovery);
 								   cout << "\t} \n";
@@ -1529,6 +1572,7 @@ Type* SymbolTable::printTypeHeader(Scope* scope, int index) {
 	Type* type = (Type*)scope->m->getElemFromArr(index);
 	cout << "Class " << type->getName();
 	if (type->getInheritedType()) cout << " extends from " << type->getParentName();
+	cout << " with size = " << type->getSize();
 	cout << " {\n";
 	return type;
 }
@@ -1556,6 +1600,7 @@ Function* SymbolTable::printMethodHeader(Scope* scope, int index, ErrorRecovery*
 			function->pl->print();
 			cout << ")";
 		}
+		cout << " and size = " << function->getSize();
 		cout << " { \n";
 		this->print(function->getScope(), errRecovery);
 		cout << "\t} \n";

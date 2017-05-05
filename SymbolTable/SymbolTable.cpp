@@ -1331,6 +1331,7 @@ void SymbolTable::checkTypeInheritance(Scope* scope, MapElem* currElem, ErrorRec
 		// Outer extends Outer
 		Type* inheritedType = (Type*) this->getTypeParentByScope(scope, type->getParentName());
 		if (inheritedType && inheritedType->strc == TYPE) {
+			// Size: adding parent size to child
 			type->setSize(type->getSize() + inheritedType->getSize());
 			if (inheritedType->getIsFinal()) {
 				errRecovery->errQ->enqueue(type->rowNo, type->colNo, "Error: Final class can't be inherited from", inheritedType->getName());

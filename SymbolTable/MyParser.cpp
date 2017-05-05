@@ -345,6 +345,7 @@ Type * MyParser::createType(char* name, int lineNo, int colNo, Modifier* m, char
 
 Type * MyParser::finishTypeDeclaration(Type* t, bool isInner) {
 	if (t && t->strc == TYPE) {
+		// Size
 		t->setSize(DataMember::getLastId() * 8);
 		DataMember::setLastId(0);
 		if (!isInner) {
@@ -482,6 +483,7 @@ Function * MyParser::createFunction(char* name, int lineNo, int colNo, Modifier*
 
 Function * MyParser::finishFunctionDeclaration(Function* f, bool methodBody) {
 	if (f) {
+		// Size
 		f->setSize(Variable::getLastId() * 8);
 		cout << "=============== Function " << f->getName() << " closed ================" << endl;
 		int methodBodyState = f->checkMethodBody(methodBody, this->errRecovery);

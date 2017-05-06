@@ -5,6 +5,7 @@
 	#include <FlexLexer.h>
 	#include "JavaCompiler\AST.h"
 	#include "SymbolTable/MyParser.h"
+	#include "CodeGeneration/CodeGeneration.h"
 	#include <io.h>
 	#include <vector>
 	#include <string>
@@ -1070,6 +1071,8 @@ void main(void)
 		if (!p->errRecovery->errQ->isEmpty())
 				p->errRecovery->printErrQueue();
 		ast->check(p);
+		CodeGeneration * codeGenerator = new CodeGeneration();
+		codeGenerator->generate(ast->list->getRoot()->tn);
 	}
 	
 }

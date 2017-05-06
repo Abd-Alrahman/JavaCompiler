@@ -1746,7 +1746,7 @@ void AST::check(MyParser * p ) {
 }
 
 void AST::print(TreeNode * tn, int lvl){
-	if (tn){
+	if (tn) {
 		for (int i = 0; i<lvl; i++)
 			cout << "  ";
 		cout << arr[tn->nodeType] << "\n";
